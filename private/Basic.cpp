@@ -1,20 +1,18 @@
 template <typename Data>    
 void disp(Data & data, const std::string & message)
 {
-    std::cout << message << "[ ";
-    for (const auto & val: data)
-        std::cout << val << " ";    
-    std::cout << "]" << std::endl;
+  std::cout << message << "[ ";
+  for (const auto & val: data) {std::cout << val << " ";}    
+  std::cout << "]" << std::endl;
 }
 
 
 template <typename Data>    
 void disp_pair(Data & data, const std::string & message)
 {
-    std::cout << message << "[ ";
-    for (const auto & val : data)
-        std::cout << "(" << val.first << "," << val.second << ") ";         
-    std::cout << "]" << std::endl;
+  std::cout << message << "[ ";
+  for (const auto & val : data) {std::cout << "(" << val.first << "," << val.second << ") ";}         
+  std::cout << "]" << std::endl;
 }
 
 
@@ -27,7 +25,7 @@ void disp_pair(Data & data, const std::string & message)
  */
 int run(const std::string & command)
 {
-    return std::system(command.c_str());
+  return std::system(command.c_str());
 }
 
 
@@ -38,17 +36,8 @@ int run(const std::string & command)
  * 
  * @return A std::string which has environment variable's value
  */
-std::string getEnvironmentVariableValue(const std::string & variableName)
+std::string getenv(const std::string & variableName)
 {
-    char * retval = std::getenv(variableName.c_str());
-    if (retval == NULL)
-    {
-        std::string results;
-        return results;
-    }
-    else
-    {
-        std::string results(retval);
-        return results;
-    }
+  char * retval = std::getenv(variableName.c_str());
+  return (retval == NULL) ? (std::string()) : (std::string(retval));
 }

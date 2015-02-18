@@ -16,12 +16,12 @@ set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
 
 # Find Boost libraries
-set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # This option make sure that we use the local boost version.
-set(Boost_NO_SYSTEM_PATHS TRUE) 
+set(Boost_NO_SYSTEM_PATHS FALSE) 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")

@@ -15,12 +15,9 @@
 #include <boost/unordered_map.hpp>
 // #include <tuple>
 
-
-// Predefined strategy
-#include "FileSearchStrategy.hpp"
-
 namespace Tools
 {
+  // TODO: Use tuple for value_type
     template<typename FileSearchStrategy,
              typename FileExtSearchStrategy,
              typename FileNameSearchStrategy>

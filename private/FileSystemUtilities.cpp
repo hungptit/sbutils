@@ -15,10 +15,7 @@ bool isDirectory(const std::string & folderPath)
 bool createDirectory(const std::string & folderPath)
 {
     const boost::filesystem::path folder(folderPath);
-    if (boost::filesystem::is_directory(folder))
-        return true;
-    else
-        return boost::filesystem::create_directories(folder);
+    return (boost::filesystem::is_directory(folder)) ? (true) : (boost::filesystem::create_directories(folder));
 }
 
 
@@ -29,7 +26,7 @@ bool remove(const std::string & folderName)
     {
         if (boost::filesystem::is_directory(p))
         {
-            return boost::filesystem::remove_all(p);
+          return boost::filesystem::remove_all(p);
         }
         else
         {
@@ -43,15 +40,13 @@ bool remove(const std::string & folderName)
 const std::string getCurrentFolder()
 {
     const boost::filesystem::path fullPath = boost::filesystem::current_path();
-    std::string fullPathName = fullPath.string();
-    return fullPathName;
+    return fullPath.string();
 }
 
 
 std::string getAbslutePath(const std::string & pathName)
 {
-    boost::filesystem::path path(pathName);
-    boost::filesystem::path fullPath = boost::filesystem::canonical(path);
-    std::string fullPathName = fullPath.string();
-    return fullPathName;
+    const boost::filesystem::path path(pathName);
+    const boost::filesystem::path fullPath = boost::filesystem::canonical(path);
+    return fullPath.string();
 }

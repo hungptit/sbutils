@@ -5,20 +5,19 @@
 #include <string>
 #include <cstdlib>
 
-namespace Tools 
+namespace Tools
 {
-    template <typename Data> 
-    void disp(Data & data, const std::string & message = "");
-    
-    template <typename Data> 
-    void disp_pair(Data & data, const std::string & message = "");
-    
-    int run(const std::string & command);
-    
-    std::string getEnvironmentVariableValue(const std::string & variableName);
+  template <typename Data>
+  void disp(Data & data, const std::string & message = "");
+
+  template <typename Data>
+  void disp_pair(Data & data, const std::string & message = "");
+
+  int run(const std::string & command);
+
+  std::string getenv(const std::string & variableName);
 
 #include "private/Basic.cpp"
 }
-
 
 #endif

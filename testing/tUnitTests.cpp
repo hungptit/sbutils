@@ -17,6 +17,7 @@ TEST(Display_Functions, Positive)
     {
         std::vector<int> data = {1,2,3,4,5,6};
         Tools::disp(data, "data: ");
+        Tools::
     }
 
     {
