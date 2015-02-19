@@ -17,7 +17,6 @@ TEST(Display_Functions, Positive)
     {
         std::vector<int> data = {1,2,3,4,5,6};
         Tools::disp(data, "data: ");
-        Tools::
     }
 
     {
@@ -35,12 +34,12 @@ TEST(Display_Functions, Positive)
 TEST(GetEnv, Positive) 
 {
     {
-        std::string results = Tools::getEnvironmentVariableValue("PATH");
+        std::string results = Tools::getenv("PATH");
         EXPECT_TRUE(!results.empty());
     }
 
     {
-        std::string results = Tools::getEnvironmentVariableValue("PATH1");
+        std::string results = Tools::getenv("PATH1");
         EXPECT_TRUE(results.empty());
     }
 }
