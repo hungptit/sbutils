@@ -50,3 +50,4 @@ std::string getAbslutePath(const std::string & pathName)
     const boost::filesystem::path fullPath = boost::filesystem::canonical(path);
     return fullPath.string();
 }
+

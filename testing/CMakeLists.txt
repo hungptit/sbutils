@@ -4,10 +4,13 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 set(PROJECTS_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/../../)
 message(${PROJECTS_FOLDER})
 
-# set (CMAKE_BUILD_TYPE Debug)
-set (CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_COMPILER ${PROJECTS_FOLDER}/3p/llvm/bin/clang++)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Wall -Wextra -pedantic -O3")
+
+SET (CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Wall -Wextra -pedantic -g")
+
+# SET (CMAKE_BUILD_TYPE Release)
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Wall -Wextra -pedantic -O3")
 
 ENABLE_TESTING()
 
