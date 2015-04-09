@@ -16,12 +16,9 @@
 // #include <tuple>
 
 namespace Tools {
-// TODO: Use tuple for value_type
-template <typename FileSearchStrategy, typename FileExtSearchStrategy,
-          typename FileNameSearchStrategy>
 class FileFinder {
   public:
-    typedef std::pair<std::string, boost::filesystem::perms> value_type;
+    typedef std::pair<std::string, boost::filesystem::perms> value_type; // TODO: Use tuple for value_type
     typedef std::vector<value_type> container_type;
 
     FileFinder() : Data() {}
@@ -38,8 +35,56 @@ class FileFinder {
 
     void clear() { Data.clear(); }
 
+    size_t search(const std::string &folderName) {
+        boost::filesystem::path currentFolder(folderName);
+        boost::filesystem::recursive_directory_iterator endIter;
+        boost::filesystem::recursive_directory_iterator dirIter(currentFolder);
+        for (; dirIter != endIter; ++dirIter) {
+            boost::filesystem::file_status fs = dirIter->status();
+            Data.emplace_back(std::make_pair(dirIter->path().string(), fs.permissions()));
+        }
+        return Data.size();
+    }    
+
+
+    template <typename FileSearchStrategy>
+    size_t search(const std::string &folderName) {
+        boost::filesystem::path currentFolder(folderName);
+        boost::filesystem::recursive_directory_iterator endIter;
+        boost::filesystem::recursive_directory_iterator dirIter(currentFolder);
+        for (; dirIter != endIter; ++dirIter) {
+            boost::filesystem::file_status fs = dirIter->status();
+            if (FileSearchStrategy::apply(fs)) {
+                Data.emplace_back(std::make_pair(dirIter->path().string(), fs.permissions()));
+            }
+        }
+        return Data.size();
+    }    
+    
+
+    template <typename FileSearchStrategy, typename FileExtSearchStrategy>
     size_t search(const std::string &folderName,
-                  typename FileExtSearchStrategy::extension_map_type &extmap,
+                  const typename FileExtSearchStrategy::extension_map_type &extmap) {
+        boost::filesystem::path currentFolder(folderName);
+        boost::filesystem::recursive_directory_iterator endIter;
+        boost::filesystem::recursive_directory_iterator dirIter(currentFolder);
+        for (; dirIter != endIter; ++dirIter) {
+            boost::filesystem::file_status fs = dirIter->status();
+            if (FileSearchStrategy::apply(fs)) {
+                const std::string fileExtension =
+                    dirIter->path().extension().string();
+                if (FileExtSearchStrategy::apply(fileExtension, extmap)) {
+                    Data.emplace_back(std::make_pair(dirIter->path().string(), fs.permissions()));
+                }
+            }
+        }
+        return Data.size();
+    }
+
+
+    template <typename FileSearchStrategy, typename FileExtSearchStrategy,  typename FileNameSearchStrategy>
+    size_t search(const std::string &folderName,
+                  const typename FileExtSearchStrategy::extension_map_type &extmap,
                   const boost::regex &expressions) {
         boost::filesystem::path currentFolder(folderName);
         boost::filesystem::recursive_directory_iterator endIter;

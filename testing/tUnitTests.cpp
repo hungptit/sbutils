@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <array>
 #include <tuple>
 
 TEST(Display_Functions, Positive) {
@@ -114,16 +115,53 @@ TEST(FileSearchStrategy, Positive) {
         EXPECT_FALSE(Tools::FileName<Tools::FileNameTag::Specific>::apply(
                          fileName, expression2));
     }
+}
 
 
+TEST(FileSearchDefault, Positive) {
+    Tools::FileFinder fSearch;
+
+    fSearch.search("data");
+    fSearch.print();
+    const auto &data = fSearch.getData();
+    EXPECT_TRUE(data.size() == 6);
+
+    // Results order might be changed for different system.
+    EXPECT_TRUE(data[0].first == "data/data.txt");
+    EXPECT_TRUE(data[1].first == "data/src");
+}
+
+
+TEST(FileSearchOneTemplateArg, Positive) {    
+    typedef Tools::FileSearchStrategy<Tools::FileTypeTag::All>
+        FSearchStrategy;
+            
+    Tools::FileFinder fSearch;
+           
+    fSearch.search<FSearchStrategy>("data");
+    fSearch.print();
+    const auto &data = fSearch.getData();
+    EXPECT_TRUE(data.size() == 5);
+
+    // Results order might be changed for different system.
+    EXPECT_TRUE(data[0].first == "data/data.txt");
+    EXPECT_TRUE(data[1].first == "data/src/data.txt");
+}
+
+TEST(FileSearchTwoTemplateArgs, Positive) {
+    
+}
+
+TEST(FileSearchThreeTemplateArgs, Positive) {
     // Find files based on given constraints
     {
-        typedef std::vector<std::string> Map;
-        Map supportedExts = {".dat", ".txt", ".mat"};
-        std::sort(supportedExts.begin(), supportedExts.end());
         const boost::regex expressions("dat\\w/(src)*/data.txt");
 
         {
+            typedef std::vector<std::string> Map;
+            Map supportedExts = {".dat", ".txt", ".mat"};
+            std::sort(supportedExts.begin(), supportedExts.end());
+
             typedef Tools::FileSearchStrategy<Tools::FileTypeTag::All>
                 FSearchStrategy;
             
@@ -134,17 +172,14 @@ TEST(FileSearchStrategy, Positive) {
             typedef Tools::FileName<Tools::FileNameTag::All>
                 FNameSearchStrategy;
             
-            Tools::FileFinder<FSearchStrategy, FExtSearchStrategy,
-                              FNameSearchStrategy> fSearch;
-            FExtSearchStrategy::extension_map_type supportedExts =
-                {".txt", ".dat", ".mat"};
+            Tools::FileFinder fSearch;
             
-            fSearch.search("data", supportedExts, expressions);
+            fSearch.search<FSearchStrategy, FExtSearchStrategy, FNameSearchStrategy>("data", supportedExts, expressions);
             fSearch.print();
             const auto &data = fSearch.getData();
             EXPECT_TRUE(data.size() == 2);
 
-            // Results order might be changed on different system.
+            // Results order might be changed for different system.
             EXPECT_TRUE(data[0].first == "data/data.txt");
             EXPECT_TRUE(data[0].second == 256);
             EXPECT_TRUE(data[1].first == "data/src/data.txt");
@@ -152,18 +187,41 @@ TEST(FileSearchStrategy, Positive) {
         }
 
         {
+            typedef std::list<std::string> Map;
+            const Map supportedExts = {".dat", ".txt", ".mat"};
+
             typedef Tools::FileSearchStrategy<Tools::FileTypeTag::All>
                 FSearchStrategy;
-            typedef Tools::FileExtension<Tools::FileExtensionTag::Specific,
-                                         std::vector<std::string>>
+            typedef Tools::FileExtension<Tools::FileExtensionTag::Specific, Map>
                 FExtSearchStrategy;            
 
             typedef Tools::FileName<Tools::FileNameTag::Specific>
                 FNameSearchStrategy;
 
-            Tools::FileFinder<FSearchStrategy, FExtSearchStrategy,
-                              FNameSearchStrategy> fSearch;
-            fSearch.search("data", supportedExts, expressions);
+            Tools::FileFinder fSearch;
+            fSearch.search<FSearchStrategy, FExtSearchStrategy, FNameSearchStrategy>("data", supportedExts, expressions);
+            fSearch.print();
+            const auto &data = fSearch.getData();
+            EXPECT_TRUE(data.size() == 1);
+            EXPECT_TRUE(data[0].first == "data/src/data.txt");
+            EXPECT_TRUE(data[0].second == 420);
+        }
+
+
+        {
+            typedef std::array<std::string, 3> Map;
+            const Map supportedExts = {".dat", ".txt", ".mat"};
+
+            typedef Tools::FileSearchStrategy<Tools::FileTypeTag::All>
+                FSearchStrategy;
+            typedef Tools::FileExtension<Tools::FileExtensionTag::Specific, Map>
+                FExtSearchStrategy;            
+
+            typedef Tools::FileName<Tools::FileNameTag::Specific>
+                FNameSearchStrategy;
+
+            Tools::FileFinder fSearch;
+            fSearch.search<FSearchStrategy, FExtSearchStrategy, FNameSearchStrategy>("data", supportedExts, expressions);
             fSearch.print();
             const auto &data = fSearch.getData();
             EXPECT_TRUE(data.size() == 1);
@@ -172,6 +230,7 @@ TEST(FileSearchStrategy, Positive) {
         }
     }
 }
+
 
 TEST(TemporaryDirectory, Positive) {
     Tools::TemporaryDirectory tmpDir;

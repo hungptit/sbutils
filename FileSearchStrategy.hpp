@@ -61,6 +61,7 @@ namespace Tools {
         typedef Container extension_map_type;
         static bool apply(const std::string &ext,
                           const Container &supportedExtensions) {
+            // TODO: Can we use std::binary_search?
             return std::find(supportedExtensions.begin(), supportedExtensions.end(), ext) != supportedExtensions.end();
         }
     };

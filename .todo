@@ -3,4 +3,7 @@
     <note priority="veryhigh" time="1423510690">
         Make file finder easier to use.
     </note>
+    <note priority="medium" time="1428591073">
+        Rewrite FileSearch by accept only one SearchStrategy and this strategy is the combination of several strategies. We may not be able to use the variadic template with this class.
+    </note>
 </todo>
