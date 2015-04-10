@@ -26,65 +26,55 @@ namespace Tools {
     // File type search strategy
     template <typename T> struct FileSearchStrategy;
 
-    template <> struct FileSearchStrategy<FileTypeTag::All> {
-        static bool apply(boost::filesystem::file_status &fs) {
+    struct SearchAllFiles {
+        static bool isValid(const boost::filesystem::file_status & fs) {
             return (fs.type() == boost::filesystem::regular_file);
         }
     };
 
-    template <> struct FileSearchStrategy<FileTypeTag::Edited> {
-        static bool apply(boost::filesystem::file_status &fs) {
-            const boost::filesystem::perms fperm = fs.permissions();
+    struct OwnerWriteFile {
+        static bool isValid(const boost::filesystem::file_status & fs) {
+            const auto fperm = fs.permissions();
             return ((fs.type() == boost::filesystem::regular_file) &&
                     (fperm & boost::filesystem::owner_write));
         }
     };
 
-    template <> struct FileSearchStrategy<FileTypeTag::OwnerReadOnly> {
-        static bool apply(boost::filesystem::file_status &fs) {
-            const boost::filesystem::perms fperm = fs.permissions();
+    struct OwnerReadFiles {
+        static bool isValid(const boost::filesystem::file_status & fs) {
+            auto fperm = fs.permissions();
             return ((fs.type() == boost::filesystem::regular_file) &&
-                    (fperm == boost::filesystem::owner_read));
+                    (fperm & boost::filesystem::owner_read));
         }
     };
 
-    // This implementation assumes that extension strings are in sorted order.
-    template <typename T, typename ExtMap> struct FileExtension;
-
-    template <typename ExtMap> struct FileExtension<FileExtensionTag::All, ExtMap> {
-        typedef ExtMap extension_map_type;
-        static bool apply(const std::string &, const ExtMap &) { return true; }
-    };
     
     template <typename Container>
-    struct FileExtension<FileExtensionTag::Specific, Container> {
-        typedef Container extension_map_type;
-        static bool apply(const std::string &ext,
-                          const Container &supportedExtensions) {
-            // TODO: Can we use std::binary_search?
-            return std::find(supportedExtensions.begin(), supportedExtensions.end(), ext) != supportedExtensions.end();
+    class SearchFileExtension {
+      public:
+        SearchFileExtension(const Container & supportedExts) : SupportedExtensions(supportedExts) {}
+        
+        bool isValid(const boost::filesystem::path & p) {
+            const std::string fileExtension = p.extension().string();
+            return std::find(SupportedExtensions.begin(), SupportedExtensions.end(), fileExtension) != SupportedExtensions.end();
         }
+      private:
+        Container SupportedExtensions;
     };
 
-    /**
-     * File search strategies
-     *
-     * @note boost::regex is used to match file name pattern.
-     */
 
-    template <typename T> struct FileName;
-
-    template <> struct FileName<FileNameTag::All> {
-        static bool apply(const std::string &, const boost::regex &) {
-            return true;
+    class SearchFileName {
+      public:
+        SearchFileName (const boost::regex & exp) : Expression(exp) {}
+        
+        bool isValid(const boost::filesystem::path & p) {
+            const std::string fileName = p.string();
+            return boost::regex_match(fileName, Expression);
         }
-    };
 
-    template <> struct FileName<FileNameTag::Specific> {
-        static bool apply(const std::string &fileName,
-                          const boost::regex &expression) {
-            return boost::regex_match(fileName, expression);
-        }
+      private:
+        boost::regex Expression;
+
     };
 }
 #endif
