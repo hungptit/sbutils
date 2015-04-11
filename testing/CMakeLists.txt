@@ -5,8 +5,8 @@ set(PROJECT_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 set (CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
-# set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_COMPILER "${PROJECT_FOLDER}3p/llvm/bin/clang++")
+set(CMAKE_CXX_COMPILER clang++)
+# set(CMAKE_CXX_COMPILER "${PROJECT_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
 ENABLE_TESTING()

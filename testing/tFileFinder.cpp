@@ -35,9 +35,8 @@ class TestData {
             std::cout << aFile.string() << " is created" << std::endl;
         }
         else {
-            std::cout << "Cannot create " << aFile.string() << std::endl;
+          std::cout << "Cannot create " << aFile.string() << std::endl;
         }
-        
     }
 
     void init() {

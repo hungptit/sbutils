@@ -51,3 +51,7 @@ std::string getAbslutePath(const std::string & pathName)
     return fullPath.string();
 }
 
+std::string getUniqueString()
+{
+  return boost::lexical_cast<std::string>(boost::uuids::random_generator()());
+}
