@@ -1,5 +1,4 @@
 #include "utils/Basic.hpp"
-#include "utils/Resources.hpp"
 #include "utils/FileSystemUtilities.hpp"
 #include "utils/FileSearchStrategy.hpp"
 #include "utils/FileFinder.hpp"
@@ -42,8 +41,8 @@ TEST(GetEnv, Positive) {
 }
 
 TEST(FileSystemUtilities, Positive) {
-    std::string folderName = Tools::TemporaryFolder<std::string>::value +
-        Tools::FileSeparator<std::string>::value + "test";
+  const boost::filesystem::path aFolder = boost::filesystem::temp_directory_path() / boost::filesystem::path("test");
+  const std::string folderName = aFolder.string();
     EXPECT_TRUE(Tools::createDirectory(folderName));
     EXPECT_TRUE(Tools::isDirectory(folderName));
     EXPECT_TRUE(Tools::getAbslutePath(folderName) == folderName);
