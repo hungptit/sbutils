@@ -72,7 +72,5 @@ class TemporaryDirectory {
   private:
     boost::filesystem::path CurrentDir;
 };
-
-#include "private/FileSystemUtilities.cpp"
 }
 #endif

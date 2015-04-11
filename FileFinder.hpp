@@ -1,19 +1,14 @@
 #ifndef FILEFINDER_HPP_
 #define FILEFINDER_HPP_
 
-#include <iostream>
-#include <algorithm>
-#include <iterator>
-#include <utility>
-#include <fstream>
+#include <vector>
 #include <string>
-
+#include <tuple>
 #include <boost/filesystem.hpp>
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 #include "boost/program_options.hpp"
 #include <boost/unordered_map.hpp>
-// #include <tuple>
 
 namespace Tools {
 class FileFinder {
@@ -46,13 +41,13 @@ class FileFinder {
     }    
 
     // Only find files or folder which satisfy given constraints.
-    template <typename Permission, typename Constraints>
+    template <typename Permissions, typename Constraints>
     size_t search(const boost::filesystem::path &aPath, const Constraints &cons) {
         boost::filesystem::recursive_directory_iterator endIter;
         boost::filesystem::recursive_directory_iterator dirIter(aPath);
         for (; dirIter != endIter; ++dirIter) {
             const boost::filesystem::file_status fs = dirIter->status();
-            if (Permission::isValid(fs)){
+            if (Permissions::isValid(fs)){
                 const boost::filesystem::path p = dirIter->path();
                 if (cons.isValid(p)) {
                     Data.emplace_back(std::make_pair(dirIter->path().string(), fs.permissions()));

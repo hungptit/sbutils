@@ -173,7 +173,7 @@ TEST(FileSearchDefault, Positive)
   fSearch.print();
   auto &data = fSearch.getData();
   EXPECT_TRUE(data.size() == 8);
-  if (data.size() > 2) {
+  if (!data.empty() > 0) {
     EXPECT_TRUE(
                 data[0].first ==
                 (tmpDir.getPath() / boost::filesystem::path("bin")).string());
@@ -181,4 +181,10 @@ TEST(FileSearchDefault, Positive)
                 (tmpDir.getPath() / boost::filesystem::path("bin") /
                  boost::filesystem::path("test")).string());
   }
+}
+
+TEST(FileSearchDefault, Negative)
+{
+  Tools::FileFinder fSearch;
+  ASSERT_ANY_THROW(fSearch.search(boost::filesystem::path("foo")));
 }

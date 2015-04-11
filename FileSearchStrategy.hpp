@@ -7,29 +7,10 @@
 #include "boost/regex.hpp"
 
 namespace Tools {
-    namespace FileTypeTag {
-        struct All;
-        struct Edited;
-        struct OwnerReadOnly;
-    }
-
-    namespace FileExtensionTag {
-        struct All;
-        struct Specific;
-    }
-
-    namespace FileNameTag {
-        struct All;
-        struct Specific;
-    }
-
-    // File type search strategy
-    template <typename T> struct FileSearchStrategy;
-
     struct SearchAllFiles {
-        static bool isValid(const boost::filesystem::file_status & fs) {
-            return (fs.type() == boost::filesystem::regular_file);
-        }
+      static bool isValid(const boost::filesystem::file_status & fs) {
+        return (fs.type() == boost::filesystem::regular_file);
+      }
     };
 
     struct OwnerWriteFile {
