@@ -1,18 +1,12 @@
-#include "utils/Basic.hpp"
-#include "utils/FileSystemUtilities.hpp"
-#include "utils/FileSearchStrategy.hpp"
-#include "utils/FileFinder.hpp"
-#include "utils/TimeUtilities.hpp"
-
 #include <iostream>
 #include <fstream>
 #include "gtest/gtest.h"
 #include <string>
-#include <map>
 #include <vector>
 #include <array>
 #include <tuple>
 #include "boost/filesystem.hpp"
+#include "utils/Utils.hpp"
 
 class TestData
 {

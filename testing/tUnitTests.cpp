@@ -1,9 +1,4 @@
-#include "utils/Basic.hpp"
-#include "utils/FileSystemUtilities.hpp"
-#include "utils/FileSearchStrategy.hpp"
-#include "utils/FileFinder.hpp"
-#include "utils/TimeUtilities.hpp"
-
+#include "utils/Utils.hpp"
 #include "gtest/gtest.h"
 #include <string>
 #include <map>
@@ -28,19 +23,6 @@ TEST(Display_Functions, Positive) {
     }
 }
 
-// TEST(GetEnv, Positive) {
-//     {
-//       const std::string varName("PATH");
-//       std::string results = std::getenv(varName.c_str());
-//         EXPECT_TRUE(!results.empty());
-//     }
-
-//     {
-//       const std::string varName("PATH1");
-//       std::string results = std::getenv(varName.c_str());
-//         EXPECT_TRUE(results.empty());
-//     }
-// }
 
 TEST(FileSystemUtilities, Positive) {
   const boost::filesystem::path aFolder = boost::filesystem::temp_directory_path() / boost::filesystem::path("test");
