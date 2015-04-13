@@ -11,54 +11,58 @@
 #include <boost/unordered_map.hpp>
 
 namespace Tools {
-class FileFinder {
-  public:
-    typedef std::pair<std::string, boost::filesystem::perms> value_type; // TODO: Use tuple for value_type
+    class FileFinder {
+      public:
+        typedef std::pair<std::string, boost::filesystem::perms>
+            value_type; // TODO: Use tuple for value_type
 
-    FileFinder() : Data() {}
+        FileFinder() : Data() {}
 
-    auto& getData() { return Data; };
+        auto &getData() { return Data; };
 
-    void print() {
-        for (auto &item : Data) {
-            std::cout << "(\"" << item.first << "\", " << item.second << ")"
-                      << std::endl;
+        void print() {
+            for (auto &item : Data) {
+                std::cout << "(\"" << item.first << "\", " << item.second << ")"
+                          << std::endl;
+            }
+            std::cout << "Number of files: " << Data.size() << std::endl;
         }
-        std::cout << "Number of files: " << Data.size() << std::endl;
-    }
 
-    void clear() { Data.clear(); }
+        void clear() { Data.clear(); }
 
-    // Default search algorithm which find everything inside a given folder.
-    size_t search(const boost::filesystem::path &aPath) {
-        boost::filesystem::recursive_directory_iterator endIter;
-        boost::filesystem::recursive_directory_iterator dirIter(aPath);
-        for (; dirIter != endIter; ++dirIter) {
-            const boost::filesystem::file_status fs = dirIter->status();
-            Data.emplace_back(std::make_pair(dirIter->path().string(), fs.permissions()));
+        // Default search algorithm which find everything inside a given folder.
+        size_t search(const boost::filesystem::path &aPath) {
+            boost::filesystem::recursive_directory_iterator endIter;
+            boost::filesystem::recursive_directory_iterator dirIter(aPath);
+            for (; dirIter != endIter; ++dirIter) {
+                const boost::filesystem::file_status fs = dirIter->status();
+                Data.emplace_back(
+                    std::make_pair(dirIter->path().string(), fs.permissions()));
+            }
+            return Data.size();
         }
-        return Data.size();
-    }    
 
-    // Only find files or folder which satisfy given constraints.
-    template <typename Permissions, typename Constraints>
-    size_t search(const boost::filesystem::path &aPath, const Constraints &cons) {
-        boost::filesystem::recursive_directory_iterator endIter;
-        boost::filesystem::recursive_directory_iterator dirIter(aPath);
-        for (; dirIter != endIter; ++dirIter) {
-            const boost::filesystem::file_status fs = dirIter->status();
-            if (Permissions::isValid(fs)){
-                const boost::filesystem::path p = dirIter->path();
-                if (cons.isValid(p)) {
-                    Data.emplace_back(std::make_pair(dirIter->path().string(), fs.permissions()));
+        // Only find files or folder which satisfy given constraints.
+        template <typename Permissions, typename Constraints>
+        size_t search(const boost::filesystem::path &aPath,
+                      const Constraints &cons) {
+            boost::filesystem::recursive_directory_iterator endIter;
+            boost::filesystem::recursive_directory_iterator dirIter(aPath);
+            for (; dirIter != endIter; ++dirIter) {
+                const boost::filesystem::file_status fs = dirIter->status();
+                if (Permissions::isValid(fs)) {
+                    const boost::filesystem::path p = dirIter->path();
+                    if (cons.isValid(p)) {
+                        Data.emplace_back(std::make_pair(
+                            dirIter->path().string(), fs.permissions()));
+                    }
                 }
             }
+            return Data.size();
         }
-        return Data.size();
-    }    
-    
-  private:
-    std::vector<value_type> Data;
-};
+
+      private:
+        std::vector<value_type> Data;
+    };
 }
 #endif

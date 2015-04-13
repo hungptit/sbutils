@@ -21,12 +21,15 @@ TEST(Display_Functions, Positive) {
         std::cout << "Current time: " << Tools::getTimeStampString()
                   << std::endl;
     }
+
+    std::cout << boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%") << std::endl;
 }
 
-
 TEST(FileSystemUtilities, Positive) {
-  const boost::filesystem::path aFolder = boost::filesystem::temp_directory_path() / boost::filesystem::path("test");
-  const std::string folderName = aFolder.string();
+    const boost::filesystem::path aFolder =
+        boost::filesystem::temp_directory_path() /
+        boost::filesystem::path("test");
+    const std::string folderName = aFolder.string();
     EXPECT_TRUE(Tools::createDirectory(folderName));
     EXPECT_TRUE(Tools::isDirectory(folderName));
     EXPECT_TRUE(Tools::getAbslutePath(folderName) == folderName);
@@ -41,7 +44,6 @@ TEST(FileSystemUtilities, Negative) {
     EXPECT_FALSE(Tools::isRegularFile(folderName));
     EXPECT_FALSE(Tools::isDirectory("tUnitTests.cpp"));
 }
-
 
 TEST(TemporaryDirectory, Positive) {
     Tools::TemporaryDirectory tmpDir;
