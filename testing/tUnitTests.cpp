@@ -28,17 +28,19 @@ TEST(Display_Functions, Positive) {
     }
 }
 
-TEST(GetEnv, Positive) {
-    {
-        std::string results = Tools::getenv("PATH");
-        EXPECT_TRUE(!results.empty());
-    }
+// TEST(GetEnv, Positive) {
+//     {
+//       const std::string varName("PATH");
+//       std::string results = std::getenv(varName.c_str());
+//         EXPECT_TRUE(!results.empty());
+//     }
 
-    {
-        std::string results = Tools::getenv("PATH1");
-        EXPECT_TRUE(results.empty());
-    }
-}
+//     {
+//       const std::string varName("PATH1");
+//       std::string results = std::getenv(varName.c_str());
+//         EXPECT_TRUE(results.empty());
+//     }
+// }
 
 TEST(FileSystemUtilities, Positive) {
   const boost::filesystem::path aFolder = boost::filesystem::temp_directory_path() / boost::filesystem::path("test");
