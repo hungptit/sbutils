@@ -22,7 +22,8 @@ TEST(Display_Functions, Positive) {
                   << std::endl;
     }
 
-    std::cout << boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%") << std::endl;
+    std::cout << boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%")
+              << std::endl;
 }
 
 TEST(FileSystemUtilities, Positive) {
