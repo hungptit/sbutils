@@ -53,8 +53,8 @@ message(STATUS "${Boost_INCLUDE_DIRS}")
 message(STATUS "${Boost_LIBRARY_DIRS}")
 message(STATUS "${Boost_LIBRARIES}")
 
-# Compile all unittests
 if (Boost_FOUND)
+  # Compile all unittests
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder tProcess)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
@@ -62,4 +62,14 @@ if (Boost_FOUND)
       ${LIB_POCO_FOUNDATION} ${LIB_POCO_UTILS} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
+ 
+  # Compile all binaries
+  set(COMMAND_SRC_FILES createZipArchive)
+  foreach (src_file ${COMMAND_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION})
+  endforeach (src_file)
+  INSTALL_PROGRAMS(//local/projects/tmp/ FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
+
+
