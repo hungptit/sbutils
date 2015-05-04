@@ -11,7 +11,7 @@ template <typename Data> void disp(Data &data, const std::string &message) {
     for (const auto &val : data) {
         std::cout << val << " ";
     }
-    std::cout << "]" << std::endl;
+    std::cout << "]";
 }
 
 template <typename Data>
@@ -20,7 +20,7 @@ void disp_pair(Data &data, const std::string &message) {
     for (const auto &val : data) {
         std::cout << "(" << val.first << "," << val.second << ") ";
     }
-    std::cout << "]" << std::endl;
+    std::cout << "]";
 }
 
 /**

@@ -5,8 +5,8 @@ set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 set (CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
-# set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
+set(CMAKE_CXX_COMPILER clang++)
+# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
 ENABLE_TESTING()
@@ -42,18 +42,34 @@ include_directories(${BOOST_INCLUDE_DIRS})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories(${PROJECTS_FOLDER})
 
+# POCO
+include_directories("${PROJECTS_FOLDER}/3p/poco/include")
+set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
+set(LIB_POCO_UTILS "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
+
 # Display debug info
 message(STATUS "${Boost_ROOT}")
 message(STATUS "${Boost_INCLUDE_DIRS}")
 message(STATUS "${Boost_LIBRARY_DIRS}")
 message(STATUS "${Boost_LIBRARIES}")
 
-# Compile all unittests
 if (Boost_FOUND)
-  set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
+  # Compile all unittests
+  set(UNITTEST_SRC_FILES tUnitTests tFileFinder tProcess)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}
+      ${LIB_POCO_FOUNDATION} ${LIB_POCO_UTILS} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
+ 
+  # Compile all binaries
+  set(COMMAND_SRC_FILES createZipArchive)
+  foreach (src_file ${COMMAND_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION})
+  endforeach (src_file)
+  INSTALL_PROGRAMS(//local/projects/tmp/ FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
+
+
