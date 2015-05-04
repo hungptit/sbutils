@@ -18,7 +18,7 @@ namespace Tools {
 
         FileFinder() : Data() {}
 
-        auto &getData() { return Data; };
+        std::vector<value_type> &getData() { return Data; };
 
         void print() {
             for (auto &item : Data) {
