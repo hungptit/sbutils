@@ -24,13 +24,13 @@ namespace Tools {
         return output;
     }
 
-    void run(const std::string &command, const std::vector<std::string> args,
-             std::ofstream &outputFile) {
-        Poco::Pipe outPipe;
-        Poco::ProcessHandle ph =
-            Poco::Process::launch(command, args, 0, &outPipe, 0);
-        Poco::PipeInputStream istr(outPipe);
-        Poco::StreamCopier::copyStream(istr, outputFile);
-    }
+    // void run(const std::string &command, const std::vector<std::string> args,
+    //          std::ofstream &outputFile) {
+    //     Poco::Pipe outPipe;
+    //     Poco::ProcessHandle ph =
+    //         Poco::Process::launch(command, args, 0, &outPipe, 0);
+    //     Poco::PipeInputStream istr(outPipe);
+    //     Poco::StreamCopier::copyStream(istr, outputFile);
+    // }
 }
 #endif
