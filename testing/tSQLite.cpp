@@ -2,21 +2,13 @@
 #include "Poco/Data/Session.h"
 #include "Poco/Data/Extraction.h"
 #include "Poco/Data/Statement.h"
-#include <Poco/Data/Session.h>
-#include <Poco/Data/SQLite/Connector.h>
+#include "Poco/Data/Session.h"
+#include "Poco/Data/SQLite/Connector.h"
 #include "Poco/Data/Data.h"
-#include "Poco/Data/SessionImpl.h"
-#include "Poco/Data/Statement.h"
-#include "Poco/Data/StatementCreator.h"
-#include "Poco/Data/Binding.h"
-#include "Poco/AutoPtr.h"
-#include "Poco/Any.h"
 #include <vector>
 #include <iostream>
 
 using namespace Poco::Data;
-using Poco::Data::Session;
-using Poco::Data::Statement;
 
 struct Person {
     std::string name;
@@ -32,39 +24,39 @@ int main() {
     Poco::Data::Session session("SQLite", "sample.db");
 
     // drop sample table, if it exists
-    session << "DROP TABLE IF EXISTS Person", now;
+    // session << "DROP TABLE IF EXISTS Person", Poco::Data::now;
 
-    // (re)create table
-    session << "CREATE TABLE Person (Name VARCHAR(30), Address VARCHAR, Age "
-               "INTEGER(3))",
-        now;
+    // // (re)create table
+    // session << "CREATE TABLE Person (Name VARCHAR(30), Address VARCHAR, Age "
+    //            "INTEGER(3))",
+    //     Poco::Data::now;
 
-    // insert some rows
-    Person person = {"Bart Simpson", "Springfield", 12};
+    // // insert some rows
+    // Person person = {"Bart Simpson", "Springfield", 12};
 
-    Statement insert(session);
-    insert << "INSERT INTO Person VALUES(?, ?, ?)", use(person.name),
-        use(person.address), use(person.age);
+    // Statement insert(session);
+    // insert << "INSERT INTO Person VALUES(?, ?, ?)", use(person.name),
+    //     use(person.address), use(person.age);
 
-    insert.execute();
+    // insert.execute();
 
-    person.name = "Lisa Simpson";
-    person.address = "Springfield";
-    person.age = 10;
+    // person.name = "Lisa Simpson";
+    // person.address = "Springfield";
+    // person.age = 10;
 
-    insert.execute();
+    // insert.execute();
 
-    // a simple query
-    Statement select(session);
-    select << "SELECT Name, Address, Age FROM Person", into(person.name),
-        into(person.address), into(person.age),
-        range(0, 1); //  iterate over result set one row at a time
+    // // a simple query
+    // Statement select(session);
+    // select << "SELECT Name, Address, Age FROM Person", into(person.name),
+    //     into(person.address), into(person.age),
+    //     range(0, 1); //  iterate over result set one row at a time
 
-    while (!select.done()) {
-        select.execute();
-        std::cout << person.name << " " << person.address << " " << person.age
-                  << std::endl;
-    }
+    // while (!select.done()) {
+    //     select.execute();
+    //     std::cout << person.name << " " << person.address << " " << person.age
+    //               << std::endl;
+    // }
 
     return 0;
 }
