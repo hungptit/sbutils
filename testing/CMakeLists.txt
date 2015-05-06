@@ -43,9 +43,13 @@ include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories(${PROJECTS_FOLDER})
 
 # POCO
-include_directories("${PROJECTS_FOLDER}/3p/poco/include")
-set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
-set(LIB_POCO_UTILS "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
+# include_directories("${PROJECTS_FOLDER}/3p/poco/include")
+# set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
+# set(LIB_POCO_UTILS "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
+# set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
+# set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
+# set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
+# set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 
 # Display debug info
 message(STATUS "${Boost_ROOT}")
@@ -55,11 +59,19 @@ message(STATUS "${Boost_LIBRARIES}")
 
 if (Boost_FOUND)
   # Compile all unittests
-  set(UNITTEST_SRC_FILES tUnitTests tFileFinder tProcess)
+  set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} -lpthread)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+
+  # Compile Poco unittests
+  set(UNITTEST_SRC_FILES tProcess tSQLite)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}
-      ${LIB_POCO_FOUNDATION} ${LIB_POCO_UTILS} -lpthread)
+      -lPocoFoundation -lPocoData -lPocoDataSQLite -lPocoXML -lPocoUtil -pthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
  
@@ -71,5 +83,3 @@ if (Boost_FOUND)
   endforeach (src_file)
   INSTALL_PROGRAMS(//local/projects/tmp/ FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
-
-
