@@ -6,7 +6,7 @@ set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 set (CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_COMPILER clang++)
-# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
+set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
 ENABLE_TESTING()
@@ -32,16 +32,12 @@ endif (Boost_NO_SYSTEM_PATHS)
 
 find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options)
 
-# Display debug info
-message(STATUS "${BOOST_ROOT}")
-message(STATUS "${BOOST_INCLUDE_DIRS}")
-message(STATUS "${BOOST_LIBRARY_DIRS}")
-
 # Include folder
 include_directories(${BOOST_INCLUDE_DIRS})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories(${PROJECTS_FOLDER})
 
+<<<<<<< HEAD
 # POCO
 # include_directories("${PROJECTS_FOLDER}/3p/poco/include")
 # set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
@@ -56,6 +52,16 @@ message(STATUS "${Boost_ROOT}")
 message(STATUS "${Boost_INCLUDE_DIRS}")
 message(STATUS "${Boost_LIBRARY_DIRS}")
 message(STATUS "${Boost_LIBRARIES}")
+=======
+# Compile using POCO static library
+include_directories("${PROJECTS_FOLDER}/3p/poco/include")
+set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
+set(LIB_POCO_UTIL "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
+set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
+set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
+set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
+set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
+>>>>>>> 877f4143259cbeccc23bed2b9d44c00ddcadd83d
 
 if (Boost_FOUND)
   # Compile all unittests
@@ -66,15 +72,24 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
+<<<<<<< HEAD
   # Compile Poco unittests
   set(UNITTEST_SRC_FILES tProcess tSQLite)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}
       -lPocoFoundation -lPocoData -lPocoDataSQLite -lPocoXML -lPocoUtil -pthread -ldl)
+=======
+  set(UNITTEST_SRC_FILES tProcess)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}
+      ${LIB_POCO_FOUNDATION} -lpthread)
+>>>>>>> 877f4143259cbeccc23bed2b9d44c00ddcadd83d
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
- 
+
+  
   # Compile all binaries
   set(COMMAND_SRC_FILES createZipArchive)
   foreach (src_file ${COMMAND_SRC_FILES})
@@ -82,4 +97,20 @@ if (Boost_FOUND)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION})
   endforeach (src_file)
   INSTALL_PROGRAMS(//local/projects/tmp/ FILES ${COMMAND_SRC_FILES})
+
+  # Compile SQLite examples. The order of linked libraries must be preserved
+  # otherwise the link process will be failed.
+  set(UNITTEST_SRC_FILES tSQLite)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES}
+      ${LIB_POCO_UTIL}
+      ${LIB_POCO_NET}
+      ${LIB_POCO_XML}
+      ${LIB_POCO_FOUNDATION}
+      ${LIB_POCO_DATA}
+      ${LIB_POCO_SQLITE}
+      -lpthread -ldl)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
 endif (Boost_FOUND)
