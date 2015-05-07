@@ -3,9 +3,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
-set (CMAKE_BUILD_TYPE Debug)
+# set (CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_COMPILER clang++)
+# set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
@@ -37,22 +37,6 @@ include_directories(${BOOST_INCLUDE_DIRS})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories(${PROJECTS_FOLDER})
 
-<<<<<<< HEAD
-# POCO
-# include_directories("${PROJECTS_FOLDER}/3p/poco/include")
-# set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
-# set(LIB_POCO_UTILS "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
-# set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
-# set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
-# set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-# set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
-
-# Display debug info
-message(STATUS "${Boost_ROOT}")
-message(STATUS "${Boost_INCLUDE_DIRS}")
-message(STATUS "${Boost_LIBRARY_DIRS}")
-message(STATUS "${Boost_LIBRARIES}")
-=======
 # Compile using POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
 set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
@@ -61,7 +45,6 @@ set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
->>>>>>> 877f4143259cbeccc23bed2b9d44c00ddcadd83d
 
 if (Boost_FOUND)
   # Compile all unittests
@@ -72,23 +55,13 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
-<<<<<<< HEAD
-  # Compile Poco unittests
-  set(UNITTEST_SRC_FILES tProcess tSQLite)
-  foreach (src_file ${UNITTEST_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}
-      -lPocoFoundation -lPocoData -lPocoDataSQLite -lPocoXML -lPocoUtil -pthread -ldl)
-=======
   set(UNITTEST_SRC_FILES tProcess)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}
       ${LIB_POCO_FOUNDATION} -lpthread)
->>>>>>> 877f4143259cbeccc23bed2b9d44c00ddcadd83d
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-
   
   # Compile all binaries
   set(COMMAND_SRC_FILES createZipArchive)
