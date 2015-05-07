@@ -68,7 +68,9 @@ if (Boost_FOUND)
   set(COMMAND_SRC_FILES createZipArchive)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION})
+    TARGET_LINK_LIBRARIES(${src_file} 
+      ${Boost_LIBRARIES} 
+      ${LIB_POCO_FOUNDATION})
   endforeach (src_file)
   INSTALL_PROGRAMS(//local/projects/tmp/ FILES ${COMMAND_SRC_FILES})
 
@@ -77,7 +79,8 @@ if (Boost_FOUND)
   set(UNITTEST_SRC_FILES tSQLite)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES}
+    TARGET_LINK_LIBRARIES(${src_file} 
+      ${Boost_LIBRARIES}
       ${LIB_POCO_UTIL}
       ${LIB_POCO_NET}
       ${LIB_POCO_XML}
