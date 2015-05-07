@@ -74,5 +74,24 @@ namespace Tools {
       private:
         boost::filesystem::path CurrentDir;
     };
+
+    void copyDir(const boost::filesystem::path &srcFolder,
+                 const boost::filesystem::path &desFolder) {
+        using namespace boost::filesystem;
+        copy_directory(srcFolder, desFolder);
+        // Copy files and recurse to the sub-folders if neccessary.
+        recursive_directory_iterator endIter;
+        recursive_directory_iterator dirIter(srcFolder);
+        for (; dirIter != endIter; ++dirIter) {
+            auto aFile = dirIter->path();
+            if (is_directory(aFile)) {
+                auto aPath = desFolder / aFile.filename();
+                copyDir(aFile, aPath);
+            } else {
+                auto desFile = desFolder / aFile.filename();
+                copy(aFile, desFile);
+            }
+        }
+    }
 }
 #endif
