@@ -2,25 +2,20 @@
 #define FileSystemUtilities_hpp_
 #include "boost/filesystem.hpp"
 #include <string>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "boost/lexical_cast.hpp"
 namespace Tools {
-    bool isRegularFile(const std::string &str) {
-        return boost::filesystem::is_regular_file(boost::filesystem::path(str));
-    }
+    bool isRegularFile(const std::string &str) { return boost::filesystem::is_regular_file(boost::filesystem::path(str)); }
 
     bool isDirectory(const std::string &folderPath) {
-        return boost::filesystem::is_directory(
-            boost::filesystem::path(folderPath));
+        return boost::filesystem::is_directory(boost::filesystem::path(folderPath));
     }
 
     bool createDirectory(const std::string &folderPath) {
         const boost::filesystem::path folder(folderPath);
-        return (boost::filesystem::is_directory(folder))
-                   ? (true)
-                   : (boost::filesystem::create_directories(folder));
+        return (boost::filesystem::is_directory(folder)) ? (true) : (boost::filesystem::create_directories(folder));
     }
 
     bool remove(const std::string &folderName) {
@@ -35,31 +30,47 @@ namespace Tools {
         return false;
     }
 
-    const std::string getCurrentFolder() {
-        return boost::filesystem::current_path().string();
-    }
+    const std::string getCurrentFolder() { return boost::filesystem::current_path().string(); }
 
     std::string getAbslutePath(const std::string &pathName) {
         const boost::filesystem::path path(pathName);
         return boost::filesystem::canonical(path).string();
     }
 
-    const std::string getUniqueString() {
-        return boost::lexical_cast<std::string>(
-            boost::uuids::random_generator()());
+    const std::string getUniqueString() { return boost::lexical_cast<std::string>(boost::uuids::random_generator()()); }
+
+    /**
+     * This function will copy the content of the srcFolder to desFolder recursively. Note that this function may throw.
+     *
+     * @param srcFolder
+     * @param desFolder
+     */
+    void copyDir(const boost::filesystem::path &srcFolder, const boost::filesystem::path &desFolder) {
+        using namespace boost::filesystem;
+        copy_directory(srcFolder, desFolder);
+        recursive_directory_iterator endIter;
+        recursive_directory_iterator dirIter(srcFolder);
+        for (; dirIter != endIter; ++dirIter) {
+            auto aFile = dirIter->path();
+            if (is_directory(aFile)) {
+                auto aPath = desFolder / aFile.filename();
+                copyDir(aFile, aPath);
+            } else {
+                auto desFile = desFolder / aFile.filename();
+                copy(aFile, desFile);
+            }
+        }
     }
 
     class TemporaryDirectory {
       public:
         TemporaryDirectory() {
-            CurrentDir = boost::filesystem::temp_directory_path() /
-                         boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%");
+            CurrentDir = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%");
             boost::filesystem::create_directories(CurrentDir);
         }
 
         TemporaryDirectory(const std::string &parentDir) {
-            CurrentDir = boost::filesystem::path(parentDir) /
-                         boost::filesystem::path(getUniqueString());
+            CurrentDir = boost::filesystem::path(parentDir) / boost::filesystem::path(getUniqueString());
             boost::filesystem::create_directories(CurrentDir);
         }
 
@@ -74,24 +85,5 @@ namespace Tools {
       private:
         boost::filesystem::path CurrentDir;
     };
-
-    void copyDir(const boost::filesystem::path &srcFolder,
-                 const boost::filesystem::path &desFolder) {
-        using namespace boost::filesystem;
-        copy_directory(srcFolder, desFolder);
-        // Copy files and recurse to the sub-folders if neccessary.
-        recursive_directory_iterator endIter;
-        recursive_directory_iterator dirIter(srcFolder);
-        for (; dirIter != endIter; ++dirIter) {
-            auto aFile = dirIter->path();
-            if (is_directory(aFile)) {
-                auto aPath = desFolder / aFile.filename();
-                copyDir(aFile, aPath);
-            } else {
-                auto desFile = desFolder / aFile.filename();
-                copy(aFile, desFile);
-            }
-        }
-    }
 }
 #endif
