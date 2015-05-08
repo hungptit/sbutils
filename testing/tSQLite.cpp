@@ -1,10 +1,5 @@
-#include "Poco/Data/Data.h"
-#include "Poco/Data/Session.h"
-#include "Poco/Data/Extraction.h"
-#include "Poco/Data/Statement.h"
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SQLite/Connector.h"
-#include "Poco/Data/Data.h"
 #include <vector>
 #include <iostream>
 
@@ -15,6 +10,7 @@ struct Person {
 };
 
 int main() {
+<<<<<<< HEAD
   using namespace Poco::Data::Keywords;
   
   // register SQLite connector
@@ -24,6 +20,17 @@ int main() {
     Poco::Data::Session session("SQLite", "sample.db");
 
     // // drop sample table, if it exists
+=======
+    using namespace Poco::Data::Keywords;
+
+    // register SQLite connector
+    Poco::Data::SQLite::Connector::registerConnector();
+
+    // create a session
+    Poco::Data::Session session("SQLite", "sample.db");
+
+    // drop sample table, if it exists
+>>>>>>> 44e129d5964e8bbc0b2fcf76dcc4f90e5ada756a
     session << "DROP TABLE IF EXISTS Person", now;
 
     // (re)create table
