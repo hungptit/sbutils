@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
-set (CMAKE_BUILD_TYPE Debug)
+# set (CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
@@ -14,6 +14,7 @@ ENABLE_TESTING()
 # Used libraries
 set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
+set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/libleveldb.a")
 
 # Find Boost libraries
 set(Boost_USE_STATIC_LIBS ON)
@@ -35,6 +36,8 @@ find_package(Boost REQUIRED regex date_time system filesystem thread graph progr
 # Include folder
 include_directories(${BOOST_INCLUDE_DIRS})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
+include_directories("${PROJECTS_FOLDER}/3p/cppformat/include")
+include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 include_directories(${PROJECTS_FOLDER})
 
 # Compile using POCO static library
@@ -43,8 +46,10 @@ set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
 set(LIB_POCO_UTIL "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
 set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
-set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
+set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
+set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
+
+set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libformat.a")
 
 if (Boost_FOUND)
   # Compile all unittests
@@ -80,13 +85,25 @@ if (Boost_FOUND)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
+      ${LIB_CPPFORMAT}
       ${Boost_LIBRARIES}
       ${LIB_POCO_UTIL}
       ${LIB_POCO_NET}
       ${LIB_POCO_XML}
+      ${LIB_POCO_SQLITE}
       ${LIB_POCO_FOUNDATION}
       ${LIB_POCO_DATA}
       ${LIB_POCO_SQLITE}
+      -lpthread -ldl)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+
+  set(UNITTEST_SRC_FILES finder)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} 
+      ${Boost_LIBRARIES}
+       ${LIB_LEVELDB}
       -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
