@@ -16,7 +16,8 @@ int main (int argc, char * argv[]) {
         ("help,h", "finder - Find all files of a given folder and .")
         ("verbose,v", "Display all data.")
         ("folder,d", po::value<std::vector<std::string>>(), "Search folders.")
-        ("extensions,e", po::value<std::vector<std::string>>(), "Search extensions.");
+        ("extensions,e", po::value<std::vector<std::string>>(), "Search extensions.")
+        ("baseline,b", po::value<std::string>(), "Baseline data.");
 
     po::positional_options_description p;
     p.add("folder", -1);
@@ -38,7 +39,7 @@ int main (int argc, char * argv[]) {
     // Process input parameters
     std::vector<std::string> folders = {"./"};
     std::string database ;
-    std::vector<std::string> searchExtensions = {std::string(".m"), ".mat", ".slx", ".cpp", ".hpp"};
+    std::vector<std::string> searchExtensions = {std::string(".m"), ".mat", ".slx", ".cpp", ".hpp", ".c", ".h", ".mdl"};
     
     if (vm.count("folder")) {
         folders = vm["folder"].as<std::vector<std::string>>();

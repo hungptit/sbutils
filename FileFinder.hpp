@@ -106,6 +106,19 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
+    /**
+     * This class will find all edited files using the below rules
+     *
+     * If the search extensions is specified then we only search for file with
+     * valid extensions otherwise we search for all files.
+     *
+     * After we get a list of edited file we will compare them with the baseline
+     * data i.e. timestamp and only keep files which have the same time-stamp as
+     * that of the baseline.
+     *
+     * @todo: Speed up this class using threads?
+     */
+
     class FindEditedFiles {
       public:
         typedef std::tuple<std::string, boost::filesystem::perms, std::time_t> value_type;
@@ -126,8 +139,7 @@ namespace Tools {
             }
         }
 
-        template <typename Container> 
-        void search(const boost::filesystem::path &searchPath, Container &searchExtensions) {
+        template <typename Container> void search(const boost::filesystem::path &searchPath, Container &searchExtensions) {
             boost::filesystem::recursive_directory_iterator endIter;
             boost::filesystem::recursive_directory_iterator dirIter(searchPath);
             for (; dirIter != endIter; ++dirIter) {
@@ -147,9 +159,11 @@ namespace Tools {
             }
         }
 
+        // @todo Use Spirit and Qi to improve the performance.
         void print() {
             for (auto &item : Data) {
-                std::cout << "(\"" << std::get<0>(item) << "\", " << std::get<1>(item) << ")" << std::endl;
+                std::cout << "(" << std::get<0>(item) << ", " << std::get<1>(item) << "," << std::get<2>(item) << ")"
+                          << std::endl;
             }
             std::cout << "Number of files: " << Data.size() << std::endl;
         }
