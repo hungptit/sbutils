@@ -36,7 +36,7 @@ namespace Tools {
                 Database->Put(writeOptions, std::get<0>(val), boost::lexical_cast<std::string>(std::get<1>(val)));
             }
         }
-        
+
       private:
         leveldb::DB *Database;
         std::string DataFile;
@@ -83,7 +83,7 @@ namespace Tools {
     class Finder {
       public:
         typedef std::tuple<std::string, boost::filesystem::perms, std::time_t> value_type;
-        
+
         void search(const boost::filesystem::path &searchPath) {
             boost::filesystem::recursive_directory_iterator endIter;
             boost::filesystem::recursive_directory_iterator dirIter(searchPath);
@@ -97,10 +97,64 @@ namespace Tools {
                 }
             }
         }
-        
+
         std::vector<value_type> &getData() { return Data; }
-        
+
         void reset() { Data.clear(); }
+
+      private:
+        std::vector<value_type> Data;
+    };
+
+    class FindEditedFiles {
+      public:
+        typedef std::tuple<std::string, boost::filesystem::perms, std::time_t> value_type;
+
+        void search(const boost::filesystem::path &searchPath) {
+            boost::filesystem::recursive_directory_iterator endIter;
+            boost::filesystem::recursive_directory_iterator dirIter(searchPath);
+            for (; dirIter != endIter; ++dirIter) {
+                const boost::filesystem::file_status fs = dirIter->status();
+                if (fs.type() == boost::filesystem::regular_file) {
+                    auto fperm = fs.permissions();
+                    if (fperm & boost::filesystem::owner_write) {
+                        auto const currentFile = dirIter->path();
+                        const std::time_t t = boost::filesystem::last_write_time(currentFile);
+                        Data.emplace_back(std::make_tuple(currentFile.string(), fperm, t));
+                    }
+                }
+            }
+        }
+
+        template <typename Container> 
+        void search(const boost::filesystem::path &searchPath, Container &searchExtensions) {
+            boost::filesystem::recursive_directory_iterator endIter;
+            boost::filesystem::recursive_directory_iterator dirIter(searchPath);
+            for (; dirIter != endIter; ++dirIter) {
+                const boost::filesystem::file_status fs = dirIter->status();
+                if (fs.type() == boost::filesystem::regular_file) {
+                    auto fperm = fs.permissions();
+                    if (fperm & boost::filesystem::owner_write) {
+                        auto const currentFile = dirIter->path();
+                        const std::string fileExtension = currentFile.extension().string();
+                        if (std::find(searchExtensions.begin(), searchExtensions.end(), fileExtension) !=
+                            searchExtensions.end()) {
+                            const std::time_t t = boost::filesystem::last_write_time(currentFile);
+                            Data.emplace_back(std::make_tuple(currentFile.string(), fperm, t));
+                        }
+                    }
+                }
+            }
+        }
+
+        void print() {
+            for (auto &item : Data) {
+                std::cout << "(\"" << std::get<0>(item) << "\", " << std::get<1>(item) << ")" << std::endl;
+            }
+            std::cout << "Number of files: " << Data.size() << std::endl;
+        }
+
+        std::vector<value_type> &getData() { return Data; }
 
       private:
         std::vector<value_type> Data;
