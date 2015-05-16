@@ -163,9 +163,9 @@ TEST(FileSearchDefault, Positive) {
     EXPECT_TRUE(data.size() == 8);
     if (!data.empty() > 0) {
         EXPECT_TRUE(
-            data[0].first ==
+            std::get<0>(data[0]) ==
             (tmpDir.getPath() / boost::filesystem::path("bin")).string());
-        EXPECT_TRUE(data[1].first ==
+        EXPECT_TRUE(std::get<0>(data[1]) ==
                     (tmpDir.getPath() / boost::filesystem::path("bin") /
                      boost::filesystem::path("test")).string());
     }
