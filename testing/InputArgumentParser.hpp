@@ -54,6 +54,11 @@ namespace Tools {
       std::cout << "Verbose: " << (Verbose ? ("true") : ("false")) << std::endl;
       std::cout << "Ignore case: " << (IgnoreCase ? "true" : "false") << std::endl;
       std::cout << "Ignore case: " << (CountOnly ? "true" : "false") << std::endl;
+      std::cout << "Database: " << Database << std::endl;
+      std::cout << "Search folders: ";
+      for (auto & val : Folders) std::cout << val << " ";
+      std::cout << std::endl;
+      std::cout << "Search pattern: " << SearchPattern << std::endl;
     }
       
     // Member variables
