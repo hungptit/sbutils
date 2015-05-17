@@ -10,17 +10,6 @@ struct Person {
 };
 
 int main() {
-<<<<<<< HEAD
-  using namespace Poco::Data::Keywords;
-  
-  // register SQLite connector
-  Poco::Data::SQLite::Connector::registerConnector();
-  
-  // create a session
-    Poco::Data::Session session("SQLite", "sample.db");
-
-    // // drop sample table, if it exists
-=======
     using namespace Poco::Data::Keywords;
 
     // register SQLite connector
@@ -29,8 +18,8 @@ int main() {
     // create a session
     Poco::Data::Session session("SQLite", "sample.db");
 
-    // drop sample table, if it exists
->>>>>>> 44e129d5964e8bbc0b2fcf76dcc4f90e5ada756a
+    // // drop sample table, if it exists
+
     session << "DROP TABLE IF EXISTS Person", now;
 
     // (re)create table
@@ -42,8 +31,7 @@ int main() {
     Person person = {"Bart Simpson", "Springfield", 12};
 
     Poco::Data::Statement insert(session);
-    insert << "INSERT INTO Person VALUES(?, ?, ?)", use(person.name),
-        use(person.address), use(person.age);
+    insert << "INSERT INTO Person VALUES(?, ?, ?)", use(person.name), use(person.address), use(person.age);
 
     insert.execute();
 
@@ -55,14 +43,12 @@ int main() {
 
     // a simple query
     Poco::Data::Statement select(session);
-    select << "SELECT Name, Address, Age FROM Person", into(person.name),
-        into(person.address), into(person.age),
+    select << "SELECT Name, Address, Age FROM Person", into(person.name), into(person.address), into(person.age),
         range(0, 1); //  iterate over result set one row at a time
 
     while (!select.done()) {
         select.execute();
-        std::cout << person.name << " " << person.address << " " << person.age
-                  << std::endl;
+        std::cout << person.name << " " << person.address << " " << person.age << std::endl;
     }
 
     return 0;
