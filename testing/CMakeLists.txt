@@ -4,8 +4,12 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 # set (CMAKE_BUILD_TYPE Debug)
+
+
 set (CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_COMPILER clang++)
+# set(CMAKE_CXX_COMPILER clang++)
+# set (CMAKE_BUILD_TYPE Release)
+# set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
@@ -38,6 +42,7 @@ include_directories(${BOOST_INCLUDE_DIRS})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories("${PROJECTS_FOLDER}/3p/cppformat/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
+include_directories ("${PROJECTS_FOLDER}/3p/rapidjson/include")
 include_directories(${PROJECTS_FOLDER})
 
 # Compile using POCO static library
@@ -53,7 +58,7 @@ set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libformat.a")
 
 if (Boost_FOUND)
   # Compile all unittests
-  set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
+  set(UNITTEST_SRC_FILES tUnitTests tFileFinder tJSON)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} -lpthread)
@@ -67,7 +72,6 @@ if (Boost_FOUND)
       ${LIB_POCO_FOUNDATION} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-
   
   # Compile all binaries
   set(COMMAND_SRC_FILES createZipArchive)
@@ -107,5 +111,3 @@ if (Boost_FOUND)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
-
-
