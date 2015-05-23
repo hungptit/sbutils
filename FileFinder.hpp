@@ -222,5 +222,44 @@ namespace Tools {
       private:
         std::vector<value_type> Data;
     };
+
+    // Use mixin design pattern to implement the file search algorithm.
+    class FindFiles {
+      public:
+        virtual bool update(boost::filesystem::recursive_directory_iterator &dirIter) = 0;
+
+        size_t search(const boost::filesystem::path &aPath) {
+            boost::filesystem::recursive_directory_iterator endIter;
+            boost::filesystem::recursive_directory_iterator dirIter(aPath);
+            auto counter = 0;
+            for (; dirIter != endIter; ++dirIter) {
+                counter += update(dirIter);
+            }
+            return counter;
+        }
+
+      protected:
+    };
+
+    template <typename T> class FindAllFiles : public T {
+      public:
+        typedef std::tuple<std::string, boost::filesystem::perms, std::time_t> value_type;
+        bool update(boost::filesystem::recursive_directory_iterator &dirIter) {
+            const boost::filesystem::file_status fs = dirIter->status();
+            if (fs.type() == boost::filesystem::regular_file) {
+                auto fperm = fs.permissions();
+                auto const currentFile = dirIter->path();
+                const std::time_t t = boost::filesystem::last_write_time(currentFile);
+                Data.emplace_back(std::make_tuple(currentFile.string(), fperm, t));
+                return true;
+            }
+            return false;
+        }
+
+        std::vector<value_type> &getData() { return Data; }
+
+      private:
+        std::vector<value_type> Data;
+    };
 }
 #endif
