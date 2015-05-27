@@ -53,12 +53,12 @@ namespace Tools {
     void disp() {
       std::cout << "Verbose: " << (Verbose ? ("true") : ("false")) << std::endl;
       std::cout << "Ignore case: " << (IgnoreCase ? "true" : "false") << std::endl;
-      std::cout << "Ignore case: " << (CountOnly ? "true" : "false") << std::endl;
-      std::cout << "Database: " << Database << std::endl;
+      std::cout << "Count only: " << (CountOnly ? "true" : "false") << std::endl;
+      std::cout << "Database: \"" << Database << "\"\n";
       std::cout << "Search folders: ";
-      for (auto & val : Folders) std::cout << val << " ";
+      for (auto & val : Folders) std::cout << "\"" << val << "\" ";
       std::cout << std::endl;
-      std::cout << "Search pattern: " << SearchPattern << std::endl;
+      std::cout << "Search pattern: \"" << SearchPattern << "\"\n";
     }
       
     // Member variables
