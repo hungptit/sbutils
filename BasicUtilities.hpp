@@ -5,28 +5,56 @@
 #include <string>
 #include <cstdlib>
 
+// Print out the content of std::tuple
+// http://cpplove.blogspot.com/2012/07/printing-tuples.html
+namespace {
+    template <std::size_t...> struct seq {};
+
+    template <std::size_t N, std::size_t... Is> struct gen_seq : gen_seq<N - 1, N - 1, Is...> {};
+
+    template <std::size_t... Is> struct gen_seq<0, Is...> : seq<Is...> {};
+
+    template <class Ch, class Tr, class Tuple, std::size_t... Is>
+    void print_tuple(std::basic_ostream<Ch, Tr> &output, Tuple const &t, seq<Is...>) {
+        using swallow = int[];
+        (void)swallow{0, (void(output << (Is == 0 ? "" : ", ") << std::get<Is>(t)), 0)...};
+    }
+
+    template <class Ch, class Tr, class... Args>
+    auto operator<<(std::basic_ostream<Ch, Tr> &output, std::tuple<Args...> const &t) -> std::basic_ostream<Ch, Tr> & {
+        print_tuple(output, t, gen_seq<sizeof...(Args)>());
+        return output;
+    }
+}
+
+
 namespace Tools {
-template <typename Data> void disp(Data &data, const std::string &message) {
-    std::cout << message << "[ ";
-    for (const auto &val : data) {
-        std::cout << val << " ";
+    template <typename Data> void disp(Data &data, const std::string &message) {
+        std::cout << message << "[ ";
+        for (const auto &val : data) {
+            std::cout << val << " ";
+        }
+        std::cout << "]";
     }
-    std::cout << "]";
-}
 
-template <typename Data>
-void disp_pair(Data &data, const std::string &message) {
-    std::cout << message << "[ ";
-    for (const auto &val : data) {
-        std::cout << "(" << val.first << "," << val.second << ") ";
+    template <typename Data> void disp_pair(Data &data, const std::string &message) {
+        std::cout << message << "[ ";
+        for (const auto &val : data) {
+            std::cout << "(" << val.first << "," << val.second << ") ";
+        }
+        std::cout << "]";
     }
-    std::cout << "]";
-}
 
-/**
- * @todo Improve this function!
- */
-int run(const std::string &command) { return std::system(command.c_str()); }
+    template <typename Container> void print(const Container &data) {
+        for (auto const &val : data) {
+            std::cout << val << "\n";
+        }
+    }
+
+    /**
+     * @todo Improve this function!
+     */
+    int run(const std::string &command) { return std::system(command.c_str()); }
 }
 
 #endif
