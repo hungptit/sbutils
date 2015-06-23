@@ -58,7 +58,7 @@ set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libformat.a")
 
 if (Boost_FOUND)
   # Compile all unittests
-  set(UNITTEST_SRC_FILES tUnitTests tFileFinder tJSON)
+  set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} -lpthread)

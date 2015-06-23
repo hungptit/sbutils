@@ -14,8 +14,6 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-#include "Json.hpp"
-
 namespace Tools {
     class Writer {
       public:
