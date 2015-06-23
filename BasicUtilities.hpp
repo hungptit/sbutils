@@ -6,16 +6,16 @@
 #include <cstdlib>
 
 // Print out the content of std::tuple
-// http://cpplove.blogspot.com/2012/07/printing-tuples.html
+// http://stackoverflow.com/questions/6245735/pretty-print-stdtuple
 namespace {
-    template <std::size_t...> struct seq {};
+    template <std::size_t...> struct int_ {};
 
     template <std::size_t N, std::size_t... Is> struct gen_seq : gen_seq<N - 1, N - 1, Is...> {};
 
-    template <std::size_t... Is> struct gen_seq<0, Is...> : seq<Is...> {};
+    template <std::size_t... Is> struct gen_seq<0, Is...> : int_<Is...> {};
 
     template <class Ch, class Tr, class Tuple, std::size_t... Is>
-    void print_tuple(std::basic_ostream<Ch, Tr> &output, Tuple const &t, seq<Is...>) {
+    void print_tuple(std::basic_ostream<Ch, Tr> &output, Tuple const &t, int_<Is...>) {
         using swallow = int[];
         (void)swallow{0, (void(output << (Is == 0 ? "" : ", ") << std::get<Is>(t)), 0)...};
     }
