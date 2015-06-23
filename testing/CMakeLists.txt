@@ -43,6 +43,7 @@ include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories("${PROJECTS_FOLDER}/3p/cppformat/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 include_directories ("${PROJECTS_FOLDER}/3p/rapidjson/include")
+include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories(${PROJECTS_FOLDER})
 
 # Compile using POCO static library
@@ -53,7 +54,6 @@ set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-
 set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libformat.a")
 
 if (Boost_FOUND)

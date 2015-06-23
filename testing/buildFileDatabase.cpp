@@ -18,12 +18,12 @@ int main(int argc, char *argv[]) {
     }
 
     // Build file information database
-    Tools::BuildFileDatabase<Tools::Finder<Tools::BasicFileInfo>> fSearch;
+    Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
     for (const auto &val : params.Folders) {
         fSearch.search(val);
     }
 
-    Tools::print(fSearch.getData());
+    // Tools::print(fSearch.getData());
     
     // Write results to database.
     Tools::Writer writer(params.Database);
