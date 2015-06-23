@@ -3,8 +3,6 @@
 
 #include "BasicUtilities.hpp"
 #include "TimeUtilities.hpp"
-#include "FileFinder.hpp"
-#include "FileSearchStrategy.hpp"
 #include "FileSystemUtilities.hpp"
 
 #endif

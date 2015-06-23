@@ -6,6 +6,8 @@
 #include <tuple>
 #include "boost/filesystem.hpp"
 #include "utils/Utils.hpp"
+#include "utils/FindUtils.hpp"
+#include "utils/LevelDBIO.hpp"
 #include "boost/program_options.hpp"
 #include "InputArgumentParser.hpp"
 
@@ -16,16 +18,16 @@ int main(int argc, char *argv[]) {
     }
 
     // Build file information database
-    Tools::Finder fSearch;
+    Tools::BuildFileDatabase<Tools::Finder<Tools::BasicFileInfo>> fSearch;
     for (const auto &val : params.Folders) {
         fSearch.search(val);
     }
 
-    // Create the database if desired.
-    if (!params.Database.empty()) {
-        Tools::Writer writer(params.Database);
-        writer.write(fSearch.getData());
-    }
+    Tools::print(fSearch.getData());
+    
+    // Write results to database.
+    Tools::Writer writer(params.Database);
+    // writer.write(fSearch.getData());
 
     return 0;
 }
