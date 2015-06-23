@@ -29,7 +29,9 @@ namespace Tools {
                 // string of a tuple.  Basically, we need file name, file
                 // extension, permission, and time stamp. These parameters will
                 // be used to query the information from the file database.
-                const auto value = boost::lexical_cast<std::string>(std::get<2>(val)) + ":" + boost::lexical_cast<std::string>(std::get<2>(val));
+                const auto value = boost::lexical_cast<std::string>(std::get<2>(val)) +
+                  ":" +
+                  boost::lexical_cast<std::string>(std::get<2>(val));
                 Database->Put(writeOptions, std::get<0>(val), value);
             }
         }

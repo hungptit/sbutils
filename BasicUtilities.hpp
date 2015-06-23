@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <tuple>
 
 // Print out the content of std::tuple
 // http://stackoverflow.com/questions/6245735/pretty-print-stdtuple

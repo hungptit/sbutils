@@ -7,6 +7,7 @@
 #include "boost/filesystem.hpp"
 #include "utils/Utils.hpp"
 #include "utils/FindUtils.hpp"
+#include "utils/LevelDBIO.hpp"
 #include "boost/program_options.hpp"
 #include "InputArgumentParser.hpp"
 
@@ -25,7 +26,7 @@ int main(int argc, char *argv[]) {
     Tools::print(fSearch.getData());
     
     // Write results to database.
-    // Tools::Writer writer(params.Database);
+    Tools::Writer writer(params.Database);
     // writer.write(fSearch.getData());
 
     return 0;

@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <iostream>
 
 TEST(Display_Functions, Positive) {
     {

@@ -50,11 +50,11 @@ int main (int argc, char * argv[]) {
     }   
 
     // Search for an edited files in given folders.
-    Tools::FindEditedFiles fSearch;
-    for (const auto & val : folders) {
-        fSearch.search(val, searchExtensions);
-    }
+    // Tools::FindEditedFiles fSearch;
+    // for (const auto & val : folders) {
+    //     fSearch.search(val, searchExtensions);
+    // }
     
-    fSearch.print();
+    // fSearch.print();
     return 0;
 }
