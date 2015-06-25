@@ -11,7 +11,11 @@
 #include "boost/program_options.hpp"
 #include "InputArgumentParser.hpp"
 
-#include <cereal/archives/binary.hpp>
+#include <string>
+#include <vector>
+#include <map>
+#include <ctime>
+#include <sstream>
 
 int main(int argc, char *argv[]) {
     Tools::InputArgumentParser params(argc, argv);
@@ -20,20 +24,35 @@ int main(int argc, char *argv[]) {
     }
 
     // Build file information database
-    // Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
-Tools::BuildFileDatabase<Tools::Finder, std::string> fSearch;
+    Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
     for (const auto &val : params.Folders) {
         fSearch.search(val);
     }
+    
+    // IO data format
+    typedef cereal::JSONOutputArchive OArchive;
+    typedef cereal::JSONInputArchive IArchive;
 
-Tools::disp(fSearch.getData(), "");
+    std::ostringstream os;
+    auto data = fSearch.getData();
 
-    // fSearch.disp<cereal::JSONOutputArchive>();
-    // auto data = fSearch.getData();
-    // Tools::disp<cereal::JSONOutputArchive, decltype(data)>(data);
+    {
+        Tools::save<OArchive, decltype(data)>(data, os);
+        std::cout << os.str().size() << std::endl;
+    }
+
+    {
+        decltype(data) test_data;
+        std::istringstream is(os.str());
+        Tools::load<IArchive, decltype(test_data)>(test_data, is);
+        std::cout << os.str().size() << std::endl;
+        for (auto val : test_data) {
+            std::cout << val << std::endl;
+        }
+    }
 
     // Write results to database.
-    Tools::Writer writer(params.Database);
+    // Tools::Writer writer(params.Database);
     // writer.write(fSearch.getData());
 
     return 0;
