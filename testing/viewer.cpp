@@ -6,6 +6,8 @@
 #include <tuple>
 #include "boost/filesystem.hpp"
 #include "utils/Utils.hpp"
+#include "utils/LevelDBIO.hpp"
+
 #include "boost/program_options.hpp"
 
 int main(int argc, char *argv[]) {
@@ -38,8 +40,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Read the database
-    // Tools::Reader reader(database);
-    // reader.read();
+    Tools::Reader reader(database);
+    reader.read();
     
     return 0;
 }

@@ -22,24 +22,31 @@ namespace Tools {
 
         ~Writer() { delete Database; }
 
-        template <typename Container> void write(Container &data) {
+        void write(const std::string & key, const std::string & value) {
             leveldb::WriteOptions writeOptions;
-            for (const auto &val : data) {
-                // TODO: Create a template function which can generate the JSON
-                // string of a tuple.  Basically, we need file name, file
-                // extension, permission, and time stamp. These parameters will
-                // be used to query the information from the file database.
-                const auto value = boost::lexical_cast<std::string>(std::get<2>(val)) +
-                  ":" +
-                  boost::lexical_cast<std::string>(std::get<2>(val));
-                Database->Put(writeOptions, std::get<0>(val), value);
-            }
+            Database->Put(writeOptions, key, value);
         }
+        
+
+        // template <typename Container> void write(Container &data) {
+        //     leveldb::WriteOptions writeOptions;
+        //     for (const auto &val : data) {
+        //         // TODO: Create a template function which can generate the JSON
+        //         // string of a tuple.  Basically, we need file name, file
+        //         // extension, permission, and time stamp. These parameters will
+        //         // be used to query the information from the file database.
+        //         const auto value = boost::lexical_cast<std::string>(std::get<2>(val)) +
+        //             ":" +
+        //             boost::lexical_cast<std::string>(std::get<3>(val));
+        //         Database->Put(writeOptions, std::get<0>(val), value);
+        //     }
+        // }
                 
       private:
         leveldb::DB *Database;
         std::string DataFile;
     };
+
 
     class Reader {
       public:
@@ -57,7 +64,8 @@ namespace Tools {
             leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
 
             for (it->SeekToFirst(); it->Valid(); it->Next()) {
-                std::cout << it->key().ToString() << " : " << it->value().ToString() << std::endl;
+                // std::cout << it->key().ToString() << " : " << it->value().ToString() << std::endl;
+                std::cout << it->key().ToString() << std::endl;
             }
 
             if (false == it->status().ok()) {

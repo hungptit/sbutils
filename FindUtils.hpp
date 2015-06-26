@@ -36,7 +36,7 @@
 #include <cereal/archives/json.hpp>
 
 namespace Tools {
-    typedef std::tuple<std::string, std::string> BasicFileInfo;
+    typedef std::tuple<std::string, std::string, std::string> BasicFileInfo;
 
     // Implement Template Method design pattern using C++ template. This approach will minize the code duplication.
     class Finder {
@@ -65,9 +65,9 @@ namespace Tools {
 
             const boost::filesystem::file_status fs = dirIter->status();
             if (fs.type() == boost::filesystem::regular_file) {
-                Data.emplace_back(std::make_tuple(dirIter->path().string(), dirIter->path().extension().string()));
+                auto const aPath = dirIter->path();
+                Data.emplace_back(std::make_tuple(aPath.string(), aPath.stem().string(), aPath.extension().string()));
             }
-
         }
 
       private:

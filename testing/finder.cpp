@@ -23,37 +23,36 @@ int main(int argc, char *argv[]) {
         params.disp();
     }
 
-    // Build file information database
-    Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
-    for (const auto &val : params.Folders) {
-        fSearch.search(val);
-    }
-    
-    // IO data format
     typedef cereal::JSONOutputArchive OArchive;
     typedef cereal::JSONInputArchive IArchive;
 
-    std::ostringstream os;
-    auto data = fSearch.getData();
+    // Build file information database
+    Tools::Writer writer(params.Database);
+    for (const auto &val : params.Folders) {
+        // Search for files
+        Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
+        fSearch.search(val);
 
-    {
+        // Serialized file information to string
+        std::ostringstream os;
+        auto data = fSearch.getData();
         Tools::save<OArchive, decltype(data)>(data, os);
-        std::cout << os.str().size() << std::endl;
+        const auto value = os.str();
+        const auto key = val;
+
+        // Write searched info to database.
+        writer.write(key, value);
     }
 
-    {
-        decltype(data) test_data;
-        std::istringstream is(os.str());
-        Tools::load<IArchive, decltype(test_data)>(test_data, is);
-        std::cout << os.str().size() << std::endl;
-        for (auto val : test_data) {
-            std::cout << val << std::endl;
-        }
-    }
-
-    // Write results to database.
-    // Tools::Writer writer(params.Database);
-    // writer.write(fSearch.getData());
+    // {
+    //     decltype(data) test_data;
+    //     std::istringstream is(os.str());
+    //     Tools::load<IArchive, decltype(test_data)>(test_data, is);
+    //     std::cout << os.str().size() << std::endl;
+    //     for (auto val : test_data) {
+    //         // std::cout << val << std::endl;
+    //     }
+    // }
 
     return 0;
 }
