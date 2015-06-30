@@ -33,21 +33,40 @@ namespace Tools {
         po::notify(vm);
 
         if (vm.count("help")) {
+            Help = true;
             std::cout << "Usage: finder [options]\n";
             std::cout << desc;
             std::cout << "Examples:" << std::endl;
-            std::cout << "\t finder ./ -o testdata." << std::endl;
+            std::cout << "\t finder ./ -d testdata." << std::endl;
         } else {
+            Help = false;
+
+            if (vm.count("ignore-case")) {
+                IgnoreCase = true;
+            }
+            else {
+                IgnoreCase = false;
+            }
+
+            if (vm.count("verbose")) {
+                Verbose = true;
+            }
+            else {
+                Verbose = false;
+            }
+
             if (vm.count("folder")) {
                 Folders = vm["folder"].as<std::vector<std::string>>();
             } else {
                 Folders.emplace_back(boost::filesystem::current_path().string());
             }
 
+            if (vm.count("extensions")) {
+                Extensions = vm["extensions"].as<std::vector<std::string>>();
+            }
+            
             if (vm.count("database")) {
                 Database = vm["database"].as<std::string>();
-            } else {
-                Database = "data";
             }
         }
     }
@@ -59,17 +78,32 @@ namespace Tools {
           std::cout << "Count only: " << (CountOnly ? "true" : "false") << std::endl;
           std::cout << "Database: \"" << Database << "\"\n";
           std::cout << "Search folders: ";
+          
+          // Display searched folders
           for (auto & val : Folders) std::cout << "\"" << val << "\" ";
           std::cout << std::endl;
-          std::cout << "Search pattern: \"" << SearchPattern << "\"\n";
+
+          // Display searched extensions
+          if (!Extensions.empty()) {
+              std::cout << "Search extensions: ";
+              for (auto & val : Folders) std::cout << "\"" << val << "\" ";
+          }
+          std::cout << std::endl;
+
+          // Display searched patterns
+          if (!SearchPattern.empty()) {
+              std::cout << "Search pattern: \"" << SearchPattern << "\"\n";
+          }          
       }
       
       // Member variables
+      bool Help;
       bool Verbose;
       bool IgnoreCase;
       bool CountOnly;
       size_t Limit;
       std::vector<std::string> Folders;
+      std::vector<std::string> Extensions;
       std::string SearchPattern;
       std::string Database;
   };

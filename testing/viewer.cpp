@@ -41,7 +41,18 @@ int main(int argc, char *argv[]) {
 
     // Read the database
     Tools::Reader reader(database);
-    reader.read();
+    // auto allKeys = reader.keys();
+
+    // {
+    //     reader.read(params.Folders[0]);
+    //     decltype(data) test_data;
+    //     std::istringstream is(os.str());
+    //     Tools::load<IArchive, decltype(test_data)>(test_data, is);
+    //     std::cout << os.str().size() << std::endl;
+    //     for (auto val : test_data) {
+    //         std::cout << val << std::endl;
+    //     }
+    // }
     
     return 0;
 }

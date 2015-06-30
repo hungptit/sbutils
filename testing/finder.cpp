@@ -18,30 +18,35 @@
 #include <sstream>
 
 int main(int argc, char *argv[]) {
-    Tools::InputArgumentParser params(argc, argv);
-    if (params.Verbose) {
-        params.disp();
-    }
-
     typedef cereal::JSONOutputArchive OArchive;
     typedef cereal::JSONInputArchive IArchive;
 
-    // Build file information database
-    Tools::Writer writer(params.Database);
-    for (const auto &val : params.Folders) {
-        // Search for files
-        Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
-        fSearch.search(val);
+    Tools::InputArgumentParser params(argc, argv);
+    if (!params.Help) {
+        // Build file information database
+        Tools::Writer writer(params.Database);
+        for (const auto &val : params.Folders) {
+            // Search for files
+            Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
+            fSearch.search(val);
 
-        // Serialized file information to string
-        std::ostringstream os;
-        auto data = fSearch.getData();
-        Tools::save<OArchive, decltype(data)>(data, os);
-        const auto value = os.str();
-        const auto key = val;
+            // Serialized file information to string
+            std::ostringstream os;
+            auto data = fSearch.getData();
+            Tools::save<OArchive, decltype(data)>(data, os);
+            const auto value = os.str();
+            const auto key = val;
 
-        // Write searched info to database.
-        writer.write(key, value);
+            // Write searched info to database.
+            writer.write(key, value);
+
+            // Display the information if the verbose flag is set.
+            if (params.Verbose) {
+                for (auto const &val : data) {
+                    std::cout << val << "\n";
+                }
+            }
+        }
     }
 
     // {

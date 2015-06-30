@@ -22,31 +22,15 @@ namespace Tools {
 
         ~Writer() { delete Database; }
 
-        void write(const std::string & key, const std::string & value) {
+        void write(const std::string &key, const std::string &value) {
             leveldb::WriteOptions writeOptions;
             Database->Put(writeOptions, key, value);
         }
-        
 
-        // template <typename Container> void write(Container &data) {
-        //     leveldb::WriteOptions writeOptions;
-        //     for (const auto &val : data) {
-        //         // TODO: Create a template function which can generate the JSON
-        //         // string of a tuple.  Basically, we need file name, file
-        //         // extension, permission, and time stamp. These parameters will
-        //         // be used to query the information from the file database.
-        //         const auto value = boost::lexical_cast<std::string>(std::get<2>(val)) +
-        //             ":" +
-        //             boost::lexical_cast<std::string>(std::get<3>(val));
-        //         Database->Put(writeOptions, std::get<0>(val), value);
-        //     }
-        // }
-                
       private:
         leveldb::DB *Database;
         std::string DataFile;
     };
-
 
     class Reader {
       public:
@@ -60,12 +44,12 @@ namespace Tools {
             }
         }
 
-        void read() {
+        std::vector<std::string> keys() {
+            std::vector<std::string> allKeys;
             leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
-
+            
             for (it->SeekToFirst(); it->Valid(); it->Next()) {
-                // std::cout << it->key().ToString() << " : " << it->value().ToString() << std::endl;
-                std::cout << it->key().ToString() << std::endl;
+                allKeys.emplace_back(it->key().ToString());
             }
 
             if (false == it->status().ok()) {
@@ -74,6 +58,26 @@ namespace Tools {
             }
 
             delete it;
+            return allKeys;
+        }
+
+        std::string read(const std::string & aKey) {
+            std::string results;
+            leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
+            for (it->SeekToFirst(); it->Valid(); it->Next()) {
+                if (it->key().ToString() == aKey) {
+                    results = it->value().ToString();
+                    break;
+                }
+            }
+
+            if (false == it->status().ok()) {
+                std::cerr << "An error was found during the scan" << std::endl;
+                std::cerr << it->status().ToString() << std::endl;
+            }
+
+            delete it;
+            return results;
         }
 
         ~Reader() { delete Database; }
