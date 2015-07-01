@@ -22,11 +22,10 @@ namespace Tools {
 
         ~Writer() { delete Database; }
 
-        void write(const std::string & key, const std::string & value) {
+        void write(const std::string &key, const std::string &value) {
             leveldb::WriteOptions writeOptions;
             Database->Put(writeOptions, key, value);
         }
-        
 
         // template <typename Container> void write(Container &data) {
         //     leveldb::WriteOptions writeOptions;
@@ -41,12 +40,11 @@ namespace Tools {
         //         Database->Put(writeOptions, std::get<0>(val), value);
         //     }
         // }
-                
+
       private:
         leveldb::DB *Database;
         std::string DataFile;
     };
-
 
     class Reader {
       public:
@@ -60,12 +58,11 @@ namespace Tools {
             }
         }
 
-        void read() {
+        std::vector<std::tuple<std::string, std::string>> read() {
+            std::vector<std::tuple<std::string, std::string>> data;
             leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
-
             for (it->SeekToFirst(); it->Valid(); it->Next()) {
-                // std::cout << it->key().ToString() << " : " << it->value().ToString() << std::endl;
-                std::cout << it->key().ToString() << std::endl;
+                data.emplace_back(std::make_tuple(it->key().ToString(), it->value().ToString()));
             }
 
             if (false == it->status().ok()) {
@@ -74,6 +71,7 @@ namespace Tools {
             }
 
             delete it;
+            return data;
         }
 
         ~Reader() { delete Database; }

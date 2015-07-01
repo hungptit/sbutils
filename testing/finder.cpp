@@ -23,9 +23,6 @@ int main(int argc, char *argv[]) {
         params.disp();
     }
 
-    typedef cereal::JSONOutputArchive OArchive;
-    typedef cereal::JSONInputArchive IArchive;
-
     // Build file information database
     Tools::Writer writer(params.Database);
     for (const auto &val : params.Folders) {
@@ -36,23 +33,13 @@ int main(int argc, char *argv[]) {
         // Serialized file information to string
         std::ostringstream os;
         auto data = fSearch.getData();
-        Tools::save<OArchive, decltype(data)>(data, os);
+        Tools::save<Tools::OArchive, decltype(data)>(data, os);
         const auto value = os.str();
         const auto key = val;
 
         // Write searched info to database.
         writer.write(key, value);
     }
-
-    // {
-    //     decltype(data) test_data;
-    //     std::istringstream is(os.str());
-    //     Tools::load<IArchive, decltype(test_data)>(test_data, is);
-    //     std::cout << os.str().size() << std::endl;
-    //     for (auto val : test_data) {
-    //         // std::cout << val << std::endl;
-    //     }
-    // }
 
     return 0;
 }

@@ -36,6 +36,12 @@
 #include <cereal/archives/json.hpp>
 
 namespace Tools {
+  // typedef cereal::JSONOutputArchive OArchive;
+  // typedef cereal::JSONInputArchive IArchive;
+
+  typedef cereal::BinaryOutputArchive OArchive;
+  typedef cereal::BinaryInputArchive IArchive;
+  
     typedef std::tuple<std::string, std::string, std::string> BasicFileInfo;
 
     // Implement Template Method design pattern using C++ template. This approach will minize the code duplication.
