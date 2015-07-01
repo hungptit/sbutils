@@ -27,23 +27,6 @@ namespace Tools {
             Database->Put(writeOptions, key, value);
         }
 
-<<<<<<< HEAD
-        // template <typename Container> void write(Container &data) {
-        //     leveldb::WriteOptions writeOptions;
-        //     for (const auto &val : data) {
-        //         // TODO: Create a template function which can generate the JSON
-        //         // string of a tuple.  Basically, we need file name, file
-        //         // extension, permission, and time stamp. These parameters will
-        //         // be used to query the information from the file database.
-        //         const auto value = boost::lexical_cast<std::string>(std::get<2>(val)) +
-        //             ":" +
-        //             boost::lexical_cast<std::string>(std::get<3>(val));
-        //         Database->Put(writeOptions, std::get<0>(val), value);
-        //     }
-        // }
-
-=======
->>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
       private:
         leveldb::DB *Database;
         std::string DataFile;
@@ -61,18 +44,11 @@ namespace Tools {
             }
         }
 
-<<<<<<< HEAD
-        std::vector<std::tuple<std::string, std::string>> read() {
-            std::vector<std::tuple<std::string, std::string>> data;
-=======
         std::vector<std::string> keys() {
             std::vector<std::string> allKeys;
->>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
+
             leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
             for (it->SeekToFirst(); it->Valid(); it->Next()) {
-<<<<<<< HEAD
-                data.emplace_back(std::make_tuple(it->key().ToString(), it->value().ToString()));
-=======
                 allKeys.emplace_back(it->key().ToString());
             }
 
@@ -93,7 +69,6 @@ namespace Tools {
                     results = it->value().ToString();
                     break;
                 }
->>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
             }
 
             if (false == it->status().ok()) {
@@ -102,11 +77,7 @@ namespace Tools {
             }
 
             delete it;
-<<<<<<< HEAD
-            return data;
-=======
             return results;
->>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
         }
 
         ~Reader() { delete Database; }
