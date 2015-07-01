@@ -101,9 +101,9 @@ namespace Tools {
     // Find edited files
     template <typename Base> class FindEditedFiles : public Base {
       public:
-        FindEditedFiles(const std::vector<std::string> &supportedExts) : Extensions(supportedExts) {}
-
         typedef EditedFileInfo value_type;
+
+        FindEditedFiles(const std::vector<std::string> &supportedExts) : Extensions(supportedExts) {}
         std::vector<value_type> &getData() { return Data; }
 
       protected:

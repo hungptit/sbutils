@@ -4,10 +4,9 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <unordered_map>
 
 #include "boost/filesystem.hpp"
-#include "boost/unordered_map.hpp"
-#include "boost/unordered_set.hpp"
 #include "boost/program_options.hpp"
 
 #include "utils/Utils.hpp"
@@ -25,18 +24,20 @@
 typedef Tools::DefaultOArchive OArchive;
 typedef Tools::DefaultIArchive IArchive;
 typedef Tools::EditedFileInfo FileInfo;
+typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
 
-std::vector<FileInfo> getEditedFiles(const Tools::InputArgumentParser &params) {
-    Tools::FindEditedFiles<Tools::Finder> fSearch(params.Extensions);
+template <typename SearchAlg> auto getEditedFiles(const Tools::InputArgumentParser &params) {
+    SearchAlg fSearch(params.Extensions);
     for (const auto &aFolder : params.Folders) {
-        const std::string aPath = Tools::getAbslutePath(aFolder);
-        fSearch.search(aPath);
+        // const std::string aPath = Tools::getAbslutePath(aFolder);
+        fSearch.search(boost::filesystem::canonical(aFolder));
     }
 
     auto data = fSearch.getData();
 
     if (params.Verbose) {
-        std::cout << "Edited files: " << data.size() << std::endl;
+        std::cout << "==== Search results ====\n";
+        std::cout << "Number of files: " << data.size() << '\n';
         for (auto const &info : data) {
             std::cout << std::get<0>(info) << "\n";
         }
@@ -44,22 +45,24 @@ std::vector<FileInfo> getEditedFiles(const Tools::InputArgumentParser &params) {
     return data;
 }
 
-boost::unordered_map<std::string, FileInfo> loadDatabase(const Tools::InputArgumentParser &params) {
+
+template <typename FileInfo>
+std::vector<FileInfo> read(const Tools::InputArgumentParser &params, const size_t maxlen = 1200000) {
     std::vector<FileInfo> database;
-    database.reserve(1200000); // Optimized for the MW sandbox
+    database.reserve(maxlen);
     if (!params.Database.empty()) {
         Tools::Reader reader(params.Database);
+        auto allKeys = reader.keys();
 
         if (params.Verbose) {
-            const auto allKeys = reader.keys();
             std::cout << "All keys in the " << params.Database << " database: " << std::endl;
             for (auto const &info : allKeys) {
                 std::cout << info << "\n";
             }
-        }
-
-        // Read in the desired keys
-        auto const &results = reader.read(Tools::getAbslutePath(params.Folders[0]));
+        }       
+        
+        auto aKey = Tools::findParent(allKeys, params.Folders[0]);
+        auto const &results = reader.read(aKey);
         if (!results.empty()) {
             std::istringstream is(results);
             Tools::load<IArchive, decltype(database)>(database, is);
@@ -69,9 +72,14 @@ boost::unordered_map<std::string, FileInfo> loadDatabase(const Tools::InputArgum
             std::cout << "Number of files in edited database: " << database.size() << std::endl;
         }
     }
+    return database;
+}
 
-    // Now get the list of edited files.
-    boost::unordered_map<std::string, FileInfo> lookupTable;
+template <typename Map> auto createLookupTable(const Tools::InputArgumentParser &params) {
+    typedef typename Map::mapped_type FileInfo;
+    auto const database = read<FileInfo>(params);
+    Map lookupTable;
+
     for (auto const &item : database) {
         auto aKey = std::get<0>(item);
         lookupTable.emplace(aKey, item);
@@ -84,7 +92,10 @@ boost::unordered_map<std::string, FileInfo> loadDatabase(const Tools::InputArgum
     return lookupTable;
 }
 
-std::vector<FileInfo> filter(boost::unordered_map<std::string, FileInfo> &lookupTable, std::vector<FileInfo> &data) {
+template <typename Map>
+auto filter(const Map &lookupTable, const std::vector<typename Map::mapped_type> &data,
+            const Tools::InputArgumentParser &) {
+    typedef typename Map::mapped_type FileInfo;
     std::vector<FileInfo> editedFiles;
     for (const auto &anEditedFile : data) {
         auto aKey = std::get<0>(anEditedFile);
@@ -99,17 +110,18 @@ std::vector<FileInfo> filter(boost::unordered_map<std::string, FileInfo> &lookup
     return editedFiles;
 }
 
-void print(const Tools::InputArgumentParser &params, std::vector<FileInfo> &editedFiles) {
-    std::cout << "Edited files: " << std::endl;
+template <typename Container> void print(const Tools::InputArgumentParser &params, Container &editedFiles) {
     if (params.Verbose) {
+        std::cout << "Edited files: " << std::endl;
         for (const auto &val : editedFiles) {
             std::cout << val << std::endl;
         }
     } else {
-        // TODO: These parameters are specific to the MW sandbox so we need to
+        // TODO: Below constraints are specific to the MW sandbox so we need to
         // store them in database?
-        std::array<std::string, 3> excludedStems = {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64"}};
-        std::array<std::string, 1> excludedExtensions = {{".p"}};
+        std::array<std::string, 4> excludedStems = {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
+        std::array<std::string, 3> excludedExtensions = {{".p", ".so", ".dbg"}};
+
         for (const auto &val : editedFiles) {
             bool isExcluded = false;
             auto aPath = std::get<0>(val);
@@ -126,22 +138,15 @@ void print(const Tools::InputArgumentParser &params, std::vector<FileInfo> &edit
 }
 
 int main(int argc, char *argv[]) {
-
     Tools::InputArgumentParser params(argc, argv);
-
-    // Display input parameters if verbose flag is on.
     if (params.Verbose) {
         params.disp();
     }
-
-    // If help command is specified then we won't search for edited files.
     if (!params.Help) {
-        // TODO: Use async programming model for this code segment.
-        auto data = getEditedFiles(params);           // Get the list of edited files.
-        auto lookupTable = loadDatabase(params);      // Load the lookup table from the database
-        auto editedFiles = filter(lookupTable, data); // Filter edited file list
+        auto data = getEditedFiles<Tools::FindEditedFiles<Tools::Finder>>(params); // Get the list of edited files.
+        auto lookupTable = createLookupTable<Map>(params);                         // Load the lookup table from the database
+        auto editedFiles = filter(lookupTable, data, params);                      // Filter edited file list
         print(params, editedFiles);
     }
-
     return 0;
 }
