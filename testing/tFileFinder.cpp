@@ -70,6 +70,11 @@ class TestData {
                                                boost::filesystem::group_exe |
                                                boost::filesystem::owner_read |
                                                boost::filesystem::group_read);
+
+            // TODO: Update this 
+            // std::vector<std::string> allKeys = {"/local-ssd/sandbox/codegen", "/local-ssd/sandbox/mdlrefadvisor"};
+            // std::cout << Tools::findKey(allKeys, "/local-ssd/sandbox/codegen/matlab/test/toolbox/") << std::endl;
+            // std::cout << Tools::findKey(allKeys, "/local/projects/utils/testing") << std::endl;
         }
     }
 };

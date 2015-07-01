@@ -27,6 +27,7 @@ namespace Tools {
             Database->Put(writeOptions, key, value);
         }
 
+<<<<<<< HEAD
         // template <typename Container> void write(Container &data) {
         //     leveldb::WriteOptions writeOptions;
         //     for (const auto &val : data) {
@@ -41,6 +42,8 @@ namespace Tools {
         //     }
         // }
 
+=======
+>>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
       private:
         leveldb::DB *Database;
         std::string DataFile;
@@ -58,11 +61,19 @@ namespace Tools {
             }
         }
 
+<<<<<<< HEAD
         std::vector<std::tuple<std::string, std::string>> read() {
             std::vector<std::tuple<std::string, std::string>> data;
+=======
+        std::vector<std::string> keys() {
+            std::vector<std::string> allKeys;
+>>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
             leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
             for (it->SeekToFirst(); it->Valid(); it->Next()) {
+<<<<<<< HEAD
                 data.emplace_back(std::make_tuple(it->key().ToString(), it->value().ToString()));
+=======
+                allKeys.emplace_back(it->key().ToString());
             }
 
             if (false == it->status().ok()) {
@@ -71,7 +82,31 @@ namespace Tools {
             }
 
             delete it;
+            return allKeys;
+        }
+
+        std::string read(const std::string &aKey) {
+            std::string results;
+            leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
+            for (it->SeekToFirst(); it->Valid(); it->Next()) {
+                if (it->key().ToString() == aKey) {
+                    results = it->value().ToString();
+                    break;
+                }
+>>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
+            }
+
+            if (false == it->status().ok()) {
+                std::cerr << "An error was found during the scan" << std::endl;
+                std::cerr << it->status().ToString() << std::endl;
+            }
+
+            delete it;
+<<<<<<< HEAD
             return data;
+=======
+            return results;
+>>>>>>> acc5b9fc9c1451ccde039ef752809b51a12806a8
         }
 
         ~Reader() { delete Database; }

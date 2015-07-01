@@ -11,23 +11,40 @@
 #include "boost/program_options.hpp"
 #include "InputArgumentParser.hpp"
 
+typedef Tools::DefaultOArchive OArchive;
+typedef Tools::DefaultIArchive IArchive;
+
+void createDatabase(const std::string & dataFile, const std::vector<std::string> & folders, bool verbose = false) {
+    Tools::Writer writer(dataFile);
+    for (const auto &aFolder : folders) {
+        const std::string aPath = Tools::getAbslutePath(aFolder);
+        // Search for files
+        Tools::BuildFileDatabase<Tools::Finder, Tools::EditedFileInfo> fSearch;
+        fSearch.search(aPath);
+        auto data = fSearch.getData();
+            
+        // Serialized file information to string
+        std::ostringstream os;
+        Tools::save<OArchive, decltype(data)>(data, os);
+        const auto value = os.str();
+
+        // Write searched info to database.
+        writer.write(aPath, value);
+
+        // Display the information if the verbose flag is set.
+        if (verbose) {
+            for (auto const &info : data) {
+                std::cout << info << "\n";
+            }
+        }
+    }    
+}
+
+
 int main(int argc, char *argv[]) {
     Tools::InputArgumentParser params(argc, argv);
-    if (params.Verbose) {
-        params.disp();
+    if (!params.Help) {
+        createDatabase(params.Database, params.Folders, params.Verbose);
     }
-
-    // Build file information database
-    // Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
-    // for (const auto &val : params.Folders) {
-    //     fSearch.search(val);
-    // }
-
-    // Tools::print(fSearch.getData());
-    
-    // Write results to database.
-    Tools::Writer writer(params.Database);
-    // writer.write(fSearch.getData());
-
     return 0;
 }

@@ -62,6 +62,26 @@ namespace Tools {
         }
     }
 
+
+    std::string findParent(std::vector<std::string> &allKeys, const std::string &aPath) {
+        auto currentItem = std::find(allKeys.begin(), allKeys.end(), aPath);
+        if (currentItem == allKeys.end()) {
+            auto aFolder = boost::filesystem::canonical(aPath).parent_path();
+            while (!aFolder.empty()) {
+                auto currentItem = std::find(allKeys.begin(), allKeys.end(), aFolder.string());
+                if (currentItem != allKeys.end()) {
+                    break;
+                } else {
+                    aFolder = boost::filesystem::canonical(aFolder).parent_path();
+                }
+            }
+            return aFolder.string();
+        } else {
+            return *currentItem;
+        }
+    }
+
+
     class TemporaryDirectory {
       public:
         TemporaryDirectory() {
