@@ -43,14 +43,13 @@ int main(int argc, char *argv[]) {
 
     // Read the database
     Tools::Reader reader(database);
-    auto data = reader.read();
-    Tools::disp(data, "Test");
-
-    for (const auto val : data) {
-      std::vector<Tools::BasicFileInfo> readData;
-      std::istringstream is(std::get<1>(val));
-      Tools::load<Tools::IArchive, decltype(readData)>(readData, is);
-        for (auto val : readData) {std::cout << val << '\n';}
+    auto keys = reader.keys();
+    for (auto aKey : keys) {
+      auto buffer = reader.read(aKey);
+      std::istringstream is(buffer);
+      std::vector<Tools::EditedFileInfo> data;
+      Tools::load<Tools::IArchive, decltype(data)>(data, is);
+      for (auto val : data) {std::cout << val << '\n';}
     }
     
     return 0;
