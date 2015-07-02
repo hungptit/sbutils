@@ -25,6 +25,7 @@ typedef Tools::DefaultOArchive OArchive;
 typedef Tools::DefaultIArchive IArchive;
 typedef Tools::EditedFileInfo FileInfo;
 typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
+constexpr size_t MaxLen = 1500000;
 
 namespace {
     template <typename SearchAlg> auto search(const Tools::InputArgumentParser &params) {
@@ -46,7 +47,7 @@ namespace {
     }
 
     template <typename FileInfo>
-    std::vector<FileInfo> read(const Tools::InputArgumentParser &params, const size_t maxlen = 1500000) {
+    std::vector<FileInfo> read(const Tools::InputArgumentParser &params, const size_t maxlen = MaxLen) {
         std::vector<FileInfo> database;
         std::string dataFile;
         if (params.Database.empty()) {
@@ -54,18 +55,18 @@ namespace {
             if (!sandbox.empty()) {
                 dataFile = (sandbox / boost::filesystem::path(".sbtools") / boost::filesystem::path("database")).string();
             }
-        }
-        else {
+        } else {
             dataFile = params.Database;
         }
 
         if (dataFile.empty()) {
-            std::cout << "Could not find the edited file database. All editable files in the given folders will be listed!" << std::endl;
+            std::cout << "Could not find the edited file database. All editable files in the given folders will be listed!"
+                      << std::endl;
             return database;
         }
-    
+
         // Reserve the space. Will need to adjust this parameter based on the number of files in the sandbox.
-        database.reserve(maxlen);   
+        database.reserve(maxlen);
 
         Tools::Reader reader(dataFile);
         auto allKeys = reader.keys();
@@ -75,8 +76,8 @@ namespace {
             for (auto const &info : allKeys) {
                 std::cout << info << "\n";
             }
-        }       
-        
+        }
+
         auto aKey = Tools::findParent(allKeys, params.Folders[0]);
         auto const &results = reader.read(aKey);
         if (!results.empty()) {
@@ -94,7 +95,10 @@ namespace {
     template <typename Map> auto createLookupTable(const Tools::InputArgumentParser &params) {
         typedef typename Map::mapped_type FileInfo;
         auto const database = read<FileInfo>(params);
+
+        // Reserve the space for a map to improve the performance.
         Map lookupTable;
+        lookupTable.reserve(database.size());
 
         for (auto const &item : database) {
             auto aKey = std::get<0>(item);
@@ -141,8 +145,8 @@ namespace {
                 auto aPath = std::get<0>(val);
                 isExcluded = std::any_of(excludedExtensions.begin(), excludedExtensions.end(),
                                          [=](const std::string &extStr) { return extStr == std::get<2>(val); }) ||
-                    std::any_of(excludedStems.begin(), excludedStems.end(),
-                                [=](const std::string &extStr) { return aPath.find(extStr) != std::string::npos; });
+                             std::any_of(excludedStems.begin(), excludedStems.end(),
+                                         [=](const std::string &extStr) { return aPath.find(extStr) != std::string::npos; });
 
                 if (!isExcluded) {
                     std::cout << std::get<0>(val) << std::endl;
@@ -157,11 +161,11 @@ int main(int argc, char *argv[]) {
     if (params.Verbose) {
         params.disp();
     }
-       
+
     if (!params.Help) {
         auto data = search<Tools::FindEditedFiles<Tools::Finder>>(params); // Get the list of edited files.
-        auto lookupTable = createLookupTable<Map>(params);                         // Load the lookup table from the database
-        auto editedFiles = filter(lookupTable, data, params);                      // Filter edited file list
+        auto lookupTable = createLookupTable<Map>(params);                 // Load the lookup table from the database
+        auto editedFiles = filter(lookupTable, data, params);              // Filter edited file list
         print(params, editedFiles);
     }
     return 0;
