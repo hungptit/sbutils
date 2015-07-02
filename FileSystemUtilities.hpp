@@ -81,6 +81,14 @@ namespace Tools {
         }
     }
 
+    boost::filesystem::path getSandboxRoot(const boost::filesystem::path & aPath) {
+        const boost::filesystem::path sbtool(".sbtools");
+        auto sandbox = boost::filesystem::canonical(aPath);
+        while (!sandbox.empty() && !boost::filesystem::exists(sandbox / sbtool)) {
+            sandbox = sandbox.parent_path();
+        }
+        return sandbox;
+    }
 
     class TemporaryDirectory {
       public:

@@ -28,7 +28,7 @@ namespace Tools {
             ("ignore-case,i", po::value<std::string>(), "Ignore case distinctions when matching patterns.");
         
         po::positional_options_description p;
-        p.add("folder", -1);
+        p.add("folders", -1);
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);

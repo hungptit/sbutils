@@ -44,6 +44,10 @@ void createDatabase(const std::string & dataFile, const std::vector<std::string>
 int main(int argc, char *argv[]) {
     Tools::InputArgumentParser params(argc, argv);
     if (!params.Help) {
+        auto dataFile = params.Database;
+        if (dataFile.empty()) {
+            dataFile = (Tools::getSandboxRoot(dataFile) / boost::filesystem::path(".sbtools") / boost::filesystem::path("database")).string();
+        }
         createDatabase(params.Database, params.Folders, params.Verbose);
     }
     return 0;
