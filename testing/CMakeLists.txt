@@ -37,8 +37,8 @@ include_directories(${BOOST_INCLUDE_DIRS})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories("${PROJECTS_FOLDER}/3p/cppformat/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
-include_directories ("${PROJECTS_FOLDER}/3p/rapidjson/include")
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
+include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
 include_directories(${PROJECTS_FOLDER})
 
 # Compile using POCO static library

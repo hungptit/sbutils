@@ -46,9 +46,12 @@ int main(int argc, char *argv[]) {
     if (!params.Help) {
         auto dataFile = params.Database;
         if (dataFile.empty()) {
-            dataFile = (Tools::getSandboxRoot(dataFile) / boost::filesystem::path(".sbtools") / boost::filesystem::path("database")).string();
+            // dataFile = (Tools::getSandboxRoot("./") / boost::filesystem::path(".sbtools") / boost::filesystem::path("database")).string();
+            dataFile = (boost::filesystem::path(".sbtools") / boost::filesystem::path("database")).string();
+            std::cout << "Edited file database: " << dataFile << std::endl;
         }
         createDatabase(params.Database, params.Folders, params.Verbose);
+        std::cout << "Edited file database: " << dataFile << std::endl;
     }
     return 0;
 }

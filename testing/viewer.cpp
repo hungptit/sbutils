@@ -4,11 +4,22 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <unordered_map>
+
 #include "boost/filesystem.hpp"
+#include "boost/program_options.hpp"
+
 #include "utils/Utils.hpp"
+#include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 
-#include "boost/program_options.hpp"
+#include "InputArgumentParser.hpp"
+
+#include <string>
+#include <vector>
+#include <map>
+#include <ctime>
+#include <sstream>
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -41,18 +52,17 @@ int main(int argc, char *argv[]) {
 
     // Read the database
     Tools::Reader reader(database);
-    // auto allKeys = reader.keys();
+    auto allKeys = reader.keys();
+    for (auto &aKey : allKeys) {
+        std::vector<Tools::EditedFileInfo> test_data;
+        auto buffer = reader.read(aKey);
+        std::istringstream is(buffer);
+        Tools::load<Tools::DefaultIArchive, decltype(test_data)>(test_data, is);
+        std::cout << buffer.size() << std::endl;
+        for (auto val : test_data) {
+            std::cout << std::get<0>(val) << std::endl;
+        }
+    }
 
-    // {
-    //     reader.read(params.Folders[0]);
-    //     decltype(data) test_data;
-    //     std::istringstream is(os.str());
-    //     Tools::load<IArchive, decltype(test_data)>(test_data, is);
-    //     std::cout << os.str().size() << std::endl;
-    //     for (auto val : test_data) {
-    //         std::cout << val << std::endl;
-    //     }
-    // }
-    
     return 0;
 }
