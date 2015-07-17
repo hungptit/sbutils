@@ -15,7 +15,7 @@ namespace Tools {
 
             // Check that the database is opened successfully.
             if (false == status.ok()) {
-                std::cerr << "Unable to open/create database" << DataFile << std::endl;
+                std::cerr << "Unable to open/create database \"" << DataFile << "\"" << std::endl;
                 std::cerr << status.ToString() << std::endl;
             }
         }
@@ -39,7 +39,7 @@ namespace Tools {
             options.create_if_missing = false;
             leveldb::Status status = leveldb::DB::Open(options, DataFile, &Database);
             if (false == status.ok()) {
-                std::cerr << "Unable to open database" << DataFile << std::endl;
+                std::cerr << "Unable to open database: \"" << DataFile << "\"" << std::endl;
                 std::cerr << status.ToString() << std::endl;
             }
         }

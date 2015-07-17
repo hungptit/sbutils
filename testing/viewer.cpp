@@ -8,6 +8,7 @@
 
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
+#include "boost/thread.hpp"
 
 #include "utils/Utils.hpp"
 #include "utils/FindUtils.hpp"
@@ -24,19 +25,18 @@
 void find(const std::string &dataFile, std::vector<std::string> &folders, std::vector<std::string> &stems,
           std::vector<std::string> &extensions, std::vector<std::string> &searchStrings) {
     Tools::Reader reader(dataFile);
-    auto allKeys = reader.keys();
+    auto allKeys = reader.keys(); // TODO: Only get keys (folders) which are closest ancesstor of given folders.
     std::set<Tools::EditedFileInfo> aList;
     for (auto &aKey : allKeys) {
         std::vector<Tools::EditedFileInfo> data;
         auto buffer = reader.read(aKey);
         std::istringstream is(buffer);
         Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
-        for (auto info : data) {            
-            bool flag =
-                (folders.empty() || true) &&
-                (stems.empty() || std::find(stems.begin(), stems.end(), std::get<1>(info)) != stems.end()) &&
-                (extensions.empty() || std::find(extensions.begin(), extensions.end(), std::get<2>(info)) != extensions.end()) && 
-                (searchStrings.empty() || true);
+        for (auto info : data) {
+            bool flag = (stems.empty() || std::find(stems.begin(), stems.end(), std::get<1>(info)) != stems.end()) &&
+                        (extensions.empty() ||
+                         std::find(extensions.begin(), extensions.end(), std::get<2>(info)) != extensions.end()) &&
+                        (searchStrings.empty() || true);
             if (flag) {
                 aList.insert(info);
             }
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
     if (verbose) {
         std::cout << "Database: " << dataFile << std::endl;
     }
-    
+
     if (vm.count("keys")) {
         Tools::Reader reader(dataFile);
         for (auto &aKey : reader.keys()) {

@@ -5,7 +5,11 @@
 #include <array>
 #include <tuple>
 #include <unordered_map>
-#include <thread>
+
+#define BOOST_THREAD_VERSION 4
+#include "boost/config.hpp"
+#include "boost/thread.hpp"
+#include "boost/thread/future.hpp"
 
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
@@ -146,9 +150,9 @@ template <typename SearchAlg, typename Map> class Finder {
     Container EditedFiles;
 };
 
+
 int main(int argc, char *argv[]) {
     typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
-    // typedef google::dense_hash_map<std::string, Tools::EditedFileInfo> Map;
     typedef Tools::FindEditedFiles<Tools::Finder> SearchAlg;
 
     Tools::InputArgumentParser params(argc, argv);
@@ -160,12 +164,11 @@ int main(int argc, char *argv[]) {
         typedef Finder<SearchAlg, Map> FindEditedFiles;
         Finder<SearchAlg, Map> searchAlg(params);
 
-        // TODO: Improve this threaded code
-        std::thread readThread(std::bind(&FindEditedFiles::read, &searchAlg));
-        std::thread findThread(std::bind(&FindEditedFiles::find, &searchAlg));
-
-        readThread.join();
-        findThread.join();
+        // Launch read and find tasks in two async threads.
+        boost::future<void> readThread = boost::async(std::bind(&FindEditedFiles::read, &searchAlg));
+        boost::future<void> findThread = boost::async(std::bind(&FindEditedFiles::find, &searchAlg));
+        readThread.get();
+        findThread.get();
 
         // Get the list of edited files then print out the results.
         searchAlg.get();

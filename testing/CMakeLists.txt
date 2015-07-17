@@ -21,17 +21,24 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # This option make sure that we use the local boost version.
-set(Boost_NO_SYSTEM_PATHS FALSE) 
+set(Boost_NO_SYSTEM_PATHS TRUE) 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
-  message(STATUS ${PROJECTS_FOLDER})
-  message(STATUS ${BOOST_ROOT})
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
-
 find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options)
-include_directories(${BOOST_INCLUDE_DIRS})
+
+# Can't tell CMake to use the customized boost libraries if the system boost
+# libraries is installed. If this problem happended then we need to use the
+# manual approach.
+# set(BOOST_FILESYSTEM "${PROJECTS_FOLDER}/3p/boost/lib/libboost_filesystem.a")
+# set(BOOST_SYSTEM "${PROJECTS_FOLDER}/3p/boost/lib/libboost_filesystem.a")
+# set(BOOST_PROGRAM_OPTIONS "${PROJECTS_FOLDER}/3p/boost/lib/libboost_program_options.a")
+# set(BOOST_PROGRAM_THREAD "${PROJECTS_FOLDER}/3p/boost/lib/libboost_thread.a")
+# set(BOOST_PROGRAM_REGEX "${PROJECTS_FOLDER}/3p/boost/lib/libboost_regex.a")
+# set(BOOST_PROGRAM_CHRONO "${PROJECTS_FOLDER}/3p/boost/lib/libboost_chrono.a")
+# set(BOOST_PROGRAM_ATOMIC "${PROJECTS_FOLDER}/3p/boost/lib/libboost_atomic.a")
 
 # Include folder
 message(${PROJECTS_FOLDER})
@@ -53,6 +60,8 @@ set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
 set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libformat.a")
 
 if (Boost_FOUND)
+  include_directories(${BOOST_INCLUDE_DIRS})
+  message(STATUS ${BOOST_INCLUDE_DIRS})
   # Compile all unittests
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
   foreach (src_file ${UNITTEST_SRC_FILES})
@@ -74,17 +83,16 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
-      ${Boost_LIBRARIES} 
-      ${LIB_POCO_FOUNDATION})
+      ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION})
   endforeach (src_file)
-  INSTALL_PROGRAMS(//local/projects/tmp/ FILES ${COMMAND_SRC_FILES})
+  INSTALL_PROGRAMS(/${PROJECTS_FOLDER}/tmp/ FILES ${COMMAND_SRC_FILES})
 
   # Compile SQLite examples. The order of linked libraries must be preserved
   # otherwise the link process will be failed.
   set(UNITTEST_SRC_FILES tSQLite)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} 
+    TARGET_LINK_LIBRARIES(${src_file}
       ${LIB_CPPFORMAT}
       ${Boost_LIBRARIES}
       ${LIB_POCO_UTIL}
@@ -98,12 +106,11 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
-  message(${Boost_LIBRARIES})
   set(COMMAND_SRC_FILES finder viewer findEditedFiles buildFileDatabase buildEditedFileDatabase)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
-      ${Boost_LIBRARIES} ${LIB_LEVELDB} -lpthread ${Boost_LIBRARIES})
+      ${Boost_LIBRARIES} ${LIB_LEVELDB} -lpthread -lrt)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
