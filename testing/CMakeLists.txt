@@ -30,7 +30,7 @@ endif (Boost_NO_SYSTEM_PATHS)
 find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options)
 
 # Can't tell CMake to use the customized boost libraries if the system boost
-# libraries is installed. If this problem happended then we need to use the
+# libraries is installed. If this problem happen then we need to use the
 # manual approach.
 # set(BOOST_FILESYSTEM "${PROJECTS_FOLDER}/3p/boost/lib/libboost_filesystem.a")
 # set(BOOST_SYSTEM "${PROJECTS_FOLDER}/3p/boost/lib/libboost_filesystem.a")

@@ -5,7 +5,12 @@
 #include <array>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 
+#define BOOST_THREAD_VERSION 4
+#include "boost/config.hpp"
+#include "boost/thread.hpp"
+#include "boost/thread/future.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 #include "boost/thread.hpp"
@@ -21,6 +26,43 @@
 #include <map>
 #include <ctime>
 #include <sstream>
+
+class ThreadedLocate {
+  public:
+    typedef std::set<Tools::EditedFileInfo> Set;
+    ThreadedLocate(const std::string &dataFile) : Reader(dataFile) {}
+    void locate(std::vector<std::string> &stems, std::vector<std::string> &extensions,
+                std::vector<std::string> &searchStrings) {}
+    void find();
+    void print();
+
+  private:
+    Tools::Reader Reader;
+    std::vector<std::string> Keys;
+    std::vector<std::string> Stems;
+    std::vector<std::string> Extensions;
+    std::vector<std::string> SearchStrings;
+    Set Results;
+}
+
+std::set<Tools::EditedFileInfo>
+findFiles(Tools::Reader &reader, std::string &aKey) {
+    std::set<Tools::EditedFileInfo> aList;
+    std::vector<Tools::EditedFileInfo> data;
+    auto buffer = reader.read(aKey);
+    std::istringstream is(buffer);
+    Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
+    for (auto info : data) {
+        bool flag =
+            (stems.empty() || std::find(stems.begin(), stems.end(), std::get<1>(info)) != stems.end()) &&
+            (extensions.empty() || std::find(extensions.begin(), extensions.end(), std::get<2>(info)) != extensions.end()) &&
+            (searchStrings.empty() || true);
+        if (flag) {
+            aList.insert(info);
+        }
+    }
+    return aList;
+}
 
 void find(const std::string &dataFile, std::vector<std::string> &folders, std::vector<std::string> &stems,
           std::vector<std::string> &extensions, std::vector<std::string> &searchStrings) {
@@ -52,7 +94,6 @@ int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-<<<<<<< HEAD
 
     // clang-format off
     desc.add_options()
@@ -66,13 +107,6 @@ int main(int argc, char *argv[]) {
         ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
 
-=======
-    desc.add_options()     
-      ("help,h", "finder - Find all files of a given folder and .")
-      ("verbose,v", "Display all data.")
-      ("database,d", po::value<std::string>(), "Edited file database.")
-      ("extensions,e", po::value<std::string>(), "File extension");
->>>>>>> 6aa8893ba7ccceabc2276d27a955a81200716210
     po::positional_options_description p;
     p.add("folders", -1);
     po::variables_map vm;
