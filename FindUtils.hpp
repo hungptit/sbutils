@@ -38,6 +38,12 @@
 namespace Tools {
     typedef std::tuple<std::string, std::string, std::string> BasicFileInfo;
     typedef std::tuple<std::string, std::string, std::string, int, std::time_t> EditedFileInfo;
+    
+    struct FileDatabaseInfo {
+        static const std::string Database;
+    };
+    const std::string FileDatabaseInfo::Database = ".database";
+ 
 
     // Implement Template Method design pattern using C++ template. This
     // approach will minize the code duplication.

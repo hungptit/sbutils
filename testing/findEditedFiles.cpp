@@ -13,7 +13,6 @@
 #include "utils/Utils.hpp"
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
-
 #include "InputArgumentParser.hpp"
 
 #include <string>
@@ -29,6 +28,7 @@ template <typename SearchAlg, typename Map> class Finder {
 
     Finder(Tools::InputArgumentParser &params, size_t maxlen = 1500000)
         : Params(params), Alg(Params.Extensions), MaxLen(maxlen){};
+
     void find() {
         for (const auto &aFolder : Params.Folders) {
             Alg.search(boost::filesystem::canonical(aFolder));
@@ -50,7 +50,7 @@ template <typename SearchAlg, typename Map> class Finder {
         if (Params.Database.empty()) {
             auto const sandbox = Tools::getSandboxRoot(Params.Folders[0]);
             if (!sandbox.empty()) {
-                dataFile = (sandbox / boost::filesystem::path(".sbtools") / boost::filesystem::path("database")).string();
+                dataFile = (boost::filesystem::path(Tools::FileDatabaseInfo::Database)).string();
             }
         } else {
             dataFile = Params.Database;
@@ -98,7 +98,9 @@ template <typename SearchAlg, typename Map> class Finder {
 
     void get() {
         auto const data = Alg.getData();
-        std::cout << "Edited files: " << data.size() << std::endl;
+        if (Params.Verbose) {
+            std::cout << "Edited files: " << data.size() << std::endl;
+        }
         for (const auto &anEditedFile : data) {
             auto aKey = std::get<0>(anEditedFile);
             auto aFile = LookupTable.find(aKey);
@@ -155,13 +157,13 @@ int main(int argc, char *argv[]) {
     }
 
     if (!params.Help) {
-        typedef Finder<SearchAlg, Map> Foo;
+        typedef Finder<SearchAlg, Map> FindEditedFiles;
         Finder<SearchAlg, Map> searchAlg(params);
 
-        // We will find files and read edited file database using two
-        // threads.
-        std::thread readThread(std::bind(&Foo::read, &searchAlg));
-        std::thread findThread(std::bind(&Foo::find, &searchAlg));
+        // TODO: Improve this threaded code
+        std::thread readThread(std::bind(&FindEditedFiles::read, &searchAlg));
+        std::thread findThread(std::bind(&FindEditedFiles::find, &searchAlg));
+
         readThread.join();
         findThread.join();
 

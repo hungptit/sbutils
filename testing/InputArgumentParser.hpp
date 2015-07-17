@@ -15,6 +15,8 @@ namespace Tools {
         using namespace boost;
         namespace po = boost::program_options;
         po::options_description desc("Allowed options");
+
+        // clang-format off
         desc.add_options()              
             ("help,h", "Print this help")
             ("verbose,v", "Display searched data.")
@@ -26,7 +28,8 @@ namespace Tools {
             ("database,d", po::value<std::string>(), "File database.")
             ("create-database,c", po::value<std::string>(), "Create database.")
             ("ignore-case,i", po::value<std::string>(), "Ignore case distinctions when matching patterns.");
-        
+        // clang-format on
+
         po::positional_options_description p;
         p.add("folders", -1);
         po::variables_map vm;

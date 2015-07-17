@@ -21,7 +21,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # This option make sure that we use the local boost version.
-set(Boost_NO_SYSTEM_PATHS TRUE) 
+set(Boost_NO_SYSTEM_PATHS FALSE) 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
   message(STATUS ${PROJECTS_FOLDER})
@@ -31,15 +31,16 @@ if (Boost_NO_SYSTEM_PATHS)
 endif (Boost_NO_SYSTEM_PATHS)
 
 find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options)
+include_directories(${BOOST_INCLUDE_DIRS})
 
 # Include folder
-include_directories(${BOOST_INCLUDE_DIRS})
+message(${PROJECTS_FOLDER})
+include_directories(${PROJECTS_FOLDER})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories("${PROJECTS_FOLDER}/3p/cppformat/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
-include_directories(${PROJECTS_FOLDER})
 
 # Compile using POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
@@ -97,11 +98,12 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
+  message(${Boost_LIBRARIES})
   set(COMMAND_SRC_FILES finder viewer findEditedFiles buildFileDatabase buildEditedFileDatabase)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
-      ${Boost_LIBRARIES} ${LIB_LEVELDB} -lpthread)
+      ${Boost_LIBRARIES} ${LIB_LEVELDB} -lpthread ${Boost_LIBRARIES})
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
