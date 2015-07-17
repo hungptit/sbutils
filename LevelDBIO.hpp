@@ -46,8 +46,8 @@ namespace Tools {
 
         std::vector<std::string> keys() {
             std::vector<std::string> allKeys;
-            leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
 
+            leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
             for (it->SeekToFirst(); it->Valid(); it->Next()) {
                 allKeys.emplace_back(it->key().ToString());
             }

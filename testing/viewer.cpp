@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
+<<<<<<< HEAD
 
     // clang-format off
     desc.add_options()
@@ -65,6 +66,13 @@ int main(int argc, char *argv[]) {
         ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
 
+=======
+    desc.add_options()     
+      ("help,h", "finder - Find all files of a given folder and .")
+      ("verbose,v", "Display all data.")
+      ("database,d", po::value<std::string>(), "Edited file database.")
+      ("extensions,e", po::value<std::string>(), "File extension");
+>>>>>>> 6aa8893ba7ccceabc2276d27a955a81200716210
     po::positional_options_description p;
     p.add("folders", -1);
     po::variables_map vm;
