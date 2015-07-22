@@ -52,6 +52,17 @@ namespace {
             }
         }
 
+
+        void locate_t() {
+            auto keys = Reader.keys();
+            for (auto const &aKey : keys) {
+                auto results = find(aKey);
+                for (auto item : results) {
+                    Results.insert(item);
+                }
+            }
+        }
+
         std::vector<Tools::EditedFileInfo> find(const std::string &aKey) {
             std::vector<Tools::EditedFileInfo> data;
             std::vector<Tools::EditedFileInfo> results;
