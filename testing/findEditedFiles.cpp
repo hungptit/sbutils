@@ -24,7 +24,6 @@
 #include <map>
 #include <ctime>
 #include <sstream>
-// #include "google/dense_hash_map"
 
 template <typename SearchAlg, typename Map> class Finder {
   public:

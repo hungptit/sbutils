@@ -71,9 +71,16 @@ namespace {
             return results;
         }
 
-        void print() {
-            for (auto const &item : Results)
-                std::cout << std::get<0>(item) << "\n";
+        void print(bool verbose = false) {
+            if (verbose) {
+                for (auto const &item : Results)
+                    std::cout << item << "\n";
+            }
+            else {
+                for (auto const &item : Results)
+                    std::cout << std::get<0>(item) << "\n";
+            }
+
         }
 
       private:
@@ -166,7 +173,7 @@ int main(int argc, char *argv[]) {
     } else {
         auto locateObj = ThreadedLocate(dataFile, stems, extensions, searchStrings);
         locateObj.locate();
-        locateObj.print();
+        locateObj.print(verbose);
     }
 
     return 0;
