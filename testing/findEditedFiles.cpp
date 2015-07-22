@@ -60,7 +60,8 @@ template <typename SearchAlg, typename Map> class Finder {
         }
 
         if (dataFile.empty()) {
-            std::cout << "Could not find the edited file database. All editable files in the given folders will be listed!"
+            std::cout << "Could not find the edited file database. All editable files in the given folders "
+                         "will be listed!"
                       << std::endl;
             return;
         }
@@ -86,9 +87,9 @@ template <typename SearchAlg, typename Map> class Finder {
             std::cout << "Number of files in edited database: " << database.size() << std::endl;
         }
 
-        // Reserve the space. Will need to adjust this parameter based on the number of files in the sandbox.
+        // Reserve the space. Will need to adjust this parameter based on the number of files in the
+        // sandbox.
         LookupTable.reserve(database.size());
-
         for (auto const &item : database) {
             auto aKey = std::get<0>(item);
             LookupTable.emplace(aKey, item);
@@ -123,16 +124,20 @@ template <typename SearchAlg, typename Map> class Finder {
                 std::cout << val << std::endl;
             }
         } else {
-            std::array<std::string, 4> excludedStems = {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
+            std::array<std::string, 4> excludedStems = {
+                {"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
             std::array<std::string, 3> excludedExtensions = {{".p", ".so", ".dbg"}};
 
+            // TODO: Improve this algorithm using thread.
             for (const auto &val : EditedFiles) {
                 bool isExcluded = false;
                 auto aPath = std::get<0>(val);
-                isExcluded = std::any_of(excludedExtensions.begin(), excludedExtensions.end(),
-                                         [=](const std::string &extStr) { return extStr == std::get<2>(val); }) ||
-                             std::any_of(excludedStems.begin(), excludedStems.end(),
-                                         [=](const std::string &extStr) { return aPath.find(extStr) != std::string::npos; });
+                isExcluded =
+                    std::any_of(excludedExtensions.begin(), excludedExtensions.end(),
+                                [=](const std::string &extStr) { return extStr == std::get<2>(val); }) ||
+                    std::any_of(excludedStems.begin(), excludedStems.end(), [=](const std::string &extStr) {
+                        return aPath.find(extStr) != std::string::npos;
+                    });
 
                 if (!isExcluded) {
                     std::cout << std::get<0>(val) << std::endl;
@@ -148,7 +153,6 @@ template <typename SearchAlg, typename Map> class Finder {
     Map LookupTable;
     Container EditedFiles;
 };
-
 
 int main(int argc, char *argv[]) {
     typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
@@ -166,6 +170,10 @@ int main(int argc, char *argv[]) {
         // Launch read and find tasks in two async threads.
         boost::future<void> readThread = boost::async(std::bind(&FindEditedFiles::read, &searchAlg));
         boost::future<void> findThread = boost::async(std::bind(&FindEditedFiles::find, &searchAlg));
+
+        readThread.wait();
+        findThread.wait();
+
         readThread.get();
         findThread.get();
 

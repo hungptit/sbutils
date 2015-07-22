@@ -18,17 +18,16 @@ void createDatabase(const std::string &dataFile, const std::vector<std::string> 
     Tools::Writer writer(dataFile);
     for (const auto &aFolder : folders) {
         const std::string aPath = Tools::getAbslutePath(aFolder);
+
         // Search for files
         Tools::BuildFileDatabase<Tools::Finder, Tools::EditedFileInfo> fSearch;
         fSearch.search(aPath);
         auto data = fSearch.getData();
 
-        // Serialized file information to string
+        // Serialized file information to string then write it to database
         std::ostringstream os;
         Tools::save<OArchive, decltype(data)>(data, os);
         const auto value = os.str();
-
-        // Write searched info to database.
         writer.write(aPath, value);
 
         // Display the information if the verbose flag is set.
