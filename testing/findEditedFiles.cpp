@@ -30,7 +30,10 @@ template <typename SearchAlg, typename Map> class Finder {
     typedef std::vector<typename Map::mapped_type> Container;
 
     Finder(Tools::InputArgumentParser &params, size_t maxlen = 1500000)
-        : Params(params), Alg(Params.Extensions), MaxLen(maxlen){};
+        : Params(params), Alg(Params.Extensions), MaxLen(maxlen) {
+        ExcludedStrings = {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
+        ExcludedExtensions = {{".p", ".so", ".dbg"}};
+    };
 
     void find() {
         for (const auto &aFolder : Params.Folders) {
@@ -116,8 +119,28 @@ template <typename SearchAlg, typename Map> class Finder {
             }
         }
     }
+    
+    // template <typename Iterator>
+    // Container filter(Iterator first, Iterator last) {
+    //     Container results;
+    //     for (auto val = first; val != last; ++val) {
+    //         bool isExcluded = false;
+    //         auto aPath = std::get<0>(*val);
+    //         isExcluded =
+    //             std::any_of(ExcludedExtensions.begin(), ExcludedExtensions.end(),
+    //                         [=](const std::string &extStr) { return extStr == std::get<2>(*val); }) ||
+    //             std::any_of(ExcludedStrings.begin(), ExcludedStrings.end(), [=](const std::string &extStr) {
+    //                 return aPath.find(extStr) != std::string::npos;
+    //             });
 
-    void disp() {
+    //         if (!isExcluded) {
+    //             results.emplace_back(val);
+    //         }
+    //     }
+    //     return results;
+    // }
+
+        void disp() {
         if (Params.Verbose) {
             std::cout << "Edited files: " << std::endl;
             for (const auto &val : EditedFiles) {
@@ -129,6 +152,10 @@ template <typename SearchAlg, typename Map> class Finder {
             std::array<std::string, 3> excludedExtensions = {{".p", ".so", ".dbg"}};
 
             // TODO: Improve this algorithm using thread.
+            // Container results = filter(EditedFiles.begin(), EditedFiles.end());
+
+            // TODO: Refine this algorithm
+            Container results;
             for (const auto &val : EditedFiles) {
                 bool isExcluded = false;
                 auto aPath = std::get<0>(val);
@@ -140,8 +167,13 @@ template <typename SearchAlg, typename Map> class Finder {
                     });
 
                 if (!isExcluded) {
-                    std::cout << std::get<0>(val) << std::endl;
+                    results.emplace_back(val);
                 }
+            }
+
+            // Display results
+            for (auto const val : results) {
+                std::cout << std::get<0>(val) << std::endl;
             }
         }
     }
@@ -152,6 +184,8 @@ template <typename SearchAlg, typename Map> class Finder {
     size_t MaxLen;
     Map LookupTable;
     Container EditedFiles;
+    std::array<std::string, 4> ExcludedStrings;
+    std::array<std::string, 4> ExcludedExtensions;
 };
 
 int main(int argc, char *argv[]) {

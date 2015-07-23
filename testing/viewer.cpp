@@ -5,6 +5,7 @@
 #include <array>
 #include <tuple>
 #include <unordered_map>
+#include <chrono>
 #include <unordered_set>
 
 #define BOOST_THREAD_VERSION 4
@@ -57,23 +58,18 @@ namespace {
         void locate() {
             auto keys = Reader.keys();
             for (auto const &aKey : keys) {
-                update(find(aKey));
+                updateSearchResults(find(aKey));
             }
         }
 
-        void locate_t() {
+        void locate_t() { // Threaded locate
             auto keys = Reader.keys();
             for (auto const &aKey : keys) {
                 boost::future<Container> aThread =
                     boost::async(std::bind(&ThreadedLocate::find, this, aKey));
-                aThread.wait(); // TODO: Do we need to call wait?
-                update(aThread.get());
+                aThread.wait();
+                updateSearchResults(aThread.get());
             }
-        }
-
-        Container find(const std::string &aKey) {
-            auto const data = read(aKey);
-            return filter(data);
         }
 
         void print(bool verbose = false) {
@@ -98,16 +94,17 @@ namespace {
         std::vector<std::string> SearchStrings;
         Container Results;
 
-        // TODO: Improve this function
-        Container filter(const Container & data) {
+        Container find(const std::string &aKey) { return filter(deserialize(Reader.read(aKey))); }
+
+        Container filter(const Container &data) {
             Container results;
             for (auto info : data) {
                 bool flag = (Stems.empty() ||
                              std::find(Stems.begin(), Stems.end(), std::get<1>(info)) != Stems.end()) &&
-                    (Extensions.empty() ||
-                     std::find(Extensions.begin(), Extensions.end(), std::get<2>(info)) !=
-                     Extensions.end()) &&
-                    (SearchStrings.empty() || true);
+                            (Extensions.empty() ||
+                             std::find(Extensions.begin(), Extensions.end(), std::get<2>(info)) !=
+                                 Extensions.end()) &&
+                            (SearchStrings.empty() || true);
                 if (flag) {
                     results.emplace_back(info);
                 }
@@ -115,14 +112,14 @@ namespace {
             return results;
         }
 
-        void update(const std::vector<Tools::EditedFileInfo> &results) {
+        void updateSearchResults(const std::vector<Tools::EditedFileInfo> &results) {
             boost::unique_lock<boost::mutex> guard(UpdateResults);
             std::move(results.begin(), results.end(), std::back_inserter(Results)); // C++11 feature
         }
 
-        Container read(const std::string &aKey) {
+        Container deserialize(const std::string &buffer) {
             Container data;
-            std::istringstream is(Reader.read(aKey));
+            std::istringstream is(buffer);
             Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
             return data;
         }
@@ -213,12 +210,17 @@ int main(int argc, char *argv[]) {
             std::cout << aKey << std::endl;
         }
     } else {
+        std::chrono::high_resolution_clock::time_point startTime =
+            std::chrono::high_resolution_clock::now();
         auto locateObj = ThreadedLocate(dataFile, stems, extensions, searchStrings);
         if (isThreaded) {
-            locateObj.locate();
-        } else {
             locateObj.locate_t();
+        } else {
+            locateObj.locate();
         }
+        std::chrono::high_resolution_clock::time_point stopTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count();
+        std::cout << "Execution time: " << duration << " miliseconds\n";
         locateObj.print();
     }
 
