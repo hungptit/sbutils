@@ -31,7 +31,8 @@ template <typename SearchAlg, typename Map> class Finder {
 
     Finder(Tools::InputArgumentParser &params, size_t maxlen = 1500000)
         : Params(params), Alg(Params.Extensions), MaxLen(maxlen) {
-        ExcludedStrings = {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
+        ExcludedStrings = {
+            {"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
         ExcludedExtensions = {{".p", ".so", ".dbg"}};
     };
 
@@ -56,14 +57,17 @@ template <typename SearchAlg, typename Map> class Finder {
         if (Params.Database.empty()) {
             auto const sandbox = Tools::getSandboxRoot(Params.Folders[0]);
             if (!sandbox.empty()) {
-                dataFile = (boost::filesystem::path(Tools::FileDatabaseInfo::Database)).string();
+                dataFile =
+                    (boost::filesystem::path(Tools::FileDatabaseInfo::Database))
+                        .string();
             }
         } else {
             dataFile = Params.Database;
         }
 
         if (dataFile.empty()) {
-            std::cout << "Could not find the edited file database. All editable files in the given folders "
+            std::cout << "Could not find the edited file database. All "
+                         "editable files in the given folders "
                          "will be listed!"
                       << std::endl;
             return;
@@ -73,7 +77,8 @@ template <typename SearchAlg, typename Map> class Finder {
         auto allKeys = reader.keys();
 
         if (Params.Verbose) {
-            std::cout << "All keys in the " << Params.Database << " database: " << std::endl;
+            std::cout << "All keys in the " << Params.Database
+                      << " database: " << std::endl;
             for (auto const &info : allKeys) {
                 std::cout << info << "\n";
             }
@@ -83,14 +88,17 @@ template <typename SearchAlg, typename Map> class Finder {
         auto const &results = reader.read(aKey);
         if (!results.empty()) {
             std::istringstream is(results);
-            Tools::load<Tools::DefaultIArchive, decltype(database)>(database, is);
+            Tools::load<Tools::DefaultIArchive, decltype(database)>(database,
+                                                                    is);
         }
 
         if (Params.Verbose) {
-            std::cout << "Number of files in edited database: " << database.size() << std::endl;
+            std::cout << "Number of files in edited database: "
+                      << database.size() << std::endl;
         }
 
-        // Reserve the space. Will need to adjust this parameter based on the number of files in the
+        // Reserve the space. Will need to adjust this parameter based on the
+        // number of files in the
         // sandbox.
         LookupTable.reserve(database.size());
         for (auto const &item : database) {
@@ -99,7 +107,8 @@ template <typename SearchAlg, typename Map> class Finder {
         }
 
         if (Params.Verbose) {
-            std::cout << "Look up table size: " << LookupTable.size() << std::endl;
+            std::cout << "Look up table size: " << LookupTable.size()
+                      << std::endl;
         }
     }
 
@@ -111,15 +120,17 @@ template <typename SearchAlg, typename Map> class Finder {
         for (const auto &anEditedFile : data) {
             auto aKey = std::get<0>(anEditedFile);
             auto aFile = LookupTable.find(aKey);
-            if ((aFile == LookupTable.end()) || (anEditedFile != aFile->second)) {
+            if ((aFile == LookupTable.end()) ||
+                (anEditedFile != aFile->second)) {
                 // If we could not find a given key in the database or the value
-                // associated with that key is the the same with the current value
+                // associated with that key is the the same with the current
+                // value
                 // then we need to record this file.
                 EditedFiles.emplace_back(anEditedFile);
             }
         }
     }
-    
+
     // template <typename Iterator>
     // Container filter(Iterator first, Iterator last) {
     //     Container results;
@@ -127,9 +138,12 @@ template <typename SearchAlg, typename Map> class Finder {
     //         bool isExcluded = false;
     //         auto aPath = std::get<0>(*val);
     //         isExcluded =
-    //             std::any_of(ExcludedExtensions.begin(), ExcludedExtensions.end(),
-    //                         [=](const std::string &extStr) { return extStr == std::get<2>(*val); }) ||
-    //             std::any_of(ExcludedStrings.begin(), ExcludedStrings.end(), [=](const std::string &extStr) {
+    //             std::any_of(ExcludedExtensions.begin(),
+    //             ExcludedExtensions.end(),
+    //                         [=](const std::string &extStr) { return extStr ==
+    //                         std::get<2>(*val); }) ||
+    //             std::any_of(ExcludedStrings.begin(), ExcludedStrings.end(),
+    //             [=](const std::string &extStr) {
     //                 return aPath.find(extStr) != std::string::npos;
     //             });
 
@@ -140,7 +154,7 @@ template <typename SearchAlg, typename Map> class Finder {
     //     return results;
     // }
 
-        void disp() {
+    void disp() {
         if (Params.Verbose) {
             std::cout << "Edited files: " << std::endl;
             for (const auto &val : EditedFiles) {
@@ -149,10 +163,12 @@ template <typename SearchAlg, typename Map> class Finder {
         } else {
             std::array<std::string, 4> excludedStems = {
                 {"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
-            std::array<std::string, 3> excludedExtensions = {{".p", ".so", ".dbg"}};
+            std::array<std::string, 3> excludedExtensions = {
+                {".p", ".so", ".dbg"}};
 
             // TODO: Improve this algorithm using thread.
-            // Container results = filter(EditedFiles.begin(), EditedFiles.end());
+            // Container results = filter(EditedFiles.begin(),
+            // EditedFiles.end());
 
             // TODO: Refine this algorithm
             Container results;
@@ -160,11 +176,16 @@ template <typename SearchAlg, typename Map> class Finder {
                 bool isExcluded = false;
                 auto aPath = std::get<0>(val);
                 isExcluded =
-                    std::any_of(excludedExtensions.begin(), excludedExtensions.end(),
-                                [=](const std::string &extStr) { return extStr == std::get<2>(val); }) ||
-                    std::any_of(excludedStems.begin(), excludedStems.end(), [=](const std::string &extStr) {
-                        return aPath.find(extStr) != std::string::npos;
-                    });
+                    std::any_of(excludedExtensions.begin(),
+                                excludedExtensions.end(),
+                                [=](const std::string &extStr) {
+                                    return extStr == std::get<2>(val);
+                                }) ||
+                    std::any_of(excludedStems.begin(), excludedStems.end(),
+                                [=](const std::string &extStr) {
+                                    return aPath.find(extStr) !=
+                                           std::string::npos;
+                                });
 
                 if (!isExcluded) {
                     results.emplace_back(val);
@@ -202,8 +223,10 @@ int main(int argc, char *argv[]) {
         Finder<SearchAlg, Map> searchAlg(params);
 
         // Launch read and find tasks in two async threads.
-        boost::future<void> readThread = boost::async(std::bind(&FindEditedFiles::read, &searchAlg));
-        boost::future<void> findThread = boost::async(std::bind(&FindEditedFiles::find, &searchAlg));
+        boost::future<void> readThread =
+            boost::async(std::bind(&FindEditedFiles::read, &searchAlg));
+        boost::future<void> findThread =
+            boost::async(std::bind(&FindEditedFiles::find, &searchAlg));
 
         readThread.wait();
         findThread.wait();
