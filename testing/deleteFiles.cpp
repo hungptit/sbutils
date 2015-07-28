@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
         ("files,f", po::value<std::vector<std::string>>(), "Files want to delete.")
+        ("list-file,l", po::value<std::string>(), "A text file which has a list of files need to remove.")
         ("stems,s", po::value<std::string>(), "The stem of a file want to delete.")
         ("extensions,e", po::value<std::string>(), "The extension of a file want to delete.");
     // clang-format on
@@ -44,6 +45,12 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> fileNames;
     if (vm.count("files")) {
         fileNames = vm["files"].as<std::vector<std::string>>();
+    } 
+
+    if (vm.count("list-file")) {
+        for (auto item : Tools::getFilesFromTxtFile(vm["list-file"].as<std::string>())) {
+            fileNames.emplace_back(item.string());
+        }
     }
 
     std::string extensions;
@@ -66,13 +73,13 @@ int main(int argc, char *argv[]) {
             if (boost::filesystem::exists(aPath)) {
                 system::error_code errcode;
                 boost::filesystem::remove(aPath, errcode);
-                if (errcode == boost::system::errc::success) {
+                if (errcode != boost::system::errc::success) {
                     std::cout << "Cannot delete " << aPath << "\n";
                 }
             }
             else {
                 std::cout << "File " << aPath << " does not exist!\n";
-            } 
+            }
         }
     }
 }

@@ -5,6 +5,8 @@
 #include <array>
 #include <tuple>
 #include <unordered_map>
+#include <ctime>
+#include <sstream>
 
 #define BOOST_THREAD_VERSION 4
 #include "boost/config.hpp"
@@ -17,226 +19,104 @@
 #include "utils/Utils.hpp"
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
-#include "InputArgumentParser.hpp"
-
-#include <string>
-#include <vector>
-#include <map>
-#include <ctime>
-#include <sstream>
-
-template <typename SearchAlg, typename Map> class Finder {
-  public:
-    typedef std::vector<typename Map::mapped_type> Container;
-
-    Finder(Tools::InputArgumentParser &params, size_t maxlen = 1500000)
-        : Params(params), Alg(Params.Extensions), MaxLen(maxlen) {
-        ExcludedStrings = {
-            {"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
-        ExcludedExtensions = {{".p", ".so", ".dbg"}};
-    };
-
-    void find() {
-        for (const auto &aFolder : Params.Folders) {
-            Alg.search(boost::filesystem::canonical(aFolder));
-        }
-
-        if (Params.Verbose) {
-            auto data = Alg.getData();
-            std::cout << "==== Search results ====\n";
-            std::cout << "Number of files: " << data.size() << '\n';
-            for (auto const &info : data) {
-                std::cout << std::get<0>(info) << "\n";
-            }
-        }
-    }
-
-    void read() {
-        Container database;
-        std::string dataFile;
-        if (Params.Database.empty()) {
-            auto const sandbox = Tools::getSandboxRoot(Params.Folders[0]);
-            if (!sandbox.empty()) {
-                dataFile =
-                    (boost::filesystem::path(Tools::FileDatabaseInfo::Database))
-                        .string();
-            }
-        } else {
-            dataFile = Params.Database;
-        }
-
-        if (dataFile.empty()) {
-            std::cout << "Could not find the edited file database. All "
-                         "editable files in the given folders "
-                         "will be listed!"
-                      << std::endl;
-            return;
-        }
-
-        Tools::Reader reader(dataFile);
-        auto allKeys = reader.keys();
-
-        if (Params.Verbose) {
-            std::cout << "All keys in the " << Params.Database
-                      << " database: " << std::endl;
-            for (auto const &info : allKeys) {
-                std::cout << info << "\n";
-            }
-        }
-
-        auto aKey = Tools::findParent(allKeys, Params.Folders[0]);
-        auto const &results = reader.read(aKey);
-        if (!results.empty()) {
-            std::istringstream is(results);
-            Tools::load<Tools::DefaultIArchive, decltype(database)>(database,
-                                                                    is);
-        }
-
-        if (Params.Verbose) {
-            std::cout << "Number of files in edited database: "
-                      << database.size() << std::endl;
-        }
-
-        // Reserve the space. Will need to adjust this parameter based on the
-        // number of files in the
-        // sandbox.
-        LookupTable.reserve(database.size());
-        for (auto const &item : database) {
-            auto aKey = std::get<0>(item);
-            LookupTable.emplace(aKey, item);
-        }
-
-        if (Params.Verbose) {
-            std::cout << "Look up table size: " << LookupTable.size()
-                      << std::endl;
-        }
-    }
-
-    void get() {
-        auto const data = Alg.getData();
-        if (Params.Verbose) {
-            std::cout << "Edited files: " << data.size() << std::endl;
-        }
-        for (const auto &anEditedFile : data) {
-            auto aKey = std::get<0>(anEditedFile);
-            auto aFile = LookupTable.find(aKey);
-            if ((aFile == LookupTable.end()) ||
-                (anEditedFile != aFile->second)) {
-                // If we could not find a given key in the database or the value
-                // associated with that key is the the same with the current
-                // value
-                // then we need to record this file.
-                EditedFiles.emplace_back(anEditedFile);
-            }
-        }
-    }
-
-    // template <typename Iterator>
-    // Container filter(Iterator first, Iterator last) {
-    //     Container results;
-    //     for (auto val = first; val != last; ++val) {
-    //         bool isExcluded = false;
-    //         auto aPath = std::get<0>(*val);
-    //         isExcluded =
-    //             std::any_of(ExcludedExtensions.begin(),
-    //             ExcludedExtensions.end(),
-    //                         [=](const std::string &extStr) { return extStr ==
-    //                         std::get<2>(*val); }) ||
-    //             std::any_of(ExcludedStrings.begin(), ExcludedStrings.end(),
-    //             [=](const std::string &extStr) {
-    //                 return aPath.find(extStr) != std::string::npos;
-    //             });
-
-    //         if (!isExcluded) {
-    //             results.emplace_back(val);
-    //         }
-    //     }
-    //     return results;
-    // }
-
-    void disp() {
-        if (Params.Verbose) {
-            std::cout << "Edited files: " << std::endl;
-            for (const auto &val : EditedFiles) {
-                std::cout << val << std::endl;
-            }
-        } else {
-            std::array<std::string, 4> excludedStems = {
-                {"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
-            std::array<std::string, 3> excludedExtensions = {
-                {".p", ".so", ".dbg"}};
-
-            // TODO: Improve this algorithm using thread.
-            // Container results = filter(EditedFiles.begin(),
-            // EditedFiles.end());
-
-            // TODO: Refine this algorithm
-            Container results;
-            for (const auto &val : EditedFiles) {
-                bool isExcluded = false;
-                auto aPath = std::get<0>(val);
-                isExcluded =
-                    std::any_of(excludedExtensions.begin(),
-                                excludedExtensions.end(),
-                                [=](const std::string &extStr) {
-                                    return extStr == std::get<2>(val);
-                                }) ||
-                    std::any_of(excludedStems.begin(), excludedStems.end(),
-                                [=](const std::string &extStr) {
-                                    return aPath.find(extStr) !=
-                                           std::string::npos;
-                                });
-
-                if (!isExcluded) {
-                    results.emplace_back(val);
-                }
-            }
-
-            // Display results
-            for (auto const val : results) {
-                std::cout << std::get<0>(val) << std::endl;
-            }
-        }
-    }
-
-  private:
-    Tools::InputArgumentParser Params;
-    SearchAlg Alg;
-    size_t MaxLen;
-    Map LookupTable;
-    Container EditedFiles;
-    std::array<std::string, 4> ExcludedStrings;
-    std::array<std::string, 4> ExcludedExtensions;
-};
+#include "Finder.hpp"
 
 int main(int argc, char *argv[]) {
     typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
     typedef Tools::FindEditedFiles<Tools::Finder> SearchAlg;
 
-    Tools::InputArgumentParser params(argc, argv);
-    if (params.Verbose) {
-        params.disp();
+    using namespace boost;
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options");
+
+    // clang-format off
+    desc.add_options()              
+        ("help,h", "Print this help")
+        ("verbose,v", "Display searched data.")
+        ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
+        ("file-stems,s", po::value<std::vector<std::string>>(), "File stems.")
+        ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
+        ("search-strings,t", po::value<std::vector<std::string>>(), "File extensions.")
+        ("regexp,r", po::value<std::vector<std::string>>(), "Search using regular expression.")
+        ("database,d", po::value<std::string>(), "File database.");
+    // clang-format on
+
+    po::positional_options_description p;
+    p.add("folders", -1);
+    po::variables_map vm;
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
+        vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << desc;
+        std::cout << "Examples:" << std::endl;
+        std::cout << "\t findEditedFiles ./ -d .database" << std::endl;
+        return EXIT_SUCCESS;
     }
 
-    if (!params.Help) {
-        typedef Finder<SearchAlg, Map> FindEditedFiles;
-        Finder<SearchAlg, Map> searchAlg(params);
-
-        // Launch read and find tasks in two async threads.
-        boost::future<void> readThread =
-            boost::async(std::bind(&FindEditedFiles::read, &searchAlg));
-        boost::future<void> findThread =
-            boost::async(std::bind(&FindEditedFiles::find, &searchAlg));
-
-        readThread.wait();
-        findThread.wait();
-
-        readThread.get();
-        findThread.get();
-
-        // Get the list of edited files then print out the results.
-        searchAlg.get();
-        searchAlg.disp();
+    auto verbose = false;
+    if (vm.count("verbose")) {
+        verbose = true;
     }
+
+    // Notes: All folder paths must be full paths.
+    boost::system::error_code errcode;
+    std::vector<std::string> folders;
+    if (vm.count("folders")) {
+        for (auto item: vm["folders"].as<std::vector<std::string>>()) {
+            folders.emplace_back(boost::filesystem::canonical(item, errcode).string());
+        }
+    } else {
+        // We will search in the current folder is the folders parameters are not specified.
+        folders.emplace_back(boost::filesystem::current_path(errcode).string()); 
+    }
+
+    std::vector<std::string> stems;
+    if (vm.count("file-stems")) {
+        stems = vm["file-stems"].as<std::vector<std::string>>();
+    }
+
+    std::vector<std::string> extensions;
+    if (vm.count("extensions")) {
+        extensions = vm["extensions"].as<std::vector<std::string>>();
+    }
+
+    std::vector<std::string> searchStrings;
+    if (vm.count("search-strings")) {
+        searchStrings = vm["search-strings"].as<std::vector<std::string>>();
+    }
+
+    std::string dataFile;
+    if (vm.count("database")) {
+        dataFile = vm["database"].as<std::string>();
+    } else {
+        dataFile =
+            boost::filesystem::path(Tools::FileDatabaseInfo::Database).string();
+    }
+
+    // Launch read and find tasks using two async threads.
+    auto const params = std::make_tuple(verbose, dataFile, folders, stems, extensions, searchStrings);
+    Finder<SearchAlg, Map, decltype(params)> searchAlg(params);
+    
+    // searchAlg.read();
+    // searchAlg.find();
+
+    boost::future<void> readThread =
+        boost::async(std::bind(&decltype(searchAlg)::read, &searchAlg));
+    boost::future<void> findThread =
+        boost::async(std::bind(&decltype(searchAlg)::find, &searchAlg));
+
+    readThread.wait();
+    findThread.wait();
+
+    readThread.get();
+    findThread.get();
+
+    // Get the list of edited files then print out the results.
+    searchAlg.filter();
+    searchAlg.disp();
+
     return 0;
 }

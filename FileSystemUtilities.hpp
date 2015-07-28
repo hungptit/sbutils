@@ -2,6 +2,8 @@
 #define FileSystemUtilities_hpp_
 
 #include <string>
+#include <fstream>
+#include <iostream>
 
 #include "boost/filesystem.hpp"
 #include "boost/uuid/uuid.hpp"
@@ -10,15 +12,20 @@
 #include "boost/lexical_cast.hpp"
 
 namespace Tools {
-    bool isRegularFile(const std::string &str) { return boost::filesystem::is_regular_file(boost::filesystem::path(str)); }
+    bool isRegularFile(const std::string &str) {
+        return boost::filesystem::is_regular_file(boost::filesystem::path(str));
+    }
 
     bool isDirectory(const std::string &folderPath) {
-        return boost::filesystem::is_directory(boost::filesystem::path(folderPath));
+        return boost::filesystem::is_directory(
+            boost::filesystem::path(folderPath));
     }
 
     bool createDirectory(const std::string &folderPath) {
         const boost::filesystem::path folder(folderPath);
-        return (boost::filesystem::is_directory(folder)) ? (true) : (boost::filesystem::create_directories(folder));
+        return (boost::filesystem::is_directory(folder))
+                   ? (true)
+                   : (boost::filesystem::create_directories(folder));
     }
 
     bool remove(const std::string &folderName) {
@@ -33,22 +40,29 @@ namespace Tools {
         return false;
     }
 
-    const std::string getCurrentFolder() { return boost::filesystem::current_path().string(); }
+    const std::string getCurrentFolder() {
+        return boost::filesystem::current_path().string();
+    }
 
     std::string getAbslutePath(const std::string &pathName) {
         const boost::filesystem::path path(pathName);
         return boost::filesystem::canonical(path).string();
     }
 
-    const std::string getUniqueString() { return boost::lexical_cast<std::string>(boost::uuids::random_generator()()); }
+    const std::string getUniqueString() {
+        return boost::lexical_cast<std::string>(
+            boost::uuids::random_generator()());
+    }
 
     /**
-     * This function will copy the content of the srcFolder to desFolder recursively. Note that this function may throw.
+     * This function will copy the content of the srcFolder to desFolder
+     * recursively. Note that this function may throw.
      *
      * @param srcFolder
      * @param desFolder
      */
-    void copyDir(const boost::filesystem::path &srcFolder, const boost::filesystem::path &desFolder) {
+    void copyDir(const boost::filesystem::path &srcFolder,
+                 const boost::filesystem::path &desFolder) {
         using namespace boost::filesystem;
         copy_directory(srcFolder, desFolder);
         recursive_directory_iterator endIter;
@@ -65,17 +79,21 @@ namespace Tools {
         }
     }
 
-
-    std::string findParent(std::vector<std::string> &allKeys, const std::string &aPath) {
+    std::string findParent(const std::vector<std::string> &allKeys,
+                           const std::string &aPath) {
+        std::cout << aPath << "\n";
         auto currentItem = std::find(allKeys.begin(), allKeys.end(), aPath);
         if (currentItem == allKeys.end()) {
             auto aFolder = boost::filesystem::canonical(aPath).parent_path();
+            std::cout << aFolder << "\n";
             while (!aFolder.empty()) {
-                auto currentItem = std::find(allKeys.begin(), allKeys.end(), aFolder.string());
+                auto currentItem =
+                    std::find(allKeys.begin(), allKeys.end(), aFolder.string());
                 if (currentItem != allKeys.end()) {
                     break;
                 } else {
-                    aFolder = boost::filesystem::canonical(aFolder).parent_path();
+                    aFolder =
+                        boost::filesystem::canonical(aFolder).parent_path();
                 }
             }
             return aFolder.string();
@@ -84,10 +102,12 @@ namespace Tools {
         }
     }
 
-    boost::filesystem::path getSandboxRoot(const boost::filesystem::path & aPath) {
+    boost::filesystem::path
+    getSandboxRoot(const boost::filesystem::path &aPath) {
         const boost::filesystem::path sbtool(".sbtools");
         auto sandbox = boost::filesystem::canonical(aPath);
-        while (!sandbox.empty() && !boost::filesystem::exists(sandbox / sbtool)) {
+        while (!sandbox.empty() &&
+               !boost::filesystem::exists(sandbox / sbtool)) {
             sandbox = sandbox.parent_path();
         }
         return sandbox;
@@ -96,12 +116,14 @@ namespace Tools {
     class TemporaryDirectory {
       public:
         TemporaryDirectory() {
-            CurrentDir = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%");
+            CurrentDir = boost::filesystem::temp_directory_path() /
+                         boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%");
             boost::filesystem::create_directories(CurrentDir);
         }
 
         TemporaryDirectory(const std::string &parentDir) {
-            CurrentDir = boost::filesystem::path(parentDir) / boost::filesystem::path(getUniqueString());
+            CurrentDir = boost::filesystem::path(parentDir) /
+                         boost::filesystem::path(getUniqueString());
             boost::filesystem::create_directories(CurrentDir);
         }
 
@@ -116,5 +138,22 @@ namespace Tools {
       private:
         boost::filesystem::path CurrentDir;
     };
+
+    std::vector<boost::filesystem::path>
+    getFilesFromTxtFile(const boost::filesystem::path &dataFile, bool verbose = false) {
+        std::vector<boost::filesystem::path> results;
+        std::ifstream input(dataFile.string());
+        for (std::string aLine; getline(input, aLine);) {
+            const auto aFile = boost::filesystem::path(aLine);
+            boost::system::error_code errcode;
+            if (boost::filesystem::is_regular_file(aFile, errcode)) {
+                results.emplace_back(aFile);
+            } else {
+                if (verbose)
+                    std::cout << aFile << ": " << errcode.message() << "\n";
+            }
+        }
+        return results;
+    }
 }
 #endif
