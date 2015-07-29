@@ -81,11 +81,9 @@ namespace Tools {
 
     std::string findParent(const std::vector<std::string> &allKeys,
                            const std::string &aPath) {
-        std::cout << aPath << "\n";
         auto currentItem = std::find(allKeys.begin(), allKeys.end(), aPath);
         if (currentItem == allKeys.end()) {
             auto aFolder = boost::filesystem::canonical(aPath).parent_path();
-            std::cout << aFolder << "\n";
             while (!aFolder.empty()) {
                 auto currentItem =
                     std::find(allKeys.begin(), allKeys.end(), aFolder.string());
@@ -140,7 +138,8 @@ namespace Tools {
     };
 
     std::vector<boost::filesystem::path>
-    getFilesFromTxtFile(const boost::filesystem::path &dataFile, bool verbose = false) {
+    getFilesFromTxtFile(const boost::filesystem::path &dataFile,
+                        bool verbose = false) {
         std::vector<boost::filesystem::path> results;
         std::ifstream input(dataFile.string());
         for (std::string aLine; getline(input, aLine);) {
