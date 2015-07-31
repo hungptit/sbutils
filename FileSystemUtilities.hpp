@@ -10,6 +10,7 @@
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
 #include "boost/lexical_cast.hpp"
+#include <boost/iostreams/device/mapped_file.hpp> // for readLines
 
 namespace Tools {
     bool isRegularFile(const std::string &str) {
@@ -137,12 +138,50 @@ namespace Tools {
         boost::filesystem::path CurrentDir;
     };
 
+    std::vector<std::string> readLines(const std::string & dataFile) {
+        boost::iostreams::mapped_file mmap(dataFile, boost::iostreams::mapped_file::readonly);
+        auto begin = mmap.const_data();
+        auto end = begin + mmap.size();
+
+        std::vector<std::string> results;
+        while (begin && begin != end) {
+            auto currentPos = begin;
+            while ((*currentPos != '\n') && (currentPos != end)) {
+                ++currentPos;
+            }
+            results.emplace_back(std::string(begin, currentPos));
+            begin = ++currentPos;
+        }
+        return results;
+    }
+
+    std::vector<std::string> readLines(const std::string & dataFile, size_t startLine, size_t stopLine) {
+        boost::iostreams::mapped_file mmap(dataFile, boost::iostreams::mapped_file::readonly);
+        auto begin = mmap.const_data();
+        auto end = begin + mmap.size();
+
+        std::vector<std::string> results;
+        size_t linenum = 0;
+        while (begin && begin != end) {
+            auto currentPos = begin;
+            while ((*currentPos != '\n') && (currentPos != end)) {
+                ++currentPos;
+            }
+            ++linenum;
+            if ((linenum >= startLine) && (linenum <= stopLine)) {
+                results.emplace_back(std::string(begin, currentPos));
+            }
+            begin = ++currentPos;
+        }
+        return results;
+    }
+
+
     std::vector<boost::filesystem::path>
     getFilesFromTxtFile(const boost::filesystem::path &dataFile,
                         bool verbose = false) {
         std::vector<boost::filesystem::path> results;
-        std::ifstream input(dataFile.string());
-        for (std::string aLine; getline(input, aLine);) {
+        for (auto aLine : readLines(dataFile.string())) {
             const auto aFile = boost::filesystem::path(aLine);
             boost::system::error_code errcode;
             if (boost::filesystem::is_regular_file(aFile, errcode)) {

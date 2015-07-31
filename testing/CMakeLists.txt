@@ -20,26 +20,15 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-#This option make sure that we use the local boost version.
+# This option make sure that we use the local boost version. Note that if the
+# system boost is installed then CMake might use that boost version.
 set(Boost_NO_SYSTEM_PATHS TRUE) 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
-find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options)
-
-#Can't tell CMake to use the customized boost libraries if the system boost
-#libraries is installed.If this problem happen then we need to use the
-#manual approach.
-#set(BOOST_FILESYSTEM "${PROJECTS_FOLDER}/3p/boost/lib/libboost_filesystem.a")
-#set(BOOST_SYSTEM "${PROJECTS_FOLDER}/3p/boost/lib/libboost_filesystem.a")
-#set(BOOST_PROGRAM_OPTIONS                                                     \
-# "${PROJECTS_FOLDER}/3p/boost/lib/libboost_program_options.a")
-#set(BOOST_PROGRAM_THREAD "${PROJECTS_FOLDER}/3p/boost/lib/libboost_thread.a")
-#set(BOOST_PROGRAM_REGEX "${PROJECTS_FOLDER}/3p/boost/lib/libboost_regex.a")
-#set(BOOST_PROGRAM_CHRONO "${PROJECTS_FOLDER}/3p/boost/lib/libboost_chrono.a")
-#set(BOOST_PROGRAM_ATOMIC "${PROJECTS_FOLDER}/3p/boost/lib/libboost_atomic.a")
+find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options iostreams)
 
 #Include folder
 message(${PROJECTS_FOLDER})
