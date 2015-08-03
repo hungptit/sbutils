@@ -10,12 +10,12 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -
 
 ENABLE_TESTING()
 
-#Used libraries
+# Used libraries
 set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
 set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/libleveldb.a")
 
-#Find Boost libraries
+# Find Boost libraries
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -30,7 +30,7 @@ if (Boost_NO_SYSTEM_PATHS)
 endif (Boost_NO_SYSTEM_PATHS)
 find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options iostreams)
 
-#Include folder
+# Include folder
 message(${PROJECTS_FOLDER})
 include_directories(${PROJECTS_FOLDER})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
@@ -39,7 +39,7 @@ include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
 
-#Compile using POCO static library
+# Use POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
 set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
 set(LIB_POCO_UTIL "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
@@ -47,11 +47,10 @@ set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libformat.a")
+set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libcppformat.a")
 
 if (Boost_FOUND)
   include_directories(${BOOST_INCLUDE_DIRS})
-  #Compile all unittests
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
@@ -66,7 +65,7 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
-#Compile all binaries
+# Compile all binaries
   set(COMMAND_SRC_FILES createZipArchive)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
@@ -74,8 +73,8 @@ if (Boost_FOUND)
   endforeach (src_file)
   INSTALL_PROGRAMS(/${PROJECTS_FOLDER}/tmp/ FILES ${COMMAND_SRC_FILES})
 
-#Compile SQLite examples.The order of linked libraries must be preserved
-#otherwise the link process will be failed.
+# Compile SQLite examples.The order of linked libraries must be preserved
+# otherwise the link process will be failed.
   set(UNITTEST_SRC_FILES tSQLite)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
@@ -89,7 +88,7 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
-      ${Boost_LIBRARIES} ${LIB_LEVELDB} -lpthread -lrt)
+      ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_CPPFORMAT} -lpthread -lrt)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})

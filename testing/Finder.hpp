@@ -1,6 +1,10 @@
 #ifndef Finder_hpp_
 #define Finder_hpp_
 
+#include <string>
+#include <tuple>
+#include "cppformat/format.h"
+
 enum {
     VERBOSE,
     DATAFILE,
@@ -32,9 +36,7 @@ class Finder {
     Finder(InputArguments &params, size_t maxlen = 1500000)
         : Params(params), Alg(std::get<EXTENSIONS>(Params)), MaxLen(maxlen),
           ExcludedStrings(
-              {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}}) {
-        ExcludedExtensions = {{".p", ".so", ".dbg"}};
-    };
+    {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}}), ExcludedExtensions ({{".p", ".so", ".dbg"}}) {};
 
     void find() {
         for (const auto &aFolder : std::get<FOLDERS>(Params)) {
@@ -144,17 +146,17 @@ class Finder {
         if (std::get<VERBOSE>(Params)) {
             std::cout << "Edited files: " << std::endl;
             for (const auto &val : EditedFiles) {
-                std::cout << val << std::endl;
+                fmt::print("{}\n", val);
             }
         } else {
             for (auto const val : EditedFiles) {
-                std::cout << std::get<0>(val) << std::endl;
+                fmt::print("{}\n", std::get<0>(val));
             }
         }
     }
 
     Container &getEditedFiles() { return EditedFiles; }
-    
+
   private:
     InputArguments Params;
     SearchAlg Alg;
