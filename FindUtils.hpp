@@ -150,6 +150,42 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
+    // Explore the given folder to a given level
+    std::tuple<std::vector<boost::filesystem::path>,
+               std::vector<boost::filesystem::path>>
+    exploreFolders(int level, const boost::filesystem::path &rootFolder) {
+        int counter = 0;
+        std::vector<boost::filesystem::path> files;
+        std::vector<boost::filesystem::path> folders = {rootFolder};
+        while (counter < level) {
+            decltype(folders) nextLevel;
+            for (auto const &aPath : folders) {
+                boost::filesystem::directory_iterator endIter;
+                boost::filesystem::directory_iterator dirIter(aPath);
+                for (; dirIter != endIter; ++dirIter) {
+                    auto currentPath = dirIter->path();
+                    if (boost::filesystem::is_directory(currentPath)) {
+                        nextLevel.push_back(currentPath);
+                    } else if (boost::filesystem::is_regular_file(
+                                   currentPath)) {
+                        files.push_back(currentPath);
+                    }
+                }
+            }
+
+            if (nextLevel.empty()) {
+                break;
+            } else {
+                folders.reserve(nextLevel.size());
+                // Move content of nextLevel to folders then clear nextLevel
+                // content.
+                folders = std::move(nextLevel);
+                counter++;
+            }
+        }
+        return std::make_tuple(folders, files);
+    }
+
     // Load/save data from the string stream using Cereal.
     typedef cereal::BinaryOutputArchive DefaultOArchive;
     typedef cereal::BinaryInputArchive DefaultIArchive;

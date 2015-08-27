@@ -36,11 +36,18 @@ class Finder {
     Finder(InputArguments &params, size_t maxlen = 1500000)
         : Params(params), Alg(std::get<EXTENSIONS>(Params)), MaxLen(maxlen),
           ExcludedStrings(
-    {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}}), ExcludedExtensions ({{".p", ".so", ".dbg"}}) {};
+              {{"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}}),
+          ExcludedExtensions({{".p", ".so", ".dbg"}}){};
 
     void find() {
-        for (const auto &aFolder : std::get<FOLDERS>(Params)) {
-            Alg.search(boost::filesystem::canonical(aFolder));
+        auto folders = std::get<FOLDERS>(Params);
+        if (folders.empty()) {
+            Alg.search(boost::filesystem::canonical(
+                boost::filesystem::current_path()));
+        } else {
+            for (const auto &aFolder : folders) {
+                Alg.search(boost::filesystem::canonical(aFolder));
+            }
         }
 
         if (std::get<VERBOSE>(Params)) {
@@ -56,6 +63,8 @@ class Finder {
     void read() {
         Container database;
         auto const dataFile = std::get<DATAFILE>(Params);
+        bool verbose = std::get<VERBOSE>(Params);
+
         if (dataFile.empty()) {
             std::cout << "Could not find the edited file database. All "
                          "editable files in the given folders "
@@ -64,55 +73,79 @@ class Finder {
             return;
         }
 
+        // Read all keys from the database
         Tools::Reader reader(dataFile);
         auto allKeys = reader.keys();
         printKeys(Params, allKeys);
 
-        auto aKey = Tools::findParent(allKeys, std::get<FOLDERS>(Params)[0]);
-        if (aKey.empty()) {
-            printKeys(Params, allKeys);
-            std::cout << "Cannot find key: \"" << aKey
-                      << "\" in the edited file database. All edited files "
-                         "will be listed\n";
+        // Find out which keys will be loaded.
+        auto folders = std::get<FOLDERS>(Params);
+        std::set<std::string> keys;
+        bool loadAllKeys = false;
+        if (folders.empty()) {
+            loadAllKeys = true;
+        } else {
+            for (auto aPath : folders) {
+                auto aKey = Tools::findParent(allKeys, aPath);
+                if (aKey.empty()) {
+                    loadAllKeys = true; // Cannot find a current key. We need to load all keys.
+                    break;
+                } else {
+                    keys.insert(aKey);
+                }
+            }
         }
 
-        auto const &results = reader.read(aKey);
-        if (!results.empty()) {
-            std::istringstream is(results);
-            Tools::load<Tools::DefaultIArchive, decltype(database)>(database,
-                                                                    is);
+        if (loadAllKeys) {
+            for (auto const &aKey : allKeys) {
+                keys.insert(aKey);
+            }
         }
 
-        if (std::get<VERBOSE>(Params)) {
+        // Load all data from the database. This piece of code can be moved out.
+        for (auto const aKey : keys) {
+            auto const results = reader.read(aKey);
+            if (!results.empty()) {
+                decltype(database) data;
+                std::istringstream is(results);
+                Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
+                std::move(data.begin(), data.end(),
+                          std::back_inserter(database));
+            }
+        }
+
+        if (verbose) {
             std::cout << "Number of files in edited database: "
                       << database.size() << std::endl;
         }
 
-        // Reserve the space. Will need to adjust this parameter based on the
-        // number of files in the
-        // sandbox.
+        // Build the lookup table.
         LookupTable.reserve(database.size());
         for (auto const &item : database) {
             auto aKey = std::get<0>(item);
             LookupTable.emplace(aKey, item);
         }
 
-        if (std::get<VERBOSE>(Params)) {
+        // Print out the verbose information.
+        if (verbose) {
             std::cout << "Look up table size: " << LookupTable.size()
                       << std::endl;
         }
     }
 
-    void filter() {
+    size_t filter() {
         auto const data = Alg.getData();
         if (std::get<VERBOSE>(Params)) {
             std::cout << "Edited files: " << data.size() << std::endl;
         }
+
+        size_t counter = 0;
         for (const auto &anEditedFile : data) {
             auto aKey = std::get<0>(anEditedFile);
             auto aFile = LookupTable.find(aKey);
             if ((aFile == LookupTable.end()) ||
                 (anEditedFile != aFile->second)) {
+                counter ++;
                 // If we could not find a given key in the database or the value
                 // associated with that key is the the same with the current
                 // value then we need to record this file.
@@ -140,6 +173,7 @@ class Finder {
                 }
             }
         }
+        return counter;
     }
 
     void disp() {
