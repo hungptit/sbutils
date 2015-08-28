@@ -114,6 +114,37 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
+    // Find files
+    template <typename Base> class FindFiles : public Base {
+      public:
+        typedef BasicFileInfo value_type;
+
+        FindFiles(const std::vector<std::string> &supportedExts)
+            : Extensions(supportedExts) {}
+        std::vector<value_type> &getData() { return Data; }
+
+      protected:
+        void update(boost::filesystem::recursive_directory_iterator &dirIter) {
+            const boost::filesystem::file_status fs = dirIter->status();
+            if (fs.type() == boost::filesystem::regular_file) {
+                auto const aPath = dirIter->path();
+                const auto extension = aPath.extension().string();
+                bool isValid = Extensions.empty() ||
+                               (std::find(Extensions.begin(), Extensions.end(),
+                                          extension) != Extensions.end());
+                if (isValid) {
+                    Data.emplace_back(std::make_tuple(
+                        aPath.parent_path().string(), aPath.stem().string(),
+                        aPath.extension().string()));
+                }
+            }
+        }
+
+      private:
+        std::vector<std::string> Extensions;
+        std::vector<value_type> Data;
+    };
+
     // Find edited files
     template <typename Base> class FindEditedFiles : public Base {
       public:
