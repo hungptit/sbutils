@@ -23,44 +23,64 @@ class GenerateFakeTests {
     GenerateFakeTests(const Path &outputFolder, const Path &dataFolder)
         : OutputFolder(outputFolder), DataFolder(dataFolder) {}
 
-    template <typename Container> void generate(Container &data) {
+    template <typename Container> size_t generate(Container &data) {
         size_t counter = 0;
-        for (auto const &val : data) {
-            fmt::MemoryWriter writer;
-            auto className = "t" + std::to_string(counter);
-            writer << "classdef " << className
-                   << " < matlab.unittest.TestCase\n";
-            writer << "methods (Test)\n";
+        auto start = data.begin();
+        auto stop = start;
+        while (true) {
+            std::advance(stop, NumModelPerTest);
+            auto distance = std::distance(start, data.end());
+            if (distance > NumModelPerTest) {
+                generateTest(start, stop, counter);
+                std::cout << std::distance(start, stop) << "\n";
+                start = stop;
+                counter++;
+            } else {
+                generateTest(start, data.end(), counter);
+                return counter++;
+            }
+        }
+        return counter;
+    }
+
+  private:
+    template <typename Iterator>
+    size_t generateTest(Iterator begin, Iterator end, const size_t counter) {
+        fmt::MemoryWriter writer;
+        auto className = "t" + std::to_string(counter);
+        writer << "classdef " << className << " < matlab.unittest.TestCase\n";
+        writer << "methods (Test)\n";
+
+        size_t function_counter = 0;
+        for (auto iter = begin; iter != end; ++iter, ++function_counter) {
+            auto val = *iter;
             writer << "function "
-                   << "foo"
-                   << "(this)\n";
+                   << "test_model_" << function_counter << "(this)\n";
             auto aPath = std::get<0>(val);
             auto modelName = std::get<1>(val);
             writer << "aPath = fullfile(matlabroot, '../','" << std::get<0>(val)
                    << "');\n";
             writer << "dataPath = '" << DataFolder.string() << "';\n";
             writer << "tag = '" << className << "';\n";
-            writer << "cd(aPath);\n";
+            writer << "addpath(aPath);\n";
             writer << "modelName = '" << modelName << "';\n";
             writer << "testObj = modelreference.UnitTestSetup([], modelName, "
                       "@load_system);\n";
             writer << "modelreference.FindSubsystems.run(aPath, modelName, "
                       "tag, dataPath);\n";
+            writer << "rmpath\n";
             writer << "end\n";
-            writer << "end\n";
-            writer << "end\n";
-
-            // fmt::print("{}\n", writer.str());
-            auto testFile = OutputFolder / Path(className + ".m");
-            std::ofstream myfile(testFile.string());
-            myfile << writer.str() << std::endl;
-            counter++;
         }
-    }
 
-  private:
-    template <typename Iterator>
-    void generateTest(Iterator begin, Iterator end) {}
+        writer << "end\n";
+        writer << "end\n";
+
+        // fmt::print("{}\n", writer.str());
+        auto testFile = OutputFolder / Path(className + ".m");
+        std::ofstream myfile(testFile.string());
+        myfile << writer.str() << std::endl;
+        return function_counter;
+    }
 
     boost::filesystem::path OutputFolder;
     boost::filesystem::path DataFolder;
@@ -165,7 +185,8 @@ int main(int argc, char *argv[]) {
     // Generate the fake tests which can be executed by sbruntests.
     GenerateFakeTests codegen(boost::filesystem::canonical(outputFolder),
                               boost::filesystem::canonical(dataFolder));
-    codegen.generate(data);
+    std::cout << "Number of generated tests: " << codegen.generate(data)
+              << std::endl;
 
     // Write model information to a JSON file.
     auto jsonFile = dataFolder / boost::filesystem::path("model.json");
