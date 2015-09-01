@@ -115,6 +115,37 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
+    // Find files
+    template <typename Base> class FindFiles : public Base {
+      public:
+        typedef BasicFileInfo value_type;
+
+        FindFiles(const std::vector<std::string> &supportedExts)
+            : Extensions(supportedExts) {}
+        std::vector<value_type> &getData() { return Data; }
+
+      protected:
+        void update(boost::filesystem::recursive_directory_iterator &dirIter) {
+            const boost::filesystem::file_status fs = dirIter->status();
+            if (fs.type() == boost::filesystem::regular_file) {
+                auto const aPath = dirIter->path();
+                const auto extension = aPath.extension().string();
+                bool isValid = Extensions.empty() ||
+                               (std::find(Extensions.begin(), Extensions.end(),
+                                          extension) != Extensions.end());
+                if (isValid) {
+                    Data.emplace_back(std::make_tuple(
+                        aPath.parent_path().string(), aPath.stem().string(),
+                        aPath.extension().string()));
+                }
+            }
+        }
+
+      private:
+        std::vector<std::string> Extensions;
+        std::vector<value_type> Data;
+    };
+
     // Find edited files
     template <typename Base> class FindEditedFiles : public Base {
       public:
@@ -150,6 +181,42 @@ namespace Tools {
         std::vector<std::string> Extensions;
         std::vector<value_type> Data;
     };
+
+    // Explore the given folder to a given level
+    std::tuple<std::vector<boost::filesystem::path>,
+               std::vector<boost::filesystem::path>>
+    exploreFolders(int level, const boost::filesystem::path &rootFolder) {
+        int counter = 0;
+        std::vector<boost::filesystem::path> files;
+        std::vector<boost::filesystem::path> folders = {rootFolder};
+        while (counter < level) {
+            decltype(folders) nextLevel;
+            for (auto const &aPath : folders) {
+                boost::filesystem::directory_iterator endIter;
+                boost::filesystem::directory_iterator dirIter(aPath);
+                for (; dirIter != endIter; ++dirIter) {
+                    auto currentPath = dirIter->path();
+                    if (boost::filesystem::is_directory(currentPath)) {
+                        nextLevel.push_back(currentPath);
+                    } else if (boost::filesystem::is_regular_file(
+                                   currentPath)) {
+                        files.push_back(currentPath);
+                    }
+                }
+            }
+
+            if (nextLevel.empty()) {
+                break;
+            } else {
+                folders.reserve(nextLevel.size());
+                // Move content of nextLevel to folders then clear nextLevel
+                // content.
+                folders = std::move(nextLevel);
+                counter++;
+            }
+        }
+        return std::make_tuple(folders, files);
+    }
 
     // Load/save data from the string stream using Cereal.
     typedef cereal::BinaryOutputArchive DefaultOArchive;

@@ -68,9 +68,6 @@ int main(int argc, char *argv[]) {
         for (auto item: vm["folders"].as<std::vector<std::string>>()) {
             folders.emplace_back(boost::filesystem::canonical(item, errcode).string());
         }
-    } else {
-        // We will search in the current folder is the folders parameters are not specified.
-        folders.emplace_back(boost::filesystem::current_path(errcode).string()); 
     }
 
     std::vector<std::string> stems;
@@ -115,7 +112,7 @@ int main(int argc, char *argv[]) {
     findThread.get();
 
     // Get the list of edited files then print out the results.
-    searchAlg.filter();
+    std::cout << "Number of new or modified files: " << searchAlg.filter() << "\n";
     searchAlg.disp();
 
     return 0;

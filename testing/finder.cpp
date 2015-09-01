@@ -1,4 +1,4 @@
-#include <iostream>
+                                                                                                                                                                                                              #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -9,7 +9,7 @@
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "boost/program_options.hpp"
-#include "InputArgumentParser.hpp"
+#include "cppformat/format.h"
 
 #include <string>
 #include <vector>
@@ -21,32 +21,89 @@ int main(int argc, char *argv[]) {
     typedef cereal::JSONOutputArchive OArchive;
     typedef cereal::JSONInputArchive IArchive;
 
-    Tools::InputArgumentParser params(argc, argv);
-    if (!params.Help) {
-        // Build file information database
-        Tools::Writer writer(params.Database);
-        for (const auto &val : params.Folders) {
-            // Search for files
-            Tools::BuildFileDatabase<Tools::Finder, Tools::BasicFileInfo> fSearch;
-            fSearch.search(val);
+    using namespace boost;
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options");
 
-            // Serialized file information to string
-            std::ostringstream os;
-            auto data = fSearch.getData();
-            Tools::save<OArchive, decltype(data)>(data, os);
-            const auto value = os.str();
-            const auto key = val;
+    // clang-format off
+    desc.add_options()              
+        ("help,h", "Print this help")
+        ("verbose,v", "Display searched data.")
+        ("toJSON,j", po::value<std::string>(), "Output results in a JSON file.")
+        ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
+        ("file-stems,s", po::value<std::vector<std::string>>(), "File stems.")
+        ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
+        ("search-strings,t", po::value<std::vector<std::string>>(), "File extensions.");
+    // clang-format on
 
-            // Write searched info to database.
-            writer.write(key, value);
+    po::positional_options_description p;
+    p.add("folders", -1);
+    po::variables_map vm;
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
+        vm);
+    po::notify(vm);
 
-            // Display the information if the verbose flag is set.
-            if (params.Verbose) {
-                for (auto const &val : data) {
-                    std::cout << val << "\n";
-                }
-            }
+    if (vm.count("help")) {
+        std::cout << desc;
+        std::cout << "Examples:" << std::endl;
+        std::cout << "\t findEditedFiles ./ -d .database" << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    auto verbose = false;
+    if (vm.count("verbose")) {
+        verbose = true;
+    }
+
+    std::string jsonFile;
+    if (vm.count("toJSON")) {
+        jsonFile = vm["toJSON"].as<std::string>();
+    }
+
+    // Notes: All folder paths must be full paths.
+    boost::system::error_code errcode;
+    std::vector<std::string> folders;
+    if (vm.count("folders")) {
+        for (auto item : vm["folders"].as<std::vector<std::string>>()) {
+            folders.emplace_back(boost::filesystem::path(item).string());
         }
+    }
+
+    std::vector<std::string> stems;
+    if (vm.count("file-stems")) {
+        stems = vm["file-stems"].as<std::vector<std::string>>();
+    }
+
+    std::vector<std::string> extensions;
+    if (vm.count("extensions")) {
+        extensions = vm["extensions"].as<std::vector<std::string>>();
+    }
+
+    std::vector<std::string> searchStrings;
+    if (vm.count("search-strings")) {
+        searchStrings = vm["search-strings"].as<std::vector<std::string>>();
+    }
+
+    Tools::FindFiles<Tools::Finder> searchAlg(extensions);
+    for (auto &val : folders) {
+        searchAlg.search(val);
+    }
+    auto data = searchAlg.getData();
+
+    if (verbose) {
+        fmt::print("Search folders:\n");
+        for (const auto &val : folders) {
+            fmt::print("{}\n", val);
+        }
+        fmt::print("Number of files: {}\n", data.size());
+    }
+
+    if (!jsonFile.empty()) {
+        std::ostringstream os;
+        Tools::save<OArchive, decltype(data)>(data, os);
+        std::ofstream myfile(jsonFile);
+        myfile << os.str() << std::endl;
     }
 
     return 0;

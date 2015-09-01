@@ -34,20 +34,25 @@ namespace {
         return output;
     }
 
-  template <class Ch, class Tr, typename First, typename Second>
-  auto operator<<(std::basic_ostream<Ch, Tr> &output,
-                  std::pair<First, Second> const &t)
-    -> std::basic_ostream<Ch, Tr> & {
-    output << "(" << t.first << "," << t.second << ")";
-    return output;
-  }
+    template <class Ch, class Tr, typename First, typename Second>
+    auto operator<<(std::basic_ostream<Ch, Tr> &output,
+                    std::pair<First, Second> const &t)
+        -> std::basic_ostream<Ch, Tr> & {
+        output << "(" << t.first << "," << t.second << ")";
+        return output;
+    }
 }
 
 namespace Tools {
     template <typename Data> void disp(Data &data, const std::string &message) {
         std::cout << message << "[ ";
-        std::for_each(data.begin(), data.end(), [](auto & val) {std::cout << val << " ";});
-        std::cout << "]\n";
+        std::for_each(data.begin(), data.end(), [](auto &val) { std::cout << val << " ";});
+        std::cout << "]";
+    }
+
+    template <typename Data> void print(Data &data) {
+        std::for_each(data.begin(), data.end(),
+                      [](auto &val) { std::cout << val << "\n";});
     }
 
     template <typename Container> void print(const Container &data) {
@@ -55,11 +60,6 @@ namespace Tools {
             std::cout << val << "\n";
         }
     }
-
-    /**
-     * @todo Improve this function!
-     */
-    int run(const std::string &command) { return std::system(command.c_str()); }
 }
 
 #endif
