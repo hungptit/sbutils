@@ -181,13 +181,50 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
+    std::tuple<std::vector<boost::filesystem::path>,
+               std::vector<boost::filesystem::path>>
+    exploreFolderAtRootLevel(const boost::filesystem::path &aPath,
+                             bool useRelativePath) {
+        std::vector<boost::filesystem::path> files;
+        std::vector<boost::filesystem::path> folders;
+
+        boost::filesystem::directory_iterator endIter;
+        boost::filesystem::directory_iterator dirIter(aPath);
+        for (; dirIter != endIter; ++dirIter) {
+            auto currentPath = dirIter->path();
+            if (boost::filesystem::is_directory(currentPath)) {
+                if (useRelativePath) {
+                    auto tmpPath = currentPath.stem();
+                    tmpPath += currentPath.extension();
+                    folders.push_back(tmpPath);
+                } else {
+                    folders.push_back(
+                        boost::filesystem::canonical(currentPath));
+                }
+            } else if (boost::filesystem::is_regular_file(currentPath)) {
+                if (useRelativePath) {
+                    auto tmpPath = currentPath.stem();
+                    tmpPath += currentPath.extension();
+                    files.push_back(tmpPath);
+                } else {
+                    files.push_back(boost::filesystem::canonical(currentPath));
+                }
+            }
+        }
+
+        return std::make_tuple(folders, files);
+    }
+
     // Explore the given folder to a given level
     std::tuple<std::vector<boost::filesystem::path>,
                std::vector<boost::filesystem::path>>
-    exploreFolders(int level, const boost::filesystem::path &rootFolder) {
-        int counter = 0;
-        std::vector<boost::filesystem::path> files;
-        std::vector<boost::filesystem::path> folders = {rootFolder};
+        exploreFolders(size_t level, const boost::filesystem::path &rootFolder, bool useRelativePath = false) {        
+        auto results = exploreFolderAtRootLevel(rootFolder, useRelativePath);
+        std::vector<boost::filesystem::path> files = std::get<1>(results);
+        std::vector<boost::filesystem::path> folders = std::get<0>(results);
+        size_t counter = 1;
+
+        // This code does not make any assumtion about the input path. 
         while (counter < level) {
             decltype(folders) nextLevel;
             for (auto const &aPath : folders) {

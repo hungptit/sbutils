@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     desc.add_options()              
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
+        ("use-relative-path,r", "Use relative path.")
         ("toJSON,j", po::value<std::string>(), "Output results in a JSON file.")
         ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
         ("file-stems,s", po::value<std::vector<std::string>>(), "File stems.")
@@ -56,12 +57,16 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
 
+    auto useRelativePath = false;
+    if (vm.count("use-relative-path")) {
+        useRelativePath = true;
+    }
+
     std::string jsonFile;
     if (vm.count("toJSON")) {
         jsonFile = vm["toJSON"].as<std::string>();
     }
 
-    // Notes: All folder paths must be full paths.
     boost::system::error_code errcode;
     std::vector<std::string> folders;
     if (vm.count("folders")) {
@@ -85,7 +90,9 @@ int main(int argc, char *argv[]) {
         searchStrings = vm["search-strings"].as<std::vector<std::string>>();
     }
 
+    // Search for files in the given folders.
     Tools::FindFiles<Tools::Finder> searchAlg(extensions);
+    
     for (auto &val : folders) {
         searchAlg.search(val);
     }
@@ -97,6 +104,11 @@ int main(int argc, char *argv[]) {
             fmt::print("{}\n", val);
         }
         fmt::print("Number of files: {}\n", data.size());
+
+        std::for_each(data.begin(), data.end(), [] (auto const & val) {
+            fmt::print("{{0}, {1}, {2}}\n", std::get<0>(val), std::get<1>(val),
+                       std::get<2>(val));
+        });
     }
 
     if (!jsonFile.empty()) {
@@ -104,7 +116,7 @@ int main(int argc, char *argv[]) {
         Tools::save<OArchive, decltype(data)>(data, os);
         std::ofstream myfile(jsonFile);
         myfile << os.str() << std::endl;
-    }
+    }      
 
     return 0;
 }

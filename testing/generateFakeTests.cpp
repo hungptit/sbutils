@@ -32,7 +32,6 @@ class GenerateFakeTests {
             auto distance = std::distance(start, data.end());
             if (distance > NumModelPerTest) {
                 generateTest(start, stop, counter);
-                std::cout << std::distance(start, stop) << "\n";
                 start = stop;
                 counter++;
             } else {
@@ -61,14 +60,13 @@ class GenerateFakeTests {
             writer << "aPath = fullfile(matlabroot, '../','" << std::get<0>(val)
                    << "');\n";
             writer << "dataPath = '" << DataFolder.string() << "';\n";
-            writer << "tag = '" << className << "';\n";
-            writer << "addpath(aPath);\n";
+            writer << "tag = '" << className << "_" << function_counter << "';\n";
+            writer << "tmpPath = modelreference.AddPath(aPath);\n";
             writer << "modelName = '" << modelName << "';\n";
             writer << "testObj = modelreference.UnitTestSetup([], modelName, "
                       "@load_system);\n";
             writer << "modelreference.FindSubsystems.run(aPath, modelName, "
                       "tag, dataPath);\n";
-            writer << "rmpath\n";
             writer << "end\n";
         }
 
@@ -84,7 +82,7 @@ class GenerateFakeTests {
 
     boost::filesystem::path OutputFolder;
     boost::filesystem::path DataFolder;
-    int NumModelPerTest = 20;
+    int NumModelPerTest = 10;
 };
 
 int main(int argc, char *argv[]) {

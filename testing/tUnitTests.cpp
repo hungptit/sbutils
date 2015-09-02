@@ -1,4 +1,3 @@
-#include "utils/Utils.hpp"
 #include "gtest/gtest.h"
 #include <string>
 #include <map>
@@ -6,6 +5,9 @@
 #include <array>
 #include <tuple>
 #include <iostream>
+#include "utils/Utils.hpp"
+#include "utils/FindUtils.hpp"
+#include "cppformat/format.h"
 
 TEST(Display_Functions, Positive) {
     {
@@ -51,4 +53,20 @@ TEST(TemporaryDirectory, Positive) {
     Tools::TemporaryDirectory tmpDir;
     std::cout << tmpDir.getPath() << std::endl;
     EXPECT_TRUE(boost::filesystem::exists(tmpDir.getPath()));
+}
+
+
+TEST(ExporeFolderRootLevel, Positive) {
+    {
+        Tools::TemporaryDirectory tmpDir;
+        auto results = Tools::exploreFolderAtRootLevel(tmpDir.getPath(), 0);
+        fmt::print("Folders:\n");
+        for (auto item : std::get<0>(results)) {
+            std::cout << item << "\n";
+        }
+        fmt::print("Files:\n");
+        for (auto item : std::get<1>(results)) {
+            std::cout << item << "\n";
+        }
+    }
 }

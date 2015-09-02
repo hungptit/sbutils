@@ -54,7 +54,7 @@ if (Boost_FOUND)
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}  ${LIB_CPPFORMAT} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
