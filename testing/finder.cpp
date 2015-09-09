@@ -104,9 +104,9 @@ int main(int argc, char *argv[]) {
             fmt::print("{}\n", val);
         }
         fmt::print("Number of files: {}\n", data.size());
-
+        
         std::for_each(data.begin(), data.end(), [] (auto const & val) {
-            fmt::print("{{0}, {1}, {2}}\n", std::get<0>(val), std::get<1>(val),
+            fmt::print("({0}, {1}, {2})\n", std::get<0>(val), std::get<1>(val),
                        std::get<2>(val));
         });
     }
