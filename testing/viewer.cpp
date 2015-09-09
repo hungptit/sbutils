@@ -46,14 +46,19 @@ namespace {
 
         ThreadedLocate(const std::string &dataFile) : Reader(dataFile) {}
 
-        ThreadedLocate(const std::string &dataFile, const std::vector<std::string> &stems)
+        ThreadedLocate(const std::string &dataFile,
+                       const std::vector<std::string> &stems)
             : Reader(dataFile), Stems(stems) {}
-        ThreadedLocate(const std::string &dataFile, const std::vector<std::string> &stems,
+        ThreadedLocate(const std::string &dataFile,
+                       const std::vector<std::string> &stems,
                        const std::vector<std::string> &exts)
             : Reader(dataFile), Stems(stems), Extensions(exts) {}
-        ThreadedLocate(const std::string &dataFile, const std::vector<std::string> &stems,
-                       const std::vector<std::string> &exts, const std::vector<std::string> &searchStrings)
-            : Reader(dataFile), Stems(stems), Extensions(exts), SearchStrings(searchStrings) {}
+        ThreadedLocate(const std::string &dataFile,
+                       const std::vector<std::string> &stems,
+                       const std::vector<std::string> &exts,
+                       const std::vector<std::string> &searchStrings)
+            : Reader(dataFile), Stems(stems), Extensions(exts),
+              SearchStrings(searchStrings) {}
 
         void locate() {
             auto keys = Reader.keys();
@@ -94,17 +99,21 @@ namespace {
         std::vector<std::string> SearchStrings;
         Container Results;
 
-        Container find(const std::string &aKey) { return filter(deserialize(Reader.read(aKey))); }
+        Container find(const std::string &aKey) {
+            return filter(deserialize(Reader.read(aKey)));
+        }
 
         Container filter(const Container &data) {
             Container results;
             for (auto info : data) {
-                bool flag = (Stems.empty() ||
-                             std::find(Stems.begin(), Stems.end(), std::get<1>(info)) != Stems.end()) &&
-                            (Extensions.empty() ||
-                             std::find(Extensions.begin(), Extensions.end(), std::get<2>(info)) !=
-                                 Extensions.end()) &&
-                            (SearchStrings.empty() || true);
+                bool flag =
+                    (Stems.empty() ||
+                     std::find(Stems.begin(), Stems.end(), std::get<1>(info)) !=
+                         Stems.end()) &&
+                    (Extensions.empty() ||
+                     std::find(Extensions.begin(), Extensions.end(),
+                               std::get<2>(info)) != Extensions.end()) &&
+                    (SearchStrings.empty() || true);
                 if (flag) {
                     results.emplace_back(info);
                 }
@@ -112,9 +121,11 @@ namespace {
             return results;
         }
 
-        void updateSearchResults(const std::vector<Tools::EditedFileInfo> &results) {
+        void
+        updateSearchResults(const std::vector<Tools::EditedFileInfo> &results) {
             boost::unique_lock<boost::mutex> guard(UpdateResults);
-            std::move(results.begin(), results.end(), std::back_inserter(Results)); // C++11 feature
+            std::move(results.begin(), results.end(),
+                      std::back_inserter(Results)); // C++11 feature
         }
 
         Container deserialize(const std::string &buffer) {
@@ -124,6 +135,22 @@ namespace {
             return data;
         }
     };
+
+    template <typename Container, typename Dictionary>
+    Dictionary createDictionary(Container &data) {
+      Dictionary dict;
+      std::cout << "Size of data: " << data.size() << "\n";
+      for (auto &item : data) {
+        auto aFile = boost::filesystem::path(std::get<0>(item));
+        while (!aFile.empty()) {
+          if (aFile.has_stem()) {
+            dict.insert(aFile.stem().string());
+          }
+          aFile = aFile.parent_path();
+        }
+      }
+      return dict;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -147,7 +174,9 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("database", -1);
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
+        vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -197,7 +226,8 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Tools::FileDatabaseInfo::Database)).string();
+        dataFile = (boost::filesystem::path(Tools::FileDatabaseInfo::Database))
+                       .string();
     }
 
     if (verbose) {
@@ -212,16 +242,24 @@ int main(int argc, char *argv[]) {
     } else {
         std::chrono::high_resolution_clock::time_point startTime =
             std::chrono::high_resolution_clock::now();
-        auto locateObj = ThreadedLocate(dataFile, stems, extensions, searchStrings);
+        auto locateObj =
+            ThreadedLocate(dataFile, stems, extensions, searchStrings);
         if (isThreaded) {
             locateObj.locate_t();
         } else {
             locateObj.locate();
         }
-        std::chrono::high_resolution_clock::time_point stopTime = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count();
+        std::chrono::high_resolution_clock::time_point stopTime =
+            std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            stopTime - startTime).count();
         std::cout << "Execution time: " << duration << " miliseconds\n";
         locateObj.print();
+        auto data = locateObj.getResults();
+        typedef std::set<std::string> Dictionary;
+        auto results = createDictionary<decltype(data), Dictionary>(data);
+        std::cout << "Size of dictionary: " << results.size() << "\n";
+        // std::for_each(results.begin(), results.end(), [](auto &val){std::cout << val << "\n";});
     }
 
     return 0;
