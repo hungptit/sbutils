@@ -17,7 +17,7 @@ TEST(Display_Functions, Positive) {
 
     {
         std::map<int, std::string> data = {{1, "a"}, {2, "b"}, {3, "c"}};
-        Tools::disp_pair(data, "data: ");
+        Tools::disp(data, "data: ");
     }
 
     {

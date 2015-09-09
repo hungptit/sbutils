@@ -52,17 +52,53 @@ namespace Tools {
     // approach will minize the code duplication.
     class Finder {
       public:
-        void search(const boost::filesystem::path &aPath) {
-            boost::filesystem::recursive_directory_iterator endIter;
-            boost::filesystem::recursive_directory_iterator dirIter(aPath);
+        typedef boost::filesystem::path Path;
+        typedef boost::filesystem::recursive_directory_iterator iter_type;
+        void search(const Path &aPath) {
+            iter_type endIter, dirIter(aPath);
             for (; dirIter != endIter; ++dirIter) {
                 update(dirIter);
             }
         }
 
       protected:
-        virtual void
-        update(boost::filesystem::recursive_directory_iterator &dirIter) = 0;
+        virtual void update(iter_type &dirIter) = 0;
+    };
+
+    class FinderWithIgnore {
+      public:
+        typedef boost::filesystem::path Path;
+        typedef boost::filesystem::directory_iterator iter_type;
+        void search(const boost::filesystem::path &aPath) {
+            std::vector<Path> currentLevel = {aPath};
+            std::vector<Path> nextLevel;
+            while (!currentLevel.empty()) {
+                for (auto &item : currentLevel) {
+                    iter_type endIter;
+                    iter_type dirIter(item);
+                    for (; dirIter != endIter; ++dirIter) {
+                        auto currentPath = dirIter->path();
+                        if (boost::filesystem::is_directory(currentPath)) {
+                            auto aStem = currentPath.stem().string();
+                            if (std::any_of(IgnoreStems.begin(),
+                                            IgnoreStems.end(),
+                                            [aStem](auto &s) {
+                                                return (aStem == s);
+                                            })) {
+                                nextLevel.push_back(currentPath);
+                            }
+                        } else if (boost::filesystem::is_regular_file(
+                                       currentPath)) {
+                            update(dirIter);
+                        }
+                    }
+                }
+            }
+        }
+
+      protected:
+        std::array<std::string, 1> IgnoreStems = {{".git"}};
+        virtual void update(iter_type &dirIter) = 0;
     };
 
     // Build a simple file database which containts file paths and extensions
@@ -75,7 +111,7 @@ namespace Tools {
         std::vector<value_type> &getData() { return Data; }
 
       protected:
-        void update(boost::filesystem::recursive_directory_iterator &dirIter) {
+        void update(typename Base::iter_type &dirIter) {
 
             const boost::filesystem::file_status fs = dirIter->status();
             if (fs.type() == boost::filesystem::regular_file) {
@@ -99,7 +135,7 @@ namespace Tools {
         std::vector<value_type> &getData() { return Data; }
 
       protected:
-        void update(boost::filesystem::recursive_directory_iterator &dirIter) {
+        void update(typename Base::iter_type &dirIter) {
             const boost::filesystem::file_status fs = dirIter->status();
             if (fs.type() == boost::filesystem::regular_file) {
                 auto const aPath = dirIter->path();
