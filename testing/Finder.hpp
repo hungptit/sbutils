@@ -151,8 +151,8 @@ class Finder {
                 // value then we need to record this file.
                 const std::array<std::string, 4> excludedStems = {
                     {"/.sbtools/", "/derived/", "toolbox_cache-glnxa64", "~"}};
-                const std::array<std::string, 3> excludedExtensions = {
-                    {".p", ".so", ".dbg"}};
+                const std::array<std::string, 5> excludedExtensions = {
+                    {".p", ".so", ".dbg", ".log", ".mexa64"}};
 
                 bool isExcluded = false;
                 auto aPath = std::get<0>(anEditedFile);

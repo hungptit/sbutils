@@ -56,9 +56,9 @@ namespace {
         ThreadedLocate(const std::string &dataFile,
                        const std::vector<std::string> &stems,
                        const std::vector<std::string> &exts,
-                       const std::vector<std::string> &folders)
+                       const std::vector<std::string> &searchStrings)
             : Reader(dataFile), Stems(stems), Extensions(exts),
-              Folders(folders) {}
+              SearchStrings(searchStrings) {}
 
         void locate() {
             auto keys = Reader.keys();
@@ -96,22 +96,24 @@ namespace {
         std::vector<std::string> Keys;
         std::vector<std::string> Stems;
         std::vector<std::string> Extensions;
-        std::vector<std::string> Folders;
+        std::vector<std::string> SearchStrings;
         Container Results;
 
         Container find(const std::string &aKey) {
-            return filter(deserialize(aKey));
+            return filter(deserialize(Reader.read(aKey)));
         }
 
         Container filter(const Container &data) {
             Container results;
             for (auto info : data) {
-                bool flag = (Stems.empty() ||
-                             std::find(Stems.begin(), Stems.end(),
-                                       std::get<1>(info)) != Stems.end()) &&
-                            (Extensions.empty() ||
-                             std::find(Extensions.begin(), Extensions.end(),
-                                       std::get<2>(info)) != Extensions.end());
+                bool flag =
+                    (Stems.empty() ||
+                     std::find(Stems.begin(), Stems.end(), std::get<1>(info)) !=
+                         Stems.end()) &&
+                    (Extensions.empty() ||
+                     std::find(Extensions.begin(), Extensions.end(),
+                               std::get<2>(info)) != Extensions.end()) &&
+                    (SearchStrings.empty() || true);
                 if (flag) {
                     results.emplace_back(info);
                 }
@@ -126,25 +128,29 @@ namespace {
                       std::back_inserter(Results)); // C++11 feature
         }
 
-        Container deserialize(const std::string &aKey) {
-            std::chrono::high_resolution_clock::time_point startTime =
-                std::chrono::high_resolution_clock::now();
-
-            std::istringstream is(Reader.read(aKey));
+        Container deserialize(const std::string &buffer) {
             Container data;
+            std::istringstream is(buffer);
             Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
-
-            std::chrono::high_resolution_clock::time_point stopTime =
-                std::chrono::high_resolution_clock::now();
-            auto duration =
-                std::chrono::duration_cast<std::chrono::milliseconds>(stopTime -
-                                                                      startTime)
-                    .count();
-            std::cout << "Deserialize time: " << duration << " miliseconds\n";
-
             return data;
         }
     };
+
+    template <typename Container, typename Dictionary>
+    Dictionary createDictionary(Container &data) {
+        Dictionary dict;
+        std::cout << "Size of data: " << data.size() << "\n";
+        for (auto &item : data) {
+            auto aFile = boost::filesystem::path(std::get<0>(item));
+            while (!aFile.empty()) {
+                if (aFile.has_stem()) {
+                    dict.insert(aFile.stem().string());
+                }
+                aFile = aFile.parent_path();
+            }
+        }
+        return dict;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -249,7 +255,21 @@ int main(int argc, char *argv[]) {
                             stopTime - startTime)
                             .count();
         std::cout << "Execution time: " << duration << " miliseconds\n";
-        locateObj.print();
+        // locateObj.print();
+        {
+            typedef cereal::JSONOutputArchive OArchive;
+            typedef cereal::JSONInputArchive IArchive;
+            auto data = locateObj.getResults();
+            typedef std::set<std::string> Dictionary;
+            auto results = createDictionary<decltype(data), Dictionary>(data);
+            std::cout << "Size of dictionary: " << results.size() << "\n";
+            // std::for_each(results.begin(), results.end(), [](auto
+            // &val){std::cout << val << "\n";});
+            std::ostringstream os;
+            Tools::save<OArchive, decltype(results)>(results, os);
+            std::ofstream myfile("dict.json");
+            myfile << os.str() << std::endl;
+        }
     }
 
     return 0;
