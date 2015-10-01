@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
         ("verbose,v", "Display searched data.")
         ("submit-file,s", po::value<std::string>(), "A text file which has a list of files need to remove.")
         ("folders,f", po::value<std::vector<std::string>>(), "Folders want to search.")
+        ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
         ("database,d", po::value<std::string>(), "Edited file database.");
     // clang-format on
 
@@ -68,9 +69,22 @@ int main(int argc, char *argv[]) {
         dataFile = boost::filesystem::path(Tools::FileDatabaseInfo::Database).string();
     }
 
-    std::vector<std::string> folders, stems, extensions, searchStrings;
     boost::system::error_code errcode;
-    folders.emplace_back(boost::filesystem::current_path(errcode).string());
+    std::vector<std::string> folders;
+    if (vm.count("folders")) {
+        for (auto item: vm["folders"].as<std::vector<std::string>>()) {
+            folders.emplace_back(boost::filesystem::canonical(item, errcode).string());
+        }
+    } else {
+        folders.emplace_back(boost::filesystem::current_path(errcode).string());
+    }
+
+    std::vector<std::string> stems, extensions, searchStrings;
+    if (vm.count("extensions")) {
+        for (auto item: vm["extensions"].as<std::vector<std::string>>()) {
+            extensions.emplace_back(boost::filesystem::canonical(item, errcode).string());
+        }
+    }
 
     std::vector<std::string> fileList;
     for (auto val : Tools::getFilesFromTxtFile(vm["submit-file"].as<std::string>())) {
