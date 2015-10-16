@@ -80,6 +80,10 @@ namespace Tools {
         }
     }
 
+    void copyFiles(const std::vector<boost::filesystem::path> & files,
+                   const boost::filesystem::path &srcFolders,
+                   const boost::filesystem::path &destFolder) {}
+
     std::string findParent(const std::vector<std::string> &allKeys,
                            const std::string &aPath) {
         auto currentItem = std::find(allKeys.begin(), allKeys.end(), aPath);
@@ -138,8 +142,9 @@ namespace Tools {
         boost::filesystem::path CurrentDir;
     };
 
-    std::vector<std::string> readLines(const std::string & dataFile) {
-        boost::iostreams::mapped_file mmap(dataFile, boost::iostreams::mapped_file::readonly);
+    std::vector<std::string> readLines(const std::string &dataFile) {
+        boost::iostreams::mapped_file mmap(
+            dataFile, boost::iostreams::mapped_file::readonly);
         auto begin = mmap.const_data();
         auto end = begin + mmap.size();
 
@@ -155,8 +160,10 @@ namespace Tools {
         return results;
     }
 
-    std::vector<std::string> readLines(const std::string & dataFile, size_t startLine, size_t stopLine) {
-        boost::iostreams::mapped_file mmap(dataFile, boost::iostreams::mapped_file::readonly);
+    std::vector<std::string> readLines(const std::string &dataFile,
+                                       size_t startLine, size_t stopLine) {
+        boost::iostreams::mapped_file mmap(
+            dataFile, boost::iostreams::mapped_file::readonly);
         auto begin = mmap.const_data();
         auto end = begin + mmap.size();
 
@@ -175,7 +182,6 @@ namespace Tools {
         }
         return results;
     }
-
 
     std::vector<boost::filesystem::path>
     getFilesFromTxtFile(const boost::filesystem::path &dataFile,

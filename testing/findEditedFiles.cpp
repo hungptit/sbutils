@@ -20,6 +20,7 @@
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "Finder.hpp"
+#include "utils/Timer.hpp"
 
 int main(int argc, char *argv[]) {
     typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
@@ -93,6 +94,8 @@ int main(int argc, char *argv[]) {
             boost::filesystem::path(Tools::FileDatabaseInfo::Database).string();
     }
 
+    Timer timer;
+
     // Launch read and find tasks using two async threads.
     auto const params = std::make_tuple(verbose, dataFile, folders, stems, extensions, searchStrings);
     Finder<SearchAlg, Map, decltype(params)> searchAlg(params);
@@ -108,12 +111,19 @@ int main(int argc, char *argv[]) {
     readThread.wait();
     findThread.wait();
 
-    readThread.get();
-    findThread.get();
+std::cout << "Elapsed time: " << timer.toc() / timer.ticksPerSecond() << std::endl;
 
-    // Get the list of edited files then print out the results.
-    std::cout << "Number of new or modified files: " << searchAlg.filter() << "\n";
+readThread.get();
+findThread.get();
+
+// Get the list of edited files then print out the results.
+timer.tic();
+std::cout << "Number of new or modified files: " << searchAlg.filter() << "\n";
+std::cout << "Elapsed time: " << timer.toc() / timer.ticksPerSecond() << std::endl;
+
+timer.tic();
     searchAlg.disp();
+std::cout << "Elapsed time: " << timer.toc() / timer.ticksPerSecond() << std::endl;
 
     return 0;
 }
