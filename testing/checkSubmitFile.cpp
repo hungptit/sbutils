@@ -59,21 +59,24 @@ int main(int argc, char *argv[]) {
     if (vm.count("submit-file")) {
         submitFile = vm["submit-file"].as<std::string>();
     } else {
-        std::cerr << "Need to provide the submit file\n";
+        std::cerr << "Need to provide a submit file name\n";
+        return -1;
     }
 
     std::string dataFile;
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = boost::filesystem::path(Tools::FileDatabaseInfo::Database).string();
+        dataFile =
+            boost::filesystem::path(Tools::FileDatabaseInfo::Database).string();
     }
 
     boost::system::error_code errcode;
     std::vector<std::string> folders;
     if (vm.count("folders")) {
-        for (auto item: vm["folders"].as<std::vector<std::string>>()) {
-            folders.emplace_back(boost::filesystem::canonical(item, errcode).string());
+        for (auto item : vm["folders"].as<std::vector<std::string>>()) {
+            folders.emplace_back(
+                boost::filesystem::canonical(item, errcode).string());
         }
     } else {
         folders.emplace_back(boost::filesystem::current_path(errcode).string());
@@ -81,13 +84,21 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> stems, extensions, searchStrings;
     if (vm.count("extensions")) {
-        for (auto item: vm["extensions"].as<std::vector<std::string>>()) {
-            extensions.emplace_back(boost::filesystem::canonical(item, errcode).string());
+        for (auto item : vm["extensions"].as<std::vector<std::string>>()) {
+            extensions.emplace_back(
+                boost::filesystem::canonical(item, errcode).string());
         }
     }
 
+    using boost::filesystem::path;
+    path aFile(submitFile);
+    if (!boost::filesystem::is_regular_file(aFile)) {
+        std::cerr << aFile << " isn't a regular file!\n";
+        return -1;
+    }
+
     std::vector<std::string> fileList;
-    for (auto val : Tools::getFilesFromTxtFile(vm["submit-file"].as<std::string>())) {
+    for (auto val : Tools::getFilesFromTxtFile(aFile.string())) {
         fileList.emplace_back(boost::filesystem::canonical(val).string());
     }
 
@@ -115,8 +126,8 @@ int main(int argc, char *argv[]) {
     findThread.get();
     searchAlg.filter();
 
+    // Get a list of edited files.
     std::vector<std::string> editedFiles;
-    ;
     for (auto item : searchAlg.getEditedFiles()) {
         editedFiles.emplace_back(std::get<0>(item));
     }

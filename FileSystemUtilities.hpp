@@ -80,9 +80,9 @@ namespace Tools {
         }
     }
 
-    void copyFiles(const std::vector<boost::filesystem::path> & files,
-                   const boost::filesystem::path &srcFolders,
-                   const boost::filesystem::path &destFolder) {}
+    void copyFiles(const std::vector<boost::filesystem::path> & ,
+                   const boost::filesystem::path &,
+                   const boost::filesystem::path &) {}
 
     std::string findParent(const std::vector<std::string> &allKeys,
                            const std::string &aPath) {
