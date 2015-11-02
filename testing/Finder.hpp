@@ -1,9 +1,12 @@
 #ifndef Finder_hpp_
 #define Finder_hpp_
 
+#include "cppformat/format.h"
+#include "utils/FindUtils.hpp"
+#include "utils/LevelDBIO.hpp"
+#include "utils/Utils.hpp"
 #include <string>
 #include <tuple>
-#include "cppformat/format.h"
 
 enum {
     VERBOSE,
@@ -42,11 +45,13 @@ class Finder {
     void find() {
         auto folders = std::get<FOLDERS>(Params);
         if (folders.empty()) {
-            Alg.search(boost::filesystem::canonical(
-                boost::filesystem::current_path()));
+            Alg.search("matlab/"); // TODO: This is a temporary solution only
+            std::cout << getPath(boost::filesystem::current_path())
+                      << std::endl;
+            // Alg.search(getPath(boost::filesystem::current_path()));
         } else {
             for (const auto &aFolder : folders) {
-                Alg.search(boost::filesystem::canonical(aFolder));
+                Alg.search(getPath(aFolder));
             }
         }
 
@@ -88,7 +93,8 @@ class Finder {
             for (auto aPath : folders) {
                 auto aKey = Tools::findParent(allKeys, aPath);
                 if (aKey.empty()) {
-                    loadAllKeys = true; // Cannot find a current key. We need to load all keys.
+                    loadAllKeys = true; // Cannot find a current key. We need to
+                                        // load all keys.
                     break;
                 } else {
                     keys.insert(aKey);
@@ -145,7 +151,7 @@ class Finder {
             auto aFile = LookupTable.find(aKey);
             if ((aFile == LookupTable.end()) ||
                 (anEditedFile != aFile->second)) {
-                counter ++;
+                counter++;
                 // If we could not find a given key in the database or the value
                 // associated with that key is the the same with the current
                 // value then we need to record this file.
@@ -180,7 +186,9 @@ class Finder {
         if (std::get<VERBOSE>(Params)) {
             std::cout << "Edited files: " << std::endl;
             for (const auto &val : EditedFiles) {
-                fmt::print("{}\n", val);
+                // fmt::print("{}\n", val); // TODO: Find out why we could not
+                // compil;e
+                std::cout << val << std::endl;
             }
         } else {
             for (auto const val : EditedFiles) {
@@ -199,5 +207,14 @@ class Finder {
     Container EditedFiles;
     std::array<std::string, 4> ExcludedStrings;
     std::array<std::string, 4> ExcludedExtensions;
+    bool UseRelativePath = true;
+
+    boost::filesystem::path getPath(const boost::filesystem::path &aPath) {
+        if (UseRelativePath) {
+            return aPath;
+        } else {
+            return boost::filesystem::canonical(aPath);
+        }
+    }
 };
 #endif

@@ -217,6 +217,16 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
+    boost::filesystem::path getPath(const boost::filesystem::path &aPath, bool useRelativePath) {
+        if (useRelativePath) {
+            auto tmpPath = aPath.stem();
+            tmpPath += aPath.extension();
+            return tmpPath;
+        } else {
+            return boost::filesystem::canonical(aPath);
+        }
+    }
+
     std::tuple<std::vector<boost::filesystem::path>,
                std::vector<boost::filesystem::path>>
     exploreFolderAtRootLevel(const boost::filesystem::path &aPath,
@@ -224,30 +234,19 @@ namespace Tools {
         std::vector<boost::filesystem::path> files;
         std::vector<boost::filesystem::path> folders;
 
+        // Explore a given folder at the root level.
         boost::filesystem::directory_iterator endIter;
         boost::filesystem::directory_iterator dirIter(aPath);
         for (; dirIter != endIter; ++dirIter) {
             auto currentPath = dirIter->path();
             if (boost::filesystem::is_directory(currentPath)) {
-                if (useRelativePath) {
-                    auto tmpPath = currentPath.stem();
-                    tmpPath += currentPath.extension();
-                    folders.push_back(tmpPath);
-                } else {
-                    folders.push_back(
-                        boost::filesystem::canonical(currentPath));
-                }
+                folders.push_back(getPath(currentPath, useRelativePath));
             } else if (boost::filesystem::is_regular_file(currentPath)) {
-                if (useRelativePath) {
-                    auto tmpPath = currentPath.stem();
-                    tmpPath += currentPath.extension();
-                    files.push_back(tmpPath);
-                } else {
-                    files.push_back(boost::filesystem::canonical(currentPath));
-                }
+                files.push_back(getPath(currentPath, useRelativePath));
             }
         }
-
+     
+        // Return
         return std::make_tuple(folders, files);
     }
 

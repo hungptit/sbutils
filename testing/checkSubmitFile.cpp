@@ -1,5 +1,5 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -11,10 +11,11 @@
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 
-#include "utils/Utils.hpp"
+#include "Finder.hpp"
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
-#include "Finder.hpp"
+#include "utils/Timer.hpp"
+#include "utils/Utils.hpp"
 
 int main(int argc, char *argv[]) {
     typedef std::unordered_map<std::string, Tools::EditedFileInfo> Map;
@@ -71,23 +72,23 @@ int main(int argc, char *argv[]) {
             boost::filesystem::path(Tools::FileDatabaseInfo::Database).string();
     }
 
+    // Get a list of folders users want to check again files listed in the
+    // submit file.
     boost::system::error_code errcode;
     std::vector<std::string> folders;
     if (vm.count("folders")) {
         for (auto item : vm["folders"].as<std::vector<std::string>>()) {
-            folders.emplace_back(
-                boost::filesystem::canonical(item, errcode).string());
+            folders.emplace_back(item);
         }
     } else {
-        folders.emplace_back(boost::filesystem::current_path(errcode).string());
+        // folders.emplace_back(boost::filesystem::current_path(errcode).string());
+        folders.emplace_back(
+            "matlab/"); // Use matlab/ as a default search path.
     }
 
     std::vector<std::string> stems, extensions, searchStrings;
     if (vm.count("extensions")) {
-        for (auto item : vm["extensions"].as<std::vector<std::string>>()) {
-            extensions.emplace_back(
-                boost::filesystem::canonical(item, errcode).string());
-        }
+        extensions = vm["extensions"].as<std::vector<std::string>>();
     }
 
     using boost::filesystem::path;
@@ -98,8 +99,9 @@ int main(int argc, char *argv[]) {
     }
 
     std::vector<std::string> fileList;
-    for (auto val : Tools::getFilesFromTxtFile(aFile.string())) {
-        fileList.emplace_back(boost::filesystem::canonical(val).string());
+    auto files = Tools::getFilesFromTxtFile(aFile.string());
+    for (auto aFile : files) {
+        fileList.push_back(aFile.string());
     }
 
     if (verbose) {
@@ -110,6 +112,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Find all valid edited files.
+    Timer timer;
     auto const params = std::make_tuple(verbose, dataFile, folders, stems,
                                         extensions, searchStrings);
     Finder<SearchAlg, Map, decltype(params)> searchAlg(params);
@@ -121,9 +124,10 @@ int main(int argc, char *argv[]) {
 
     readThread.wait();
     findThread.wait();
-
     readThread.get();
     findThread.get();
+
+    // Filter unrelated artifacts
     searchAlg.filter();
 
     // Get a list of edited files.
@@ -147,6 +151,9 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
+    std::cout << "Elapsed time: " << timer.toc() / timer.ticksPerSecond()
+              << " seconds" << std::endl;
 
     return EXIT_SUCCESS;
 }

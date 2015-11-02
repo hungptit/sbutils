@@ -39,10 +39,11 @@ createFileInfo(std::vector<boost::filesystem::path> &files) {
 }
 
 void createFolderDatabase(Tools::Writer &writer,
-                          std::vector<boost::filesystem::path> &folders,
+                          std::vector<boost::filesystem::path> &folders, 
+                          bool useRelativePath,
                           bool verbose) {
     for (const auto &aFolder : folders) {
-        const auto aPath = boost::filesystem::canonical(aFolder);
+        const auto aPath = useRelativePath ? (aFolder) : (boost::filesystem::canonical(aFolder));
         std::cout << "Build file database for " << aFolder << "\n";
 
         // Search for files
@@ -68,13 +69,13 @@ void createFolderDatabase(Tools::Writer &writer,
 
 void createDatabase(const std::string &dataFile,
                     const std::vector<std::string> &folders,
-                    const int exploreLevel, bool verbose = false) {
+                    const int exploreLevel, bool useRelativePath, bool verbose = false) {
     Tools::Writer writer(dataFile);
     if (folders.empty()) {
         auto results = Tools::exploreFolders(
             exploreLevel,
-            boost::filesystem::canonical(boost::filesystem::current_path()));
-        createFolderDatabase(writer, std::get<0>(results), verbose);
+            boost::filesystem::canonical(boost::filesystem::current_path()), useRelativePath);
+        createFolderDatabase(writer, std::get<0>(results), useRelativePath, verbose);
 
         // Now write all files to a unique key.
         auto data = createFileInfo(std::get<0>(results));
@@ -84,7 +85,7 @@ void createDatabase(const std::string &dataFile,
         for (auto &val : folders) {
             data.emplace_back(boost::filesystem::path(val));
         }
-        createFolderDatabase(writer, data, verbose);
+        createFolderDatabase(writer, data, useRelativePath, verbose);
     }
 }
 
@@ -97,6 +98,7 @@ int main(int argc, char *argv[]) {
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
+        ("use_absolute_path,a", "Use absolute path.")
         ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
         ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
@@ -122,6 +124,11 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
 
+    bool useRelativePath = true;
+    if (vm.count("use_absolute_path")) {
+        useRelativePath = false;
+    }
+
     std::vector<std::string> folders;
 
     if (vm.count("folders")) {
@@ -137,7 +144,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Create the edited file database.
-    createDatabase(dataFile, folders, 2, verbose);
+    createDatabase(dataFile, folders, 2, useRelativePath, verbose);
     std::cout << "Edited file database: " << dataFile << std::endl;
     return 0;
 }
