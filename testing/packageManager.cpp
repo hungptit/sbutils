@@ -22,7 +22,7 @@
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Process.hpp"
-#include "Finder.hpp"
+#include "utils/Finder.hpp"
 
 struct BuildInfo {
   public:
