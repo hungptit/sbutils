@@ -65,16 +65,8 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
-# Compile all binaries
-  set(COMMAND_SRC_FILES createZipArchive)
-  foreach (src_file ${COMMAND_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_CPPFORMAT} ${LIB_POCO_FOUNDATION})
-  endforeach (src_file)
-  INSTALL_PROGRAMS(/${PROJECTS_FOLDER}/tmp/ FILES ${COMMAND_SRC_FILES})
-
-# Compile SQLite examples.The order of linked libraries must be preserved
-# otherwise the link process will be failed.
+  # Compile SQLite examples.The order of linked libraries must be preserved
+  # otherwise the link process will be failed.
   set(UNITTEST_SRC_FILES tSQLite)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
@@ -83,22 +75,20 @@ if (Boost_FOUND)
       ${LIB_POCO_DATA} ${LIB_POCO_SQLITE} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-
+  
   set(COMMAND_SRC_FILES finder viewer  buildFileDatabase)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
       ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_CPPFORMAT} -lpthread -lrt)
-    ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 
-  set(COMMAND_SRC_FILES packageManager)
+  set(COMMAND_SRC_FILES createZipArchive packageManager)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
       ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_CPPFORMAT} ${LIB_POCO_FOUNDATION} -lpthread -lrt)
-    ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

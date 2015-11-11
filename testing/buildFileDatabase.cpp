@@ -9,7 +9,6 @@
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "boost/program_options.hpp"
-#include "InputArgumentParser.hpp"
 
 int main(int argc, char *argv[]) {
     typedef Tools::DefaultOArchive OArchive;
