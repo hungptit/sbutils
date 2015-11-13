@@ -65,47 +65,6 @@ namespace Tools {
         virtual void update(iter_type &dirIter) = 0;
     };
 
-
-    // Explore the folder using DFS
-    class DFSFinder {
-      public:
-        typedef boost::filesystem::path path;
-        typedef boost::filesystem::directory_iterator directory_iterator;
-        
-        void search(const path &aPath) {
-            std::stack<path, std::vector<path>> folders;
-            folders.push(aPath);
-            while (!folders.empty()) {
-                auto aPath = folders.top();
-                folders.pop();
-                directory_iterator endIter;
-                directory_iterator dirIter(aPath);
-                for (; dirIter != endIter; ++dirIter) {
-                    auto currentPath = dirIter->path();
-                    if ((boost::filesystem::is_directory(currentPath))) {
-                        if (isValidDir(currentPath)) {
-                            folders.emplace(currentPath);
-                        }                        
-                    } else if ((boost::filesystem::is_regular_file(currentPath))) {
-                        if (isValidFile(currentPath)) {
-                            update(currentPath);
-                        }                        
-                    } else {
-                        unexpected(currentPath);
-                    }
-                }
-            }
-        }
-        
-      protected:
-        virtual bool isValidDir(const path &aPath) = 0;
-        virtual bool isValidFile(const path &aPath) = 0;
-        virtual void update(const path &aPath) = 0;
-        virtual void unexpected(const path &aPath) = 0;
-    };
-
-    // Explore the folder using BFS
-
     // Build a simple file database which containts file paths and extensions
     template <typename Base, typename T> class BuildFileDatabase; // Base class
 
