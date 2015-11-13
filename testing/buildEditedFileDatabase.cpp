@@ -1,15 +1,15 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <array>
-#include <tuple>
+#include "InputArgumentParser.hpp"
 #include "boost/filesystem.hpp"
-#include "utils/Utils.hpp"
+#include "boost/program_options.hpp"
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
-#include "boost/program_options.hpp"
-#include "InputArgumentParser.hpp"
+#include "utils/Utils.hpp"
+#include <array>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <tuple>
+#include <vector>
 
 typedef Tools::DefaultOArchive OArchive;
 typedef Tools::DefaultIArchive IArchive;
@@ -78,7 +78,8 @@ void createDatabase(const std::string &dataFile,
 
         // Now write all files to a unique key.
         auto data = createFileInfo(std::get<0>(results));
-        serialize<OArchive, decltype(data)>(writer, "files_at_root_level", data);
+        serialize<OArchive, decltype(data)>(writer, "files_at_root_level",
+                                            data);
     } else {
         std::vector<boost::filesystem::path> data;
         for (auto &val : folders) {
