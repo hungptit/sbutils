@@ -1,21 +1,21 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <array>
-#include <tuple>
 #include "boost/filesystem.hpp"
-#include "utils/Utils.hpp"
-#include "utils/FindUtils.hpp"
-#include "utils/LevelDBIO.hpp"
 #include "boost/program_options.hpp"
 #include "cppformat/format.h"
+#include "utils/FindUtils.hpp"
+#include "utils/LevelDBIO.hpp"
+#include "utils/Utils.hpp"
+#include <array>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <tuple>
+#include <vector>
 
+#include <ctime>
+#include <map>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <map>
-#include <ctime>
-#include <sstream>
 
 int main(int argc, char *argv[]) {
     typedef cereal::JSONOutputArchive OArchive;
@@ -67,11 +67,13 @@ int main(int argc, char *argv[]) {
         jsonFile = vm["toJSON"].as<std::string>();
     }
 
+    using boost::filesystem::path;
+
     boost::system::error_code errcode;
     std::vector<std::string> folders;
     if (vm.count("folders")) {
         for (auto item : vm["folders"].as<std::vector<std::string>>()) {
-            folders.emplace_back(boost::filesystem::path(item).string());
+            folders.emplace_back(path(item).string());
         }
     }
 
@@ -92,7 +94,7 @@ int main(int argc, char *argv[]) {
 
     // Search for files in the given folders.
     Tools::FindFiles<Tools::Finder> searchAlg(extensions);
-    
+
     for (auto &val : folders) {
         searchAlg.search(val);
     }
@@ -104,10 +106,16 @@ int main(int argc, char *argv[]) {
             fmt::print("{}\n", val);
         }
         fmt::print("Number of files: {}\n", data.size());
-        
-        std::for_each(data.begin(), data.end(), [] (auto const & val) {
+        std::for_each(data.begin(), data.end(), [](auto const &val) {
             fmt::print("({0}, {1}, {2})\n", std::get<0>(val), std::get<1>(val),
                        std::get<2>(val));
+        });
+    } else {
+        fmt::print("Number of files: {}\n", data.size());
+        std::for_each(data.begin(), data.end(), [](auto const &val) {
+            fmt::print("{0}\n", (path(std::get<0>(val)) /
+                                 path(std::get<1>(val) + std::get<2>(val)))
+                                    .string());
         });
     }
 
@@ -116,7 +124,7 @@ int main(int argc, char *argv[]) {
         Tools::save<OArchive, decltype(data)>(data, os);
         std::ofstream myfile(jsonFile);
         myfile << os.str() << std::endl;
-    }      
+    }
 
     return 0;
 }
