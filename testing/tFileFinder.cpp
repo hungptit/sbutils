@@ -1,12 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include "gtest/gtest.h"
-#include <string>
-#include <vector>
-#include <array>
-#include <tuple>
 #include "boost/filesystem.hpp"
 #include "utils/Utils.hpp"
+#include "gtest/gtest.h"
+#include <array>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <tuple>
+#include <vector>
 
 class TestData {
   public:
@@ -70,11 +70,6 @@ class TestData {
                                                boost::filesystem::group_exe |
                                                boost::filesystem::owner_read |
                                                boost::filesystem::group_read);
-
-            // TODO: Update this 
-            // std::vector<std::string> allKeys = {"/local-ssd/sandbox/codegen", "/local-ssd/sandbox/mdlrefadvisor"};
-            // std::cout << Tools::findKey(allKeys, "/local-ssd/sandbox/codegen/matlab/test/toolbox/") << std::endl;
-            // std::cout << Tools::findKey(allKeys, "/local/projects/utils/testing") << std::endl;
         }
     }
 };
@@ -125,15 +120,18 @@ class TestData {
 //         Map supportedExts = {".txt", ".dat", ".mat"};
 //         std::sort(supportedExts.begin(), supportedExts.end());
 
-//         Tools::SearchFileExtension<std::vector<std::string>> st(supportedExts);
+//         Tools::SearchFileExtension<std::vector<std::string>>
+//         st(supportedExts);
 
 //         {
-//             boost::filesystem::path aFile = boost::filesystem::path("data.mat");
+//             boost::filesystem::path aFile =
+//             boost::filesystem::path("data.mat");
 //             EXPECT_TRUE(st.isValid(aFile));
 //         }
 
 //         {
-//             boost::filesystem::path aFile = boost::filesystem::path("data.foo");
+//             boost::filesystem::path aFile =
+//             boost::filesystem::path("data.foo");
 //             EXPECT_FALSE(st.isValid(aFile));
 //         }
 //     }

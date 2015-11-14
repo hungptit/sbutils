@@ -27,7 +27,9 @@ namespace Tools {
     // (command, arguments, initial directory)
     typedef std::tuple<std::string, std::vector<std::string>>
         CommandInfo;
+
     typedef std::tuple<std::string, std::string, int> CommandOutput;
+    
     CommandOutput run(CommandInfo &info, const std::string & initialDirectory) {
         Poco::Pipe outPipe, errPipe;
         Poco::ProcessHandle ph =

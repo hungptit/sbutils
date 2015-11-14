@@ -1,32 +1,30 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
 #include <array>
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include <tuple>
 #include <unordered_map>
-#include <chrono>
 #include <unordered_set>
+#include <vector>
 
 #define BOOST_THREAD_VERSION 4
 #include "boost/config.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread/future.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 #include "boost/thread.hpp"
+#include "boost/thread.hpp"
+#include "boost/thread/future.hpp"
 
-#include "utils/Utils.hpp"
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
+#include "utils/Utils.hpp"
 
-#include "InputArgumentParser.hpp"
-
+#include <ctime>
+#include <map>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <map>
-#include <ctime>
-#include <sstream>
 
 namespace {
     boost::mutex UpdateResults;

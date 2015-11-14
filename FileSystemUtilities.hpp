@@ -80,9 +80,21 @@ namespace Tools {
         }
     }
 
-    void copyFiles(const std::vector<boost::filesystem::path> & files,
-                   const boost::filesystem::path &srcFolders,
-                   const boost::filesystem::path &destFolder) {}
+    // files is a list of files with the relative paths.
+    void copyFiles_rel(const std::vector<boost::filesystem::path> &files ,
+                   const boost::filesystem::path &srcDir,
+                   const boost::filesystem::path &dstDir) {
+        boost::system::error_code errcode;
+        auto options = boost::filesystem::copy_option::overwrite_if_exists;
+        for (auto aFile : files) {
+            auto srcFile = srcDir / aFile;
+            auto dstFile = dstDir / aFile;
+
+            // TODO: Make sure that file properties are preserved, otherwise we
+            // need to execute the copy command.
+            boost::filesystem::copy_file(srcFile, dstFile, options);
+        }
+    }
 
     std::string findParent(const std::vector<std::string> &allKeys,
                            const std::string &aPath) {
