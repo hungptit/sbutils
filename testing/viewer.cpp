@@ -20,11 +20,9 @@
 #include "utils/LevelDBIO.hpp"
 #include "utils/Utils.hpp"
 
-#include <ctime>
-#include <map>
-#include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace {
     boost::mutex UpdateResults;

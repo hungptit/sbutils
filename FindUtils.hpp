@@ -1,39 +1,39 @@
 #ifndef FindUtils_hpp
 #define FindUtils_hpp
 
-#include <vector>
 #include <string>
 #include <tuple>
+#include <vector>
 
-#include <boost/filesystem.hpp>
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
+#include <boost/filesystem.hpp>
 
-#include <cereal/types/memory.hpp>
 #include <cereal/types/array.hpp>
-#include <cereal/types/valarray.hpp>
-#include <cereal/types/vector.hpp>
+#include <cereal/types/bitset.hpp>
+#include <cereal/types/chrono.hpp>
+#include <cereal/types/complex.hpp>
 #include <cereal/types/deque.hpp>
 #include <cereal/types/forward_list.hpp>
 #include <cereal/types/list.hpp>
-#include <cereal/types/string.hpp>
 #include <cereal/types/map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/polymorphic.hpp>
 #include <cereal/types/queue.hpp>
 #include <cereal/types/set.hpp>
 #include <cereal/types/stack.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/tuple.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/unordered_set.hpp>
 #include <cereal/types/utility.hpp>
-#include <cereal/types/tuple.hpp>
-#include <cereal/types/bitset.hpp>
-#include <cereal/types/complex.hpp>
-#include <cereal/types/chrono.hpp>
-#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/valarray.hpp>
+#include <cereal/types/vector.hpp>
 
 #include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/archives/xml.hpp>
-#include <cereal/archives/json.hpp>
 
 namespace Tools {
     typedef cereal::BinaryOutputArchive OArchive;
@@ -62,42 +62,6 @@ namespace Tools {
         }
 
       protected:
-        virtual void update(iter_type &dirIter) = 0;
-    };
-
-    class FinderWithIgnore {
-      public:
-        typedef boost::filesystem::path Path;
-        typedef boost::filesystem::directory_iterator iter_type;
-        void search(const boost::filesystem::path &aPath) {
-            std::vector<Path> currentLevel = {aPath};
-            std::vector<Path> nextLevel;
-            while (!currentLevel.empty()) {
-                for (auto &item : currentLevel) {
-                    iter_type endIter;
-                    iter_type dirIter(item);
-                    for (; dirIter != endIter; ++dirIter) {
-                        auto currentPath = dirIter->path();
-                        if (boost::filesystem::is_directory(currentPath)) {
-                            auto aStem = currentPath.stem().string();
-                            if (std::any_of(IgnoreStems.begin(),
-                                            IgnoreStems.end(),
-                                            [aStem](auto &s) {
-                                                return (aStem == s);
-                                            })) {
-                                nextLevel.push_back(currentPath);
-                            }
-                        } else if (boost::filesystem::is_regular_file(
-                                       currentPath)) {
-                            update(dirIter);
-                        }
-                    }
-                }
-            }
-        }
-
-      protected:
-        std::array<std::string, 1> IgnoreStems = {{".git"}};
         virtual void update(iter_type &dirIter) = 0;
     };
 
@@ -217,7 +181,8 @@ namespace Tools {
         std::vector<value_type> Data;
     };
 
-    boost::filesystem::path getPath(const boost::filesystem::path &aPath, bool useRelativePath) {
+    boost::filesystem::path getPath(const boost::filesystem::path &aPath,
+                                    bool useRelativePath) {
         if (useRelativePath) {
             auto tmpPath = aPath.stem();
             tmpPath += aPath.extension();
@@ -245,7 +210,7 @@ namespace Tools {
                 files.push_back(getPath(currentPath, useRelativePath));
             }
         }
-     
+
         // Return
         return std::make_tuple(folders, files);
     }
@@ -253,13 +218,14 @@ namespace Tools {
     // Explore the given folder to a given level
     std::tuple<std::vector<boost::filesystem::path>,
                std::vector<boost::filesystem::path>>
-        exploreFolders(size_t level, const boost::filesystem::path &rootFolder, bool useRelativePath = false) {        
+    exploreFolders(size_t level, const boost::filesystem::path &rootFolder,
+                   bool useRelativePath = false) {
         auto results = exploreFolderAtRootLevel(rootFolder, useRelativePath);
         std::vector<boost::filesystem::path> files = std::get<1>(results);
         std::vector<boost::filesystem::path> folders = std::get<0>(results);
         size_t counter = 1;
 
-        // This code does not make any assumtion about the input path. 
+        // This code does not make any assumtion about the input path.
         while (counter < level) {
             decltype(folders) nextLevel;
             for (auto const &aPath : folders) {
