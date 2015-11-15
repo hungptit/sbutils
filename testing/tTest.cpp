@@ -71,19 +71,62 @@ namespace Tools {
       public:
       protected:
         typedef typename Base::path path;
-        bool isValidDir(const path &aPath) {return true;};
-        bool isValidFile(const path &aPath) {return true;};
-        void update(const path &aPath) {};
-        void unexpected(const path &aPath) {};
+        bool isValidDir(const path &) {return true;};
+        bool isValidFile(const path &) {return true;};
+        void update(const path &) {};
+        void unexpected(const path &) {};
       private:
         
     };
+
+  template<typename Base>
+  class TestFinder : public Base {
+  public:
+    ~TestFinder() { std::cout << counter << std::endl;}
+    
+    void update(typename Base::iter_type &dirIter) {
+      const boost::filesystem::file_status fs = dirIter->status();
+      if ((fs.type() == boost::filesystem::regular_file)) {
+        counter ++;
+      }
+    }
+  private:
+    size_t counter = 0;
+  };
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+  // std::cout << argv[1] << "\n";
+  // std::string fName(argv[1]);
+  // std::cout << fName << "\n";
+
+  // boost::filesystem::path aPath("/home/hungptit/projects/3p");
+  boost::filesystem::path aPath(argv[1]);
+  // std::cout << boost::filesystem::is_directory(aPath) << "\n";
+
+  {
     Timer timer;
-    Tools::SimpleDFSFinder<Tools::DFSFinder> finder;
-    std::cout << "Number of file: " << finder.search("/local-ssd/sandbox/exportfcns") << std::endl;;
+    Tools::TestFinder<Tools::Finder> finder;
+    finder.search(aPath);
+    // std::cout << "Number of file: " << finder.search(aPath) << std::endl;;
     std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
               << " seconds" << std::endl;
+  }
+  
+  {
+    Timer timer;
+    Tools::SimpleDFSFinder<Tools::DFSFinder> finder;
+    std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+              << " seconds" << std::endl;
+  }
+
+  {
+    Timer timer;
+    Tools::TestFinder<Tools::Finder> finder;
+    finder.search(aPath);
+    // std::cout << "Number of file: " << finder.search(aPath) << std::endl;;
+    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+              << " seconds" << std::endl;
+  }
 }
