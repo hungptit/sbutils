@@ -18,8 +18,8 @@
 
 #include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
-#include "utils/Utils.hpp"
 #include "utils/Timer.hpp"
+#include "utils/Utils.hpp"
 
 #include <sstream>
 #include <string>
@@ -42,15 +42,16 @@ namespace Tools {
                 directory_iterator dirIter(aPath);
                 for (; dirIter != endIter; ++dirIter) {
                     auto currentPath = dirIter->path();
-                    if ((boost::filesystem::is_directory(currentPath))) {
-                        if (isValidDir(currentPath)) {
-                            folders.push(currentPath);
-                        }
-                    } else if ((boost::filesystem::is_regular_file(
-                                   currentPath))) {
+                    auto status = dirIter->status();
+                    auto ftype = status.type();
+                    if (ftype == boost::filesystem::regular_file) {
                         if (isValidFile(currentPath)) {
                             update(currentPath);
-                            counter ++;
+                            counter++;
+                        }
+                    } else if (ftype == boost::filesystem::directory_file) {
+                        if (isValidDir(currentPath)) {
+                            folders.push(currentPath);
                         }
                     } else {
                         unexpected(currentPath);
@@ -71,62 +72,64 @@ namespace Tools {
       public:
       protected:
         typedef typename Base::path path;
-        bool isValidDir(const path &) {return true;};
-        bool isValidFile(const path &) {return true;};
-        void update(const path &) {};
-        void unexpected(const path &) {};
+        bool isValidDir(const path &) { return true; };
+        bool isValidFile(const path &) { return true; };
+        void update(const path &){};
+        void unexpected(const path &){};
+
       private:
-        
     };
 
-  template<typename Base>
-  class TestFinder : public Base {
-  public:
-    ~TestFinder() { std::cout << counter << std::endl;}
-    
-    void update(typename Base::iter_type &dirIter) {
-      const boost::filesystem::file_status fs = dirIter->status();
-      if ((fs.type() == boost::filesystem::regular_file)) {
-        counter ++;
-      }
-    }
-  private:
-    size_t counter = 0;
-  };
+    template <typename Base> class TestFinder : public Base {
+      public:
+        ~TestFinder() { std::cout << counter << std::endl; }
+
+        void update(typename Base::iter_type &dirIter) {
+            const boost::filesystem::file_status fs = dirIter->status();
+            if ((fs.type() == boost::filesystem::regular_file)) {
+                counter++;
+            }
+        }
+
+      private:
+        size_t counter = 0;
+    };
 }
 
 int main(int argc, char *argv[]) {
-  // std::cout << argv[1] << "\n";
-  // std::string fName(argv[1]);
-  // std::cout << fName << "\n";
+    // std::cout << argv[1] << "\n";
+    // std::string fName(argv[1]);
+    // std::cout << fName << "\n";
 
-  // boost::filesystem::path aPath("/home/hungptit/projects/3p");
-  boost::filesystem::path aPath(argv[1]);
-  // std::cout << boost::filesystem::is_directory(aPath) << "\n";
+    // boost::filesystem::path aPath("/home/hungptit/projects/3p");
+    boost::filesystem::path aPath(argv[1]);
+    // std::cout << boost::filesystem::is_directory(aPath) << "\n";
 
-  {
-    Timer timer;
-    Tools::TestFinder<Tools::Finder> finder;
-    finder.search(aPath);
-    // std::cout << "Number of file: " << finder.search(aPath) << std::endl;;
-    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-              << " seconds" << std::endl;
-  }
-  
-  {
-    Timer timer;
-    Tools::SimpleDFSFinder<Tools::DFSFinder> finder;
-    std::cout << "Number of file: " << finder.search(aPath) << std::endl;
-    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-              << " seconds" << std::endl;
-  }
+    {
+        Timer timer;
+        Tools::TestFinder<Tools::Finder> finder;
+        finder.search(aPath);
+        // std::cout << "Number of file: " << finder.search(aPath) <<
+        // std::endl;;
+        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+                  << " seconds" << std::endl;
+    }
 
-  {
-    Timer timer;
-    Tools::TestFinder<Tools::Finder> finder;
-    finder.search(aPath);
-    // std::cout << "Number of file: " << finder.search(aPath) << std::endl;;
-    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-              << " seconds" << std::endl;
-  }
+    {
+        Timer timer;
+        Tools::SimpleDFSFinder<Tools::DFSFinder> finder;
+        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+                  << " seconds" << std::endl;
+    }
+
+    {
+        Timer timer;
+        Tools::TestFinder<Tools::Finder> finder;
+        finder.search(aPath);
+        // std::cout << "Number of file: " << finder.search(aPath) <<
+        // std::endl;;
+        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+                  << " seconds" << std::endl;
+    }
 }
