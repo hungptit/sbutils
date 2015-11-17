@@ -48,7 +48,7 @@ set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
 set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libcppformat.a")
-set(LIB_SNAPPY "/usr/lib/libsnappy.a")
+set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 
 if (Boost_FOUND)
   include_directories(${BOOST_INCLUDE_DIRS})
