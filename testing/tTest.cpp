@@ -89,7 +89,9 @@ namespace Tools {
                                 aPath.extension().string(), fs.permissions(),
                                 boost::filesystem::last_write_time(aPath)));
         };
-        void unexpected(const path &){};
+        void unexpected(const path &aPath){
+          std::cout << "How to handle this: " << aPath << std::endl;
+        };
 
       private:
         std::vector<Tools::EditedFileInfo> Data;
