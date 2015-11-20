@@ -17,7 +17,6 @@
 #include "boost/thread.hpp"
 
 #include "utils/Utils.hpp"
-#include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 
 #include <string>

@@ -4,13 +4,10 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-
 #include "boost/filesystem.hpp"
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "boost/lexical_cast.hpp"
 #include <boost/iostreams/device/mapped_file.hpp> // for readLines
+#include "Utils.hpp"
 
 namespace Utils {
     bool isRegularFile(const std::string &str) {
@@ -48,11 +45,6 @@ namespace Utils {
     std::string getAbslutePath(const std::string &pathName) {
         const boost::filesystem::path path(pathName);
         return boost::filesystem::canonical(path).string();
-    }
-
-    const std::string getUniqueString() {
-        return boost::lexical_cast<std::string>(
-            boost::uuids::random_generator()());
     }
 
     /**
@@ -128,88 +120,77 @@ namespace Utils {
         return sandbox;
     }
 
-    class TemporaryDirectory {
-      public:
-        TemporaryDirectory() {
-            CurrentDir = boost::filesystem::temp_directory_path() /
-                         boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%");
-            boost::filesystem::create_directories(CurrentDir);
+      boost::filesystem::path getPath(const boost::filesystem::path &aPath,
+                                    bool useRelativePath) {
+        if (useRelativePath) {
+            auto tmpPath = aPath.stem();
+            tmpPath += aPath.extension();
+            return tmpPath;
+        } else {
+            return boost::filesystem::canonical(aPath);
         }
-
-        TemporaryDirectory(const std::string &parentDir) {
-            CurrentDir = boost::filesystem::path(parentDir) /
-                         boost::filesystem::path(getUniqueString());
-            boost::filesystem::create_directories(CurrentDir);
-        }
-
-        ~TemporaryDirectory() {
-            if (boost::filesystem::exists(CurrentDir)) {
-                boost::filesystem::remove_all(CurrentDir);
-            }
-        }
-
-        const boost::filesystem::path &getPath() { return CurrentDir; }
-
-      private:
-        boost::filesystem::path CurrentDir;
-    };
-
-    std::vector<std::string> readLines(const std::string &dataFile) {
-        boost::iostreams::mapped_file mmap(
-            dataFile, boost::iostreams::mapped_file::readonly);
-        auto begin = mmap.const_data();
-        auto end = begin + mmap.size();
-
-        std::vector<std::string> results;
-        while (begin && begin != end) {
-            auto currentPos = begin;
-            while ((*currentPos != '\n') && (currentPos != end)) {
-                ++currentPos;
-            }
-            results.emplace_back(std::string(begin, currentPos));
-            begin = ++currentPos;
-        }
-        return results;
     }
 
-    std::vector<std::string> readLines(const std::string &dataFile,
-                                       size_t startLine, size_t stopLine) {
-        boost::iostreams::mapped_file mmap(
-            dataFile, boost::iostreams::mapped_file::readonly);
-        auto begin = mmap.const_data();
-        auto end = begin + mmap.size();
+    std::tuple<std::vector<boost::filesystem::path>,
+               std::vector<boost::filesystem::path>>
+    exploreFolderAtRootLevel(const boost::filesystem::path &aPath,
+                             bool useRelativePath) {
+        std::vector<boost::filesystem::path> files;
+        std::vector<boost::filesystem::path> folders;
 
-        std::vector<std::string> results;
-        size_t linenum = 0;
-        while (begin && begin != end) {
-            auto currentPos = begin;
-            while ((*currentPos != '\n') && (currentPos != end)) {
-                ++currentPos;
+        // Explore a given folder at the root level.
+        boost::filesystem::directory_iterator endIter;
+        boost::filesystem::directory_iterator dirIter(aPath);
+        for (; dirIter != endIter; ++dirIter) {
+            auto currentPath = dirIter->path();
+            if (boost::filesystem::is_directory(currentPath)) {
+                folders.push_back(getPath(currentPath, useRelativePath));
+            } else if (boost::filesystem::is_regular_file(currentPath)) {
+                files.push_back(getPath(currentPath, useRelativePath));
             }
-            ++linenum;
-            if ((linenum >= startLine) && (linenum <= stopLine)) {
-                results.emplace_back(std::string(begin, currentPos));
-            }
-            begin = ++currentPos;
         }
-        return results;
+        return std::make_tuple(folders, files);
     }
 
-    std::vector<boost::filesystem::path>
-    getFilesFromTxtFile(const boost::filesystem::path &dataFile,
-                        bool verbose = false) {
-        std::vector<boost::filesystem::path> results;
-        for (auto aLine : readLines(dataFile.string())) {
-            const auto aFile = boost::filesystem::path(aLine);
-            boost::system::error_code errcode;
-            if (boost::filesystem::is_regular_file(aFile, errcode)) {
-                results.emplace_back(aFile);
+    // Explore a folder to a given level. 
+    // TODO: Need to rewrite this algorithm base on the BFS algorithms.
+    std::tuple<std::vector<boost::filesystem::path>,
+               std::vector<boost::filesystem::path>>
+    exploreFolders(size_t level, const boost::filesystem::path &rootFolder,
+                   bool useRelativePath = false) {
+        auto results = exploreFolderAtRootLevel(rootFolder, useRelativePath);
+        std::vector<boost::filesystem::path> files = std::get<1>(results);
+        std::vector<boost::filesystem::path> folders = std::get<0>(results);
+        size_t counter = 1;
+
+        // This code does not make any assumtion about the input path.
+        while (counter < level) {
+            decltype(folders) nextLevel;
+            for (auto const &aPath : folders) {
+                boost::filesystem::directory_iterator endIter;
+                boost::filesystem::directory_iterator dirIter(aPath);
+                for (; dirIter != endIter; ++dirIter) {
+                    auto currentPath = dirIter->path();
+                    if (boost::filesystem::is_directory(currentPath)) {
+                        nextLevel.push_back(currentPath);
+                    } else if (boost::filesystem::is_regular_file(
+                                   currentPath)) {
+                        files.push_back(currentPath);
+                    }
+                }
+            }
+
+            if (nextLevel.empty()) {
+                break;
             } else {
-                if (verbose)
-                    std::cout << aFile << ": " << errcode.message() << "\n";
+                folders.reserve(nextLevel.size());
+                // Move content of nextLevel to folders then clear nextLevel
+                // content.
+                folders = std::move(nextLevel);
+                counter++;
             }
         }
-        return results;
+        return std::make_tuple(folders, files);
     }
 }
 #endif

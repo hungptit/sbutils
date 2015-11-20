@@ -1,10 +1,11 @@
 #include <fstream>
 #include <iostream>
 #include "utils/Utils.hpp"
+#include "utils/TemporaryDirectory.hpp"
 #include "utils/Process.hpp"
 #include "gtest/gtest.h"
 TEST(Basic, Positive) {
-    Utils::TemporaryDirectory tmpDir;
+    TemporaryDirectory tmpDir;
     std::string cmd("/bin/ls");
     std::vector<std::string> args = {"-l"};
     args.emplace_back(tmpDir.getPath().string());

@@ -1,5 +1,6 @@
 #include "boost/filesystem.hpp"
 #include "utils/Utils.hpp"
+#include "utils/TemporaryDirectory.hpp"
 #include "gtest/gtest.h"
 #include <array>
 #include <fstream>
@@ -156,7 +157,7 @@ class TestData {
 // }
 
 TEST(FileSearchDefault, Positive) {
-    Utils::TemporaryDirectory tmpDir;
+    TemporaryDirectory tmpDir;
     TestData testData(tmpDir.getPath());
     // Utils::FileFinder fSearch;
     // fSearch.search(tmpDir.getPath());

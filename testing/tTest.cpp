@@ -19,7 +19,6 @@
 #include "utils/BFSFileSearch.hpp"
 #include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
-#include "utils/FindUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"

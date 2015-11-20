@@ -6,7 +6,7 @@
 #include <tuple>
 #include <iostream>
 #include "utils/Utils.hpp"
-#include "utils/FindUtils.hpp"
+#include "utils/TemporaryDirectory.hpp"
 #include "cppformat/format.h"
 
 TEST(Display_Functions, Positive) {
@@ -50,7 +50,7 @@ TEST(FileSystemUtilities, Negative) {
 }
 
 TEST(TemporaryDirectory, Positive) {
-    Utils::TemporaryDirectory tmpDir;
+    TemporaryDirectory tmpDir;
     std::cout << tmpDir.getPath() << std::endl;
     EXPECT_TRUE(boost::filesystem::exists(tmpDir.getPath()));
 }
@@ -58,7 +58,7 @@ TEST(TemporaryDirectory, Positive) {
 
 TEST(ExporeFolderRootLevel, Positive) {
     {
-        Utils::TemporaryDirectory tmpDir;
+        TemporaryDirectory tmpDir;
         auto results = Utils::exploreFolderAtRootLevel(tmpDir.getPath(), 0);
         fmt::print("Folders:\n");
         for (auto item : std::get<0>(results)) {

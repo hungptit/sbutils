@@ -1,6 +1,3 @@
 * TODO list
-    * Move all sandbox related functionalities out of the **utils** package.
-    * Move utils to github
-    * Cleanup sbtools and rename to **tools**.
-* Others
-    * 
+    * Update old tests and add more tests.
+    * Move utils to github.
