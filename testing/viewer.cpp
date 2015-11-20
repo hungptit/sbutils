@@ -20,9 +20,9 @@
 #include "utils/LevelDBIO.hpp"
 #include "utils/Utils.hpp"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace {
     boost::mutex UpdateResults;
@@ -37,8 +37,8 @@ namespace {
      */
     class ThreadedLocate {
       public:
-        typedef std::set<Tools::EditedFileInfo> Set;
-        typedef std::vector<Tools::EditedFileInfo> Container;
+        typedef std::set<Utils::FileInfo> Set;
+        typedef std::vector<Utils::FileInfo> Container;
 
         ThreadedLocate(const std::string &dataFile) : Reader(dataFile) {}
 
@@ -88,7 +88,7 @@ namespace {
         Container getResults() const { return Results; }
 
       private:
-        Tools::Reader Reader;
+        Utils::Reader Reader;
         std::vector<std::string> Keys;
         std::vector<std::string> Stems;
         std::vector<std::string> Extensions;
@@ -116,7 +116,7 @@ namespace {
         }
 
         void
-        updateSearchResults(const std::vector<Tools::EditedFileInfo> &results) {
+        updateSearchResults(const std::vector<Utils::FileInfo> &results) {
             boost::unique_lock<boost::mutex> guard(UpdateResults);
             std::move(results.begin(), results.end(),
                       std::back_inserter(Results)); // C++11 feature
@@ -128,7 +128,7 @@ namespace {
 
             std::istringstream is(Reader.read(aKey));
             Container data;
-            Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
+            Utils::load<Utils::IArchive, decltype(data)>(data, is);
 
             std::chrono::high_resolution_clock::time_point stopTime =
                 std::chrono::high_resolution_clock::now();
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Tools::FileDatabaseInfo::Database))
+        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database))
                        .string();
     }
 
@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (vm.count("keys")) {
-        Tools::Reader reader(dataFile);
+        Utils::Reader reader(dataFile);
         for (auto &aKey : reader.keys()) {
             std::cout << aKey << std::endl;
         }

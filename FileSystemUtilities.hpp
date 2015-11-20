@@ -12,7 +12,7 @@
 #include "boost/lexical_cast.hpp"
 #include <boost/iostreams/device/mapped_file.hpp> // for readLines
 
-namespace Tools {
+namespace Utils {
     bool isRegularFile(const std::string &str) {
         return boost::filesystem::is_regular_file(boost::filesystem::path(str));
     }

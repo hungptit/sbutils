@@ -36,10 +36,28 @@ namespace Utils {
     typedef cereal::BinaryOutputArchive OArchive;
     typedef cereal::BinaryInputArchive IArchive;
 
+    template <typename OArchive, typename Container>
+    void save(const Container &data, std::ostringstream &os) {
+        OArchive oar(os);
+        oar(cereal::make_nvp("data", data));
+    }
+
+    template <typename OArchive, typename Container>
+    void load(Container &data, std::istringstream &is) {
+        OArchive iar(is);
+        iar(data);
+    }
+
     // Define the file information which is (path, stem, extension, permission,
     // time_stamp)
     typedef std::tuple<std::string, std::string, std::string, int, std::time_t>
         FileInfo;
+
+    // Constant strings
+    struct FileDatabaseInfo {
+        static const std::string Database;
+    };
+    const std::string FileDatabaseInfo::Database = ".database";
 }
 
 #endif
