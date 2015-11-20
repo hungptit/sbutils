@@ -61,7 +61,7 @@ int main(int ac, char *av[]) {
         aZipFile = parentPath / boost::filesystem::path("data.zip");
     }
 
-    Tools::disp(folders, "Added folders: ");
+    Utils::disp(folders, "Added folders: ");
     std::cout << " to " + aZipFile.string() << std::endl;
 
     // Create a zip file
@@ -70,7 +70,7 @@ int main(int ac, char *av[]) {
     for (const auto &val : folders) {
         args.emplace_back(val);
     }
-    const std::string output = Tools::run(command, args);
+    const std::string output = Utils::run(command, args);
     if (vm.count("verbose")) {
         std::cout << output << std::endl;
     }

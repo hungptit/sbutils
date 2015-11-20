@@ -39,8 +39,8 @@ namespace {
      */
     class ThreadedLocate {
       public:
-        typedef std::set<Tools::EditedFileInfo> Set;
-        typedef std::vector<Tools::EditedFileInfo> Container;
+        typedef std::set<Utils::EditedFileInfo> Set;
+        typedef std::vector<Utils::EditedFileInfo> Container;
 
         ThreadedLocate(const std::string &dataFile) : Reader(dataFile) {}
 
@@ -90,7 +90,7 @@ namespace {
         Container getResults() const { return Results; }
 
       private:
-        Tools::Reader Reader;
+        Utils::Reader Reader;
         std::vector<std::string> Keys;
         std::vector<std::string> Stems;
         std::vector<std::string> Extensions;
@@ -120,7 +120,7 @@ namespace {
         }
 
         void
-        updateSearchResults(const std::vector<Tools::EditedFileInfo> &results) {
+        updateSearchResults(const std::vector<Utils::EditedFileInfo> &results) {
             boost::unique_lock<boost::mutex> guard(UpdateResults);
             std::move(results.begin(), results.end(),
                       std::back_inserter(Results)); // C++11 feature
@@ -129,7 +129,7 @@ namespace {
         Container deserialize(const std::string &buffer) {
             Container data;
             std::istringstream is(buffer);
-            Tools::load<Tools::DefaultIArchive, decltype(data)>(data, is);
+            Utils::load<Utils::DefaultIArchive, decltype(data)>(data, is);
             return data;
         }
     };
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Tools::FileDatabaseInfo::Database))
+        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database))
                        .string();
     }
 
@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (vm.count("keys")) {
-        Tools::Reader reader(dataFile);
+        Utils::Reader reader(dataFile);
         for (auto &aKey : reader.keys()) {
             std::cout << aKey << std::endl;
         }
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
             // std::for_each(results.begin(), results.end(), [](auto
             // &val){std::cout << val << "\n";});
             std::ostringstream os;
-            Tools::save<OArchive, decltype(results)>(results, os);
+            Utils::save<OArchive, decltype(results)>(results, os);
             std::ofstream myfile("dict.json");
             myfile << os.str() << std::endl;
         }

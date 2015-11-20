@@ -9,7 +9,7 @@ namespace {
             for (auto & aKey : keys) {
                 decltype(results) data;
                 std::istringstream is(DBConnector.read(aKey));
-                Tools::load<IArchive, decltype(data)>(data, is);
+                Utils::load<IArchive, decltype(data)>(data, is);
                 std::move(data.begin(), data.end(),
                           std::back_inserter(results));
             }
@@ -29,7 +29,7 @@ namespace {
             for (auto & aKey : keys) {
                 decltype(results) data;
                 std::istringstream is(DBConnector.read(aKey));
-                Tools::load<IArchive, decltype(data)>(data, is);
+                Utils::load<IArchive, decltype(data)>(data, is);
                 std::move(data.begin(), data.end(),
                           std::back_inserter(results));
             }

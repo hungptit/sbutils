@@ -1,9 +1,6 @@
-#include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 #include "cppformat/format.h"
-#include "utils/FindUtils.hpp"
-#include "utils/LevelDBIO.hpp"
-#include "utils/Utils.hpp"
+
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -11,19 +8,17 @@
 #include <tuple>
 #include <vector>
 
-#include <ctime>
-#include <map>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "utils/BFSFileSearch.hpp"
+#include "utils/DFSFileSearch.hpp"
+#include "utils/FileSearch.hpp"
+#include "utils/Timer.hpp"
+#include "utils/Utils.hpp"
 
 int main(int argc, char *argv[]) {
-    typedef cereal::JSONOutputArchive OArchive;
-    typedef cereal::JSONInputArchive IArchive;
-
     using namespace boost;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
+    Timer timer;
 
     // clang-format off
     desc.add_options()              
@@ -93,11 +88,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Search for files in the given folders.
-    Tools::FindFiles<Tools::Finder> searchAlg(extensions);
+    Utils::BasicFileSearch<Utils::DFSFileSearchBase, std::vector<std::string>,
+                           std::vector<std::string>> searchAlg(stems,
+                                                               extensions);
 
     for (auto &val : folders) {
         searchAlg.search(val);
     }
+
     auto data = searchAlg.getData();
 
     if (verbose) {
@@ -121,10 +119,13 @@ int main(int argc, char *argv[]) {
 
     if (!jsonFile.empty()) {
         std::ostringstream os;
-        Tools::save<OArchive, decltype(data)>(data, os);
+        Utils::save<cereal::JSONOutputArchive, decltype(data)>(data, os);
         std::ofstream myfile(jsonFile);
         myfile << os.str() << std::endl;
     }
+
+    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+              << " seconds" << std::endl;
 
     return 0;
 }

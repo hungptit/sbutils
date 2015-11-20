@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace Tools {
+namespace Utils {
     void run(const std::string &command, const std::vector<std::string> args,
              std::string &output) {
         Poco::Pipe outPipe;

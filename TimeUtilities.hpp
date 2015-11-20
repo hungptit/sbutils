@@ -5,7 +5,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <string>
 
-namespace Tools {
+namespace Utils {
     std::string getTimeStampString() {
         const boost::posix_time::ptime now =
             boost::posix_time::second_clock::local_time();

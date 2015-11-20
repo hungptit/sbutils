@@ -4,7 +4,7 @@
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 
-namespace Tools {
+namespace Utils {
     class Writer {
       public:
         Writer(const std::string &dataFile) : DataFile(dataFile) {

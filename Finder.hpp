@@ -1,14 +1,13 @@
 #ifndef Finder_hpp_
 #define Finder_hpp_
 
-#include "cppformat/format.h"
-#include "utils/FindUtils.hpp"
-#include "utils/LevelDBIO.hpp"
+#include "utils/BFSFileSearch.hpp"
+#include "utils/DFSFileSearch.hpp"
+#include "utils/FileSearch.hpp"
+#include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
-#include <string>
-#include <tuple>
 
-namespace Tools {
+namespace Utils {
     enum {
         VERBOSE,
         DATAFILE,
@@ -69,7 +68,7 @@ namespace Tools {
             }
 
             // Read all keys from the database
-            Tools::Reader reader(dataFile);
+            Utils::Reader reader(dataFile);
             auto allKeys = reader.keys();
             printKeys(Params, allKeys);
 
@@ -81,7 +80,7 @@ namespace Tools {
                 loadAllKeys = true;
             } else {
                 for (auto aPath : folders) {
-                    auto aKey = Tools::findParent(allKeys, aPath);
+                    auto aKey = Utils::findParent(allKeys, aPath);
                     if (aKey.empty()) {
                         loadAllKeys =
                             true; // Cannot find a current key. We need to
@@ -106,8 +105,7 @@ namespace Tools {
                 if (!results.empty()) {
                     decltype(database) data;
                     std::istringstream is(results);
-                    Tools::load<Tools::DefaultIArchive, decltype(data)>(data,
-                                                                        is);
+                    Utils::load<Utils::IArchive, decltype(data)>(data, is);
                     std::move(data.begin(), data.end(),
                               std::back_inserter(database));
                 }

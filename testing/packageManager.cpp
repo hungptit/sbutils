@@ -58,7 +58,7 @@ struct BuildInfo {
 class Package {
   public:
     typedef boost::filesystem::path Path;
-    typedef std::vector<Tools::CommandInfo> value_type;
+    typedef std::vector<Utils::CommandInfo> value_type;
 
     Package(const std::string &tag, const value_type &cloneCmd,
             const value_type &updateCmd, const value_type &prepareCmd,
@@ -76,23 +76,23 @@ class Package {
         // Clone the source code if neccesary
         if (!boost::filesystem::is_directory(srcDir)) {
             for (auto & cmd : CloneCommand) {
-                auto results = Tools::run(cmd, srcDir.string());
+                auto results = Utils::run(cmd, srcDir.string());
             }
         }
                 
         // Update source code
         for (auto & cmd : UpdateCommand) {
-            auto results = Tools::run(cmd, srcDir.string());
+            auto results = Utils::run(cmd, srcDir.string());
         }
         
         // Prepare
         for (auto & cmd : PrepareCommand) {
-            auto results = Tools::run(cmd, srcDir.string());
+            auto results = Utils::run(cmd, srcDir.string());
         }
 
         // Build
         for (auto & cmd : BuildCommand) {
-            auto results = Tools::run(cmd, buildDir.string());
+            auto results = Utils::run(cmd, buildDir.string());
         }
         
         return true;
@@ -101,10 +101,10 @@ class Package {
     void print() {
         fmt::print("Tag: {}\n", Tag);
         fmt::print("CloneCommand: \n");
-        // Tools::print(CloneCommand);
-        // Tools::print(UpdateCommand);
-        // Tools::print(PrepareCommand);
-        // Tools::print(BuildCommand);
+        // Utils::print(CloneCommand);
+        // Utils::print(UpdateCommand);
+        // Utils::print(PrepareCommand);
+        // Utils::print(BuildCommand);
         // fmt::print("UpdateCommand: {}\n", UpdateCommand);
         // fmt::print("PrepareCommand: {}\n", PrepareCommand);
         // fmt::print("BuildCommand: {}\n", BuildCommand);
@@ -115,10 +115,10 @@ class Package {
 
   private:
     std::string Tag;
-    std::vector<Tools::CommandInfo> CloneCommand;
-    std::vector<Tools::CommandInfo> UpdateCommand;
-    std::vector<Tools::CommandInfo> PrepareCommand;
-    std::vector<Tools::CommandInfo> BuildCommand;
+    std::vector<Utils::CommandInfo> CloneCommand;
+    std::vector<Utils::CommandInfo> UpdateCommand;
+    std::vector<Utils::CommandInfo> PrepareCommand;
+    std::vector<Utils::CommandInfo> BuildCommand;
     std::vector<std::string> RequiredPackages;
 };
 
@@ -131,8 +131,8 @@ class BuildManager {
 int main() {
     BuildInfo binfo = {"/local/projects/3p"};
     binfo.print();
-    Tools::CommandInfo clone{"git", {"clone", "--recursive", "https://github.com/boostorg/boost.git"}};
-    Tools::CommandInfo update{"git", {"pull"}};
+    Utils::CommandInfo clone{"git", {"clone", "--recursive", "https://github.com/boostorg/boost.git"}};
+    Utils::CommandInfo update{"git", {"pull"}};
     Package::value_type cloneCmd{update};
     // Package boost = {
     //     "boost",
@@ -147,10 +147,10 @@ int main() {
     // boost.print();
 
     // std::vector<std::string> args;
-    // Tools::CommandInfo info = std::make_tuple(std::string("ls"), args,
+    // Utils::CommandInfo info = std::make_tuple(std::string("ls"), args,
     // std::string("/local/"));
-    // Tools::CommandInfo info{"ls", {}, "/local/"};
-    // auto results = Tools::run(update);
+    // Utils::CommandInfo info{"ls", {}, "/local/"};
+    // auto results = Utils::run(update);
     // std::cout << "stdout:" << std::get<0>(results) << std::endl;
     // if (std::get<2>(results)) {
     //     std::cout << "Error code:" << std::get<2>(results) << std::endl;
