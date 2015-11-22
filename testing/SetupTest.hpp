@@ -16,6 +16,7 @@
 #include "utils/Utils.hpp"
 
 namespace {
+    // Create a fake folder for FileSearch related classes.
     class SetupTestDirectory {
       public:
         using path = boost::filesystem::path;
@@ -35,24 +36,17 @@ namespace {
             createFile(f12, "fooo.cpp");
             createFile(f12, "fooo.hpp");
             createFile(f12, "CMakeLists.txt");
-            
+
             // 1st level folders
             path f21 = f11 / "1";
             path f22 = f11 / "boo";
             boost::filesystem::create_directories(f21);
             boost::filesystem::create_directories(f22);
-            createFile(f21, "fooo.so");
-            createFile(f21, "fooo.a");
+            createFile(f21, "foo.so");
+            createFile(f21, "foo.a");
         }
 
         ~SetupTestDirectory() { boost::filesystem::remove_all(CurrentPath); }
-
-      void createFile(const path & parent, const path &aFile) {
-        path aPath(parent / aFile);
-        std::ofstream myfile;
-        myfile.open(aPath.string());
-        myfile << aFile << "\n";
-        }
 
         const path getOriginalPath() const { return OriginalPath; }
         const path getCurrentPath() const { return CurrentPath; }
@@ -60,5 +54,12 @@ namespace {
       private:
         path OriginalPath;
         path CurrentPath;
+
+        void createFile(const path &parent, const path &aFile) {
+            path aPath(parent / aFile);
+            std::ofstream myfile;
+            myfile.open(aPath.string());
+            myfile << aFile << "\n";
+        }
     };
 }

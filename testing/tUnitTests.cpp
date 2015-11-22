@@ -1,20 +1,22 @@
 #include "gtest/gtest.h"
-#include <string>
-#include <map>
-#include <vector>
 #include <array>
-#include <tuple>
 #include <iostream>
+#include <map>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #include "utils/BFSFileSearch.hpp"
 #include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/LevelDBIO.hpp"
-#include "utils/Timer.hpp"
 #include "utils/TemporaryDirectory.hpp"
+#include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
 
 #include "SetupTest.hpp"
+
+using path = boost::filesystem::path;
 
 TEST(Display_Functions, Positive) {
     {
@@ -62,7 +64,6 @@ TEST(TemporaryDirectory, Positive) {
     EXPECT_TRUE(boost::filesystem::exists(tmpDir.getPath()));
 }
 
-
 TEST(ExporeFolderRootLevel, Positive) {
     {
         TemporaryDirectory tmpDir;
@@ -79,17 +80,61 @@ TEST(ExporeFolderRootLevel, Positive) {
 }
 
 TEST(FileSearch, Positive) {
-  SetupTestDirectory setup;
-  auto aPath = setup.getCurrentPath();
+    SetupTestDirectory setup;
+    auto aPath = setup.getCurrentPath();
 
-  // Search for files using DFS
-  Utils::FileSearchBase<Utils::DFSFileSearchBase> dfs_finder;
-  std::cout << "Number of files: " << dfs_finder.search(aPath) << std::endl;
+    // Search for files using DFS
+    Utils::FileSearchBase<Utils::DFSFileSearchBase> dfs_finder;
+    std::cout << "Number of files: " << dfs_finder.search(aPath) << std::endl;
 
     // Search for files using BFS
-  Utils::FileSearchBase<Utils::BFSFileSearchBase> bfs_finder;
-  std::cout << "Number of files: " << bfs_finder.search(aPath) << std::endl;
+    Utils::FileSearchBase<Utils::BFSFileSearchBase> bfs_finder;
+    std::cout << "Number of files: " << bfs_finder.search(aPath) << std::endl;
 
-  // The number of files obtained using two algorithms should be the same
-  EXPECT_TRUE(dfs_finder.getData().size() == bfs_finder.getData().size());
+    // The number of files obtained using two algorithms should be the same
+    EXPECT_TRUE(dfs_finder.getData().size() == 6);
+    EXPECT_TRUE(dfs_finder.getData().size() == bfs_finder.getData().size());
+
+    // Test filter methods
+    std::vector<std::string> stems = {"foo"};
+    std::vector<std::string> exts = {".txt"};
+    auto results = dfs_finder.filter(stems, exts);
+    Utils::print(results);
+    EXPECT_EQ(results.size(), static_cast<size_t>(2));
+}
+
+TEST(FileDatabase, Positive) {
+    SetupTestDirectory setup;
+    auto aPath = setup.getCurrentPath();
+    Utils::FileSearchBase<Utils::DFSFileSearchBase> dfs_finder;
+    std::cout << "Number of files: " << dfs_finder.search(aPath) << std::endl;
+
+    // Serialized file information to string
+    std::ostringstream os;
+    auto data = dfs_finder.getData();
+    Utils::save<Utils::OArchive, decltype(data)>(data, os);
+    const auto value = os.str();
+
+    // Write data to the database.
+    path dataFile = aPath / path(Utils::FileDatabaseInfo::Database);
+    auto key = dataFile.string();
+    {
+        Utils::Writer writer(dataFile.string());
+        writer.write(key, value);
+    }
+
+    // Now read the data back and compare with the original data.
+    {
+      Timer timer;
+      Utils::Reader reader(dataFile.string());
+        std::istringstream is(reader.read(key));
+        std::vector<Utils::FileInfo> rdata;
+        Utils::load<Utils::IArchive, decltype(rdata)>(rdata, is);
+        std::cout << "Deserialize time: "
+                  << timer.toc() / timer.ticksPerSecond() << " seconds"
+                  << std::endl;
+        Utils::print(rdata);
+        EXPECT_TRUE(rdata.size() == 6);
+        EXPECT_EQ(data, rdata);
+    }
 }
