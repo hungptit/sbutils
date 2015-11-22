@@ -5,9 +5,16 @@
 #include <array>
 #include <tuple>
 #include <iostream>
-#include "utils/Utils.hpp"
+
+#include "utils/BFSFileSearch.hpp"
+#include "utils/DFSFileSearch.hpp"
+#include "utils/FileSearch.hpp"
+#include "utils/LevelDBIO.hpp"
+#include "utils/Timer.hpp"
 #include "utils/TemporaryDirectory.hpp"
-#include "cppformat/format.h"
+#include "utils/Utils.hpp"
+
+#include "SetupTest.hpp"
 
 TEST(Display_Functions, Positive) {
     {
@@ -69,4 +76,20 @@ TEST(ExporeFolderRootLevel, Positive) {
             std::cout << item << "\n";
         }
     }
+}
+
+TEST(FileSearch, Positive) {
+  SetupTestDirectory setup;
+  auto aPath = setup.getCurrentPath();
+
+  // Search for files using DFS
+  Utils::FileSearchBase<Utils::DFSFileSearchBase> dfs_finder;
+  std::cout << "Number of files: " << dfs_finder.search(aPath) << std::endl;
+
+    // Search for files using BFS
+  Utils::FileSearchBase<Utils::BFSFileSearchBase> bfs_finder;
+  std::cout << "Number of files: " << bfs_finder.search(aPath) << std::endl;
+
+  // The number of files obtained using two algorithms should be the same
+  EXPECT_TRUE(dfs_finder.getData().size() == bfs_finder.getData().size());
 }

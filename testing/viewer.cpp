@@ -16,7 +16,10 @@
 #include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
 #include "utils/LevelDBIO.hpp"
+#include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
+
+#include "cppformat/format.h"
 
 #include <map>
 #include <string>
@@ -72,14 +75,15 @@ namespace {
         }
 
         void print(bool verbose = false) {
-            Set sortedResults;
-            sortedResults.insert(Results.begin(), Results.end());
+            Set results;
+            results.insert(Results.begin(), Results.end());
             if (verbose) {
-                for (auto const &item : sortedResults)
-                    std::cout << item << "\n";
+                std::for_each(results.begin(), results.end(),
+                              [](auto &item) { std::cout << item << "\n"; });
             } else {
-                for (auto const &item : sortedResults)
-                    std::cout << std::get<0>(item) << "\n";
+                std::for_each(results.begin(), results.end(), [](auto &item) {
+                    fmt::print("{}\n", std::get<0>(item));
+                });
             }
         }
 
@@ -113,29 +117,20 @@ namespace {
             return results;
         }
 
-        void
-        updateSearchResults(const std::vector<Utils::FileInfo> &results) {
+        void updateSearchResults(const std::vector<Utils::FileInfo> &results) {
             boost::unique_lock<boost::mutex> guard(UpdateResults);
             std::move(results.begin(), results.end(),
                       std::back_inserter(Results)); // C++11 feature
         }
 
         Container deserialize(const std::string &aKey) {
-            std::chrono::high_resolution_clock::time_point startTime =
-                std::chrono::high_resolution_clock::now();
-
+            Timer timer;
             std::istringstream is(Reader.read(aKey));
             Container data;
             Utils::load<Utils::IArchive, decltype(data)>(data, is);
-
-            std::chrono::high_resolution_clock::time_point stopTime =
-                std::chrono::high_resolution_clock::now();
-            auto duration =
-                std::chrono::duration_cast<std::chrono::milliseconds>(stopTime -
-                                                                      startTime)
-                    .count();
-            std::cout << "Deserialize time: " << duration << " miliseconds\n";
-
+            std::cout << "Deserialize time: "
+                      << timer.toc() / timer.ticksPerSecond() << " seconds"
+                      << std::endl;
             return data;
         }
     };

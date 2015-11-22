@@ -27,10 +27,12 @@
 #include <string>
 #include <vector>
 
-int main(int, char *argv[]) {
-    boost::filesystem::path aPath(argv[1]);
-    
+#include "gtest/gtest.h"
 
+
+int main(int argc, char *argv[]) {
+    boost::filesystem::path aPath((argc == 2) ? argv[1] : "./");
+    
     std::array<std::string, 1> stems = {{"foo"}};
     std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
                                       ".internal", ".includecache", ".marks"}};

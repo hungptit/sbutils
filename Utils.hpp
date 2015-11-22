@@ -1,6 +1,7 @@
 #ifndef Utils_hpp_
 #define Utils_hpp_
 
+// Cereal
 #include <cereal/types/array.hpp>
 #include <cereal/types/bitset.hpp>
 #include <cereal/types/chrono.hpp>
@@ -21,13 +22,12 @@
 #include <cereal/types/utility.hpp>
 #include <cereal/types/valarray.hpp>
 #include <cereal/types/vector.hpp>
-
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/archives/xml.hpp>
 
-#include "BasicUtilities.hpp"
+// Boost libraries
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/filesystem.hpp"
