@@ -1,16 +1,16 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <array>
-#include <tuple>
 #include "boost/program_options.hpp"
 #include "utils/BFSFileSearch.hpp"
 #include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
+#include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
-#include "utils/LevelDBIO.hpp"
+#include <array>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <tuple>
+#include <vector>
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -28,7 +28,9 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("folders", -1);
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
+        vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -38,7 +40,9 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = false;
-    if (vm.count("verbose")) { verbose = true;}
+    if (vm.count("verbose")) {
+        verbose = true;
+    }
 
     std::vector<std::string> folders;
 
@@ -52,7 +56,8 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database)).string();
+        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database))
+                       .string();
     }
 
     // Build file information database
@@ -62,7 +67,7 @@ int main(int argc, char *argv[]) {
         const std::string aPath = Utils::getAbslutePath(aFolder);
         Utils::FileSearchBase<Utils::DFSFileSearchBase> fSearch;
         fSearch.search(aPath);
-        
+
         // Serialized file information to string
         std::ostringstream os;
         auto data = fSearch.getData();

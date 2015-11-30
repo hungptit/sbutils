@@ -4,7 +4,6 @@
 // STL headers
 #include <array>
 #include <string>
-#include <tuple>
 #include <vector>
 
 // Boost libraries
@@ -46,7 +45,7 @@ namespace Utils {
                 if (flag) {
                     results.emplace_back(item);
                 }
-                
+
             }
             return results;
         }
@@ -59,7 +58,7 @@ namespace Utils {
             return std::find(excludedFolders.begin(), excludedFolders.end(),
                              searchStr) == excludedFolders.end();
         };
-        
+
         bool isValidFile(const path &) { return true; };
 
         void update(const path &aPath, boost::filesystem::file_status &fs) {

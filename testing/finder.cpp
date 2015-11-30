@@ -1,6 +1,5 @@
 #include "boost/program_options.hpp"
 #include "cppformat/format.h"
-
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -19,9 +18,9 @@ int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
     Timer timer;
-
+    
     // clang-format off
-    desc.add_options()              
+    desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
         ("use-relative-path,r", "Use relative path.")
@@ -116,7 +115,6 @@ int main(int argc, char *argv[]) {
                                     .string());
         });
     }
-
     if (!jsonFile.empty()) {
         std::ostringstream os;
         Utils::save<cereal::JSONOutputArchive, decltype(data)>(data, os);
@@ -126,6 +124,5 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
               << " seconds" << std::endl;
-
     return 0;
 }

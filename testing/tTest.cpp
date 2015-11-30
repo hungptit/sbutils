@@ -5,6 +5,8 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <set>
+#include <map>
 #include <unordered_set>
 #include <vector>
 
@@ -22,6 +24,7 @@
 #include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
+#include "utils/FolderDiff.hpp"
 
 #include <sstream>
 #include <string>
@@ -37,45 +40,73 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
                                       ".internal", ".includecache", ".marks"}};
 
+    // {
+    //     Timer timer;
+    //     Utils::FileSearchBase<Utils::DFSFileSearchBase> finder;
+
+    //     std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+
+    //     for (auto aFile : finder.filter(stems, exts)) {
+    //         std::cout << aFile << "\n";
+    //     }
+
+    //     std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+    //               << " seconds" << std::endl;
+    // }
+
+    // {
+    //     Timer timer;
+    //     typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
+    //     FileSearch finder;
+    //     std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+    //     std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+    //               << " seconds" << std::endl;
+    //     // for (auto aFile : finder.getData()) {
+    //     //     std::cout << aFile << "\n";
+    //     // }
+    // }
+
+    // {
+    //     std::vector<std::string> stems = {{"CMakeLists"}};
+    //     std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
+    //                                       ".internal", ".includecache", ".marks"}};
+    //     Timer timer;
+    //     typedef Utils::FileSearchBase<Utils::DFSFileSearchBase> Boo;
+    //     typedef Utils::BasicFileSearch<Boo, std::vector<std::string>, std::vector<std::string>> Foo;
+    //     typedef Utils::BasicFileSearch<Utils::DFSFileSearchBase, std::vector<std::string>, std::vector<std::string>> Hoo;
+
+    //     // Foo finder(stems, exts);
+    //     Foo finder(stems, exts);
+    //     std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+    //     std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
+    //               << " seconds" << std::endl;
+    // }
+
     {
-        Timer timer;
-        Utils::FileSearchBase<Utils::DFSFileSearchBase> finder;
+      typedef std::vector<Utils::FileInfo> Container;
+      const std::string dataFile = ".database";
+      Utils::Reader reader(dataFile);
+      Utils::FolderDiff<Container> diff;
+      const std::string aKey("/home/hungptit/projects/utils/testing/Testing");
 
-        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+      typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
+      FileSearch finder;
 
-        for (auto aFile : finder.filter(stems, exts)) {
-            std::cout << aFile << "\n";
-        }
-
-        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-    }
-
-    {
-        Timer timer;
-        typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
-        FileSearch finder;
-        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
-        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-        // for (auto aFile : finder.getData()) {
-        //     std::cout << aFile << "\n";
-        // }
-    }
-
-    {
-        std::vector<std::string> stems = {{"CMakeLists"}};
-        std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
-                                          ".internal", ".includecache", ".marks"}};
-        Timer timer;
-        typedef Utils::FileSearchBase<Utils::DFSFileSearchBase> Boo;
-        typedef Utils::BasicFileSearch<Boo, std::vector<std::string>, std::vector<std::string>> Foo;
-        typedef Utils::BasicFileSearch<Utils::DFSFileSearchBase, std::vector<std::string>, std::vector<std::string>> Hoo;
-
-        // Foo finder(stems, exts);
-        Foo finder(stems, exts);
-        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
-        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
+      // Find files
+      Timer timer;
+      diff.find(finder, aKey);
+      std::cout << "Find time: " << timer.toc() / timer.ticksPerSecond()
+                << " seconds" << std::endl;
+      Utils::print(finder.getData());
+      
+      // Read data
+      timer.tic();
+      auto dict = diff.read(reader, aKey);
+      std::cout << "Read time: " << timer.toc() / timer.ticksPerSecond()
+                << " seconds" << std::endl;
+      Utils::print(dict);
+      
+      // Find the diff
+      diff.diff(finder.getData(), dict);      
     }
 }

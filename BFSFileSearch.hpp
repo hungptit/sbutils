@@ -2,12 +2,12 @@
 #define BFSFileSearch_hpp_
 
 // STL headers
+#include <array>
+#include <deque>
+#include <queue>
 #include <string>
 #include <tuple>
-#include <array>
 #include <vector>
-#include <queue>
-#include <deque>
 
 // Boost libraries
 #define BOOST_THREAD_VERSION 4
@@ -22,7 +22,7 @@
 
 namespace Utils {
     /**
-     * This class define a file search algorithm using the depth-first search. 
+     * This class define a file search algorithm using the depth-first search.
      * Derived class will need to overwrite virtual functions.
      */
     class BFSFileSearchBase {
@@ -66,7 +66,7 @@ namespace Utils {
         virtual void update(const path &aPath,
                             boost::filesystem::file_status &fs) = 0;
         virtual void unexpected(const path &aPath) = 0;
-    };    
+    };
 }
 
 #endif
