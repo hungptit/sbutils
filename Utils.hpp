@@ -187,6 +187,15 @@ namespace Utils {
     }
 
     // File related utilities
+    std::string normalize_path(const std::string &aPath) {
+        auto pos = aPath.size() - 1;
+        auto sepChar = boost::filesystem::path::preferred_separator;
+        for (; pos != 0; --pos) {
+            if (aPath[pos] != sepChar) break;
+        }
+        return aPath.substr(0, pos + 1);
+    }
+
     bool isRegularFile(const std::string &str) {
         return boost::filesystem::is_regular_file(boost::filesystem::path(str));
     }
@@ -349,6 +358,7 @@ namespace Utils {
                 for (; dirIter != endIter; ++dirIter) {
                     auto currentPath = dirIter->path();
                     if (boost::filesystem::is_directory(currentPath)) {
+                        auto tmpPath = currentPath;
                         nextLevel.push_back(currentPath);
                     } else if (boost::filesystem::is_regular_file(
                                    currentPath)) {

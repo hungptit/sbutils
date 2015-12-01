@@ -57,7 +57,7 @@ namespace {
     }
 
     auto diff(Utils::Reader &reader, std::string &aPath, bool verbose) {
-        boost::filesystem::path p(aPath); // Use relative path
+        boost::filesystem::path p(Utils::normalize_path(aPath));
         auto aKey = p.string();
         if (verbose) {
             std::cout << "Current path: " << p << "\n";
