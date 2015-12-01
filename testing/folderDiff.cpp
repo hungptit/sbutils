@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     // clang-format on
 
     po::positional_options_description p;
-    p.add("database", -1);
+    p.add("folders", -1);
     po::variables_map vm;
     po::store(
         po::command_line_parser(argc, argv).options(desc).positional(p).run(),
