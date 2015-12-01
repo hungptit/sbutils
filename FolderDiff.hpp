@@ -1,12 +1,16 @@
 #ifndef FolderDiff_hpp
 #define FolderDiff_hpp
 
+#include "boost/unordered_map.hpp"
+#include "boost/unordered_set.hpp"
+
 namespace Utils {
     template <typename Container> class FolderDiff {
       public:
         template <typename FileSearch>
         void find(FileSearch &fsearch, const std::string &aFolder) {
             fsearch.search(aFolder);
+            // std::cout << "Found files: " << fsearch.getData().size() << "\n";
         }
 
         template <typename Reader>
@@ -17,52 +21,82 @@ namespace Utils {
                 std::istringstream is(results);
                 Utils::load<Utils::IArchive, Container>(dict, is);
             }
+            // std::cout << "Dictionary sizes: " << dict.size() << "\n";
             return dict;
         }
 
-      /**
-       * This methods will return a tuple which has
-       *     1. Items in first and not in second.
-       *     2. Items in both first and second but they are different.
-       *     3. Items which are in second and not in first.
-       * The first item of each data element is a using string which is a full file name. 
-       */
+        /**
+         * This methods will return a tuple which has
+         *     1. Items in first and not in second.
+         *     2. Items in both first and second but they are different.
+         *     3. Items which are in second and not in first.
+         * The first item of each data element is a using string which is a full
+         * file name.
+         */
         std::tuple<Container, Container, Container>
-        diff(const Container &first, const Container &second) {
+        diff(const Container &first, const Container &second,
+             bool verbose = false) {
 
-          Container modifiedFiles;
-          Container newFiles;
-          Container deletedFiles;
+            Container modifiedFiles;
+            Container results;
+            Container newFiles;
+            Container deletedFiles;
 
-          // Create a lookup table
-          typedef typename Container::value_type value_type;
-          std::set<value_type> dict;
-          for (auto item : second) {
-            dict.emplace(item);
-          }
+            // Create a lookup table
+            typedef typename Container::value_type value_type;
+            boost::unordered_set<value_type> dict(second.begin(), second.end());
 
-          // Cleanup iteam which belong to both.
-          // The complexity of this algorithm is n * log(n).
-          for (auto item : first) {
-            auto pos = dict.find(item);
-            if (pos == dict.end()) {
-              modifiedFiles.emplace_back(item);
-            } else {
-              dict.erase(pos);
+            if (verbose) {
+                std::cout << "---- Dictionary sizes: " << dict.size() << " \n";
             }
-          }
 
-          // Separate modified, new, and delete files.
-          
-          std::cout << "----\n";
-          Utils::print(modifiedFiles);
-          std::cout << "----\n";
-          Utils::print(dict);
+            // Cleanup iteam which belong to both.
+            // The complexity of this algorithm is O(cn).
+            for (auto item : first) {
+                auto pos = dict.find(item);
+                if (pos == dict.end()) {
+                    // modified files and new files will be stored in results.
+                    results.emplace_back(item);
+                } else {
+                    dict.erase(pos);
+                }
+            }
 
-          // Get a list of edited, new, and removed files.
-          
-          
-          return std::make_tuple(modifiedFiles, newFiles, deletedFiles);
+            // Get modified and deleted items.
+            boost::unordered_map<std::string, value_type> map;
+            for (auto item : dict) {
+                map[std::get<0>(item)] = item;
+            }
+
+            if (verbose) {
+                std::cout << "map:\n";
+                Utils::print(map);
+                std::cout << "results:\n";
+                Utils::print(results);
+            }
+
+            if (!map.empty()) {
+                for (auto item : results) {
+                    auto aKey = std::get<0>(item);
+                    auto pos = map.find(aKey);
+                    if (pos != map.end()) {
+                        modifiedFiles.emplace_back(item);
+                        map.erase(aKey);
+                    } else {
+                        newFiles.emplace_back(item);
+                    }
+                }
+            } else {
+                newFiles = std::move(results);
+            }
+
+            // Get deleted items
+            for (auto item : map) {
+                deletedFiles.emplace_back(item.second);
+            }
+
+            // Return
+            return std::make_tuple(modifiedFiles, newFiles, deletedFiles);
         }
     };
 }

@@ -35,22 +35,12 @@ namespace Utils {
         typedef std::vector<typename Map::mapped_type> Container;
 
         SandboxFinder(InputArguments &params, size_t maxlen = 4096)
-            : Params(params), Alg(std::get<EXTENSIONS>(Params)),
-              MaxLen(maxlen){};
+            : Params(params), Alg(), MaxLen(maxlen){};
 
         void find() {
             auto folders = std::get<FOLDERS>(Params);
             for (const auto &aFolder : folders) {
                 Alg.search(getPath(aFolder));
-            }
-
-            if (std::get<VERBOSE>(Params)) {
-                auto data = Alg.getData();
-                std::cout << "==== Search results ====\n";
-                std::cout << "Number of files: " << data.size() << '\n';
-                for (auto const &info : data) {
-                    std::cout << std::get<0>(info) << "\n";
-                }
             }
         }
 
@@ -132,7 +122,8 @@ namespace Utils {
 
         template <typename FilterRules>
         size_t filter(const FilterRules &rules) {
-            auto const data = Alg.getData();
+            auto data = Alg.filter(std::get<STEMS>(Params),
+                                   std::get<EXTENSIONS>(Params));
             std::cout << "Edited files: " << data.size() << std::endl;
             size_t counter = 0;
             for (const auto &anEditedFile : data) {
@@ -152,7 +143,8 @@ namespace Utils {
         }
 
         size_t filter() {
-            auto const data = Alg.getData();
+            auto data = Alg.filter(std::get<STEMS>(Params),
+                                   std::get<EXTENSIONS>(Params));
             std::cout << "Edited files: " << data.size() << std::endl;
 
             size_t counter = 0;

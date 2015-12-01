@@ -27,10 +27,10 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        std::cout << "Usage: buildEditedFileDatabase [options]\n";
+        std::cout << "Usage: viewer [options]\n";
         std::cout << desc;
         std::cout << "Examples:" << std::endl;
-        std::cout << "\t finder ./ -d testdata." << std::endl;
+        std::cout << "\t viewer -d .database -s AutoFix" << std::endl;
         return 0;
     }
 
@@ -91,10 +91,11 @@ int main(int argc, char *argv[]) {
         auto locateObj =
             ThreadedLocate(dataFile, stems, extensions, searchStrings);
         (isThreaded) ? locateObj.locate_t() : locateObj.locate();
-        
         std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
                   << " seconds" << std::endl;
-        locateObj.print();
+        
+        // Display search results.
+        locateObj.print(verbose);
     }
 
     return 0;

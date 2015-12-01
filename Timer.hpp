@@ -5,16 +5,22 @@
 
 class Timer {
   public:
-    Timer() { tic(); }
-    void tic() { StartTime = clock::now(); }
-    auto toc() const { return (clock::now() - StartTime).count(); }
-    static auto ticksPerSecond() {
-        double den = clock::duration::period::den;
-        return den / clock::duration::period::num;
+    Timer() {
+        tic();
+        TicksPerSeconds =
+            clock::duration::period::den / clock::duration::period::num;
     }
+
+    void tic() { StartTime = clock::now(); }
+
+    auto toc() const { return (clock::now() - StartTime).count(); }
+
+    auto ticksPerSecond() const { return TicksPerSeconds; }
 
   private:
     using clock = std::chrono::high_resolution_clock;
     clock::time_point StartTime;
+    double TicksPerSeconds;
 };
+
 #endif

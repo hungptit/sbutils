@@ -46,10 +46,12 @@ namespace {
     ThreadedLocate(const std::string &dataFile,
                    const std::vector<std::string> &stems)
       : Reader(dataFile), Stems(stems) {}
+
     ThreadedLocate(const std::string &dataFile,
                    const std::vector<std::string> &stems,
                    const std::vector<std::string> &exts)
       : Reader(dataFile), Stems(stems), Extensions(exts) {}
+
     ThreadedLocate(const std::string &dataFile,
                    const std::vector<std::string> &stems,
                    const std::vector<std::string> &exts,
@@ -75,8 +77,7 @@ namespace {
     }
 
     void print(bool verbose = false) {
-      Set results;
-      results.insert(Results.begin(), Results.end());
+      Set results(Results.begin(), Results.end());
       if (verbose) {
         std::for_each(results.begin(), results.end(),
                       [](auto &item) { std::cout << item << "\n"; });

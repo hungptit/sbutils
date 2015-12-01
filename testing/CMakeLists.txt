@@ -77,10 +77,10 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   
-  set(COMMAND_SRC_FILES finder viewer  buildFileDatabase tTest)
+  set(COMMAND_SRC_FILES finder viewer  buildFileDatabase folderDiff tTest)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} 
+    TARGET_LINK_LIBRARIES(${src_file}
       ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_CPPFORMAT} ${LIB_SNAPPY} -lpthread -lrt)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
