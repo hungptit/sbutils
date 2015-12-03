@@ -31,18 +31,6 @@
 #include <vector>
 
 namespace {
-    class ElapsedTime {
-      public:
-        ~ElapsedTime() {
-            std::cout << "Elapsed time: "
-                      << Timer_.toc() / Timer_.ticksPerSecond() << " seconds"
-                      << std::endl;
-        }
-
-      private:
-        Timer Timer_;
-    };
-
     // TODO: Need to add filter to this function.
     template <typename Container> void print(Container &data, bool verbose) {
         if (verbose) {
@@ -64,7 +52,7 @@ namespace {
             std::cout << "Current key: " << aKey << "\n";
         }
 
-        Timer timer;
+        Utils::Timer timer;
 
         typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
         FileSearch finder;
@@ -92,6 +80,25 @@ namespace {
                       << " seconds" << std::endl;
         }
         return results;
+    }
+
+    auto diffFolders(std::vector<std::string> &folders, std::string &dataFile,
+                     bool verbose) {
+        Utils::Reader reader(dataFile);
+        std::vector<Utils::FileInfo> allEditedFiles, allNewFiles,
+            allDeletedFiles;
+        for (auto aPath : folders) {
+            std::vector<Utils::FileInfo> editedFiles, newFiles, deletedFiles;
+            std::tie(editedFiles, newFiles, deletedFiles) =
+                diff(reader, aPath, verbose);
+            std::move(editedFiles.begin(), editedFiles.end(),
+                      std::back_inserter(allEditedFiles));
+            std::move(newFiles.begin(), newFiles.end(),
+                      std::back_inserter(allNewFiles));
+            std::move(deletedFiles.begin(), deletedFiles.end(),
+                      std::back_inserter(allDeletedFiles));
+        }
+        return std::make_tuple(allEditedFiles, allNewFiles, allDeletedFiles);
     }
 }
 
@@ -176,28 +183,23 @@ int main(int argc, char *argv[]) {
         std::cout << "Database: " << dataFile << std::endl;
     }
 
-    Utils::Reader reader(dataFile);
-
     {
-        ElapsedTime e;
+        Utils::ElapsedTime<Utils::MILLISECOND> e;
+        std::vector<Utils::FileInfo> allEditedFiles, allNewFiles,
+            allDeletedFiles;
+        std::tie(allEditedFiles, allNewFiles, allDeletedFiles) =
+            diffFolders(folders, dataFile, verbose);
 
-        // Find files
-        for (auto aPath : folders) {
-            std::vector<Utils::FileInfo> editedFiles, newFiles, deletedFiles;
-            std::tie(editedFiles, newFiles, deletedFiles) =
-                diff(reader, aPath, verbose);
+        // Now we will display the results
+        std::cout << "---- Modified files: " << allEditedFiles.size()
+                  << " ----\n";
+        print(allEditedFiles, verbose);
 
-            // Now we will display the results
-            std::cout << "---- Modified files: " << editedFiles.size()
-                      << " ----\n";
-            print(editedFiles, verbose);
+        std::cout << "---- New files: " << allNewFiles.size() << " ----\n";
+        print(allNewFiles, verbose);
 
-            std::cout << "---- New files: " << newFiles.size() << " ----\n";
-            Utils::print(newFiles);
-
-            std::cout << "---- Deleted files: " << deletedFiles.size()
-                      << " ----\n";
-            Utils::print(deletedFiles);
-        }
+        std::cout << "---- Deleted files: " << allDeletedFiles.size()
+                  << " ----\n";
+        print(allDeletedFiles, verbose);
     }
 }

@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-    Timer timer;
+    Utils::Timer timer;
     
     // clang-format off
     desc.add_options()

@@ -68,13 +68,6 @@ namespace Utils {
                 map[std::get<0>(item)] = item;
             }
 
-            if (verbose) {
-                std::cout << "map:\n";
-                Utils::print(map);
-                std::cout << "results:\n";
-                Utils::print(results);
-            }
-
             if (!map.empty()) {
                 for (auto item : results) {
                     auto aKey = std::get<0>(item);

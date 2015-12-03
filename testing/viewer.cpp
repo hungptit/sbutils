@@ -87,13 +87,13 @@ int main(int argc, char *argv[]) {
             std::cout << aKey << std::endl;
         }
     } else {
-        Timer timer;
+        Utils::Timer timer;
         auto locateObj =
             ThreadedLocate(dataFile, stems, extensions, searchStrings);
         (isThreaded) ? locateObj.locate_t() : locateObj.locate();
         std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
                   << " seconds" << std::endl;
-        
+
         // Display search results.
         locateObj.print(verbose);
     }

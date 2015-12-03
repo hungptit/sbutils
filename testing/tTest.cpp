@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
                                       ".internal", ".includecache", ".marks"}};
 
     {
-        Timer timer;
+        Utils::Timer timer;
         Utils::FileSearchBase<Utils::DFSFileSearchBase> finder;
 
         std::cout << "Number of file: " << finder.search(aPath) << std::endl;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        Timer timer;
+        Utils::Timer timer;
         typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
         FileSearch finder;
         std::cout << "Number of file: " << finder.search(aPath) << std::endl;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> stems = {{"CMakeLists"}};
         std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
                                           ".internal", ".includecache", ".marks"}};
-        Timer timer;
+        Utils::Timer timer;
         typedef Utils::FileSearchBase<Utils::DFSFileSearchBase> Boo;
         typedef Utils::BasicFileSearch<Boo, std::vector<std::string>, std::vector<std::string>> Foo;
         typedef Utils::BasicFileSearch<Utils::DFSFileSearchBase, std::vector<std::string>, std::vector<std::string>> Hoo;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
       FileSearch finder;
 
       // Find files
-      Timer timer;
+      Utils::Timer timer;
       diff.find(finder, aKey);
       std::cout << "Find time: " << timer.toc() / timer.ticksPerSecond()
                 << " seconds" << std::endl;

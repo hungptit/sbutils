@@ -125,8 +125,8 @@ TEST(FileDatabase, Positive) {
 
     // Now read the data back and compare with the original data.
     {
-      Timer timer;
-      Utils::Reader reader(dataFile.string());
+        Utils::Timer timer;
+        Utils::Reader reader(dataFile.string());
         std::istringstream is(reader.read(key));
         std::vector<Utils::FileInfo> rdata;
         Utils::load<Utils::IArchive, decltype(rdata)>(rdata, is);
