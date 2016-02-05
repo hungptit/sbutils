@@ -76,7 +76,7 @@ class TestData {
 };
 
 // TEST(FileSearchStrategy, Positive) {
-//     Utils::TemporaryDirectory tmpDir;
+//     utils::TemporaryDirectory tmpDir;
 //     {
 //         TestData testData(tmpDir.getPath());
 //         boost::filesystem::path aFile = tmpDir.getPath() /
@@ -84,17 +84,17 @@ class TestData {
 //                                         boost::filesystem::path("test.cpp");
 //         boost::filesystem::file_status fs = boost::filesystem::status(aFile);
 //         {
-//             Utils::SearchAllFiles st;
+//             utils::SearchAllFiles st;
 //             EXPECT_TRUE(st.isValid(fs));
 //         }
 
 //         {
-//             Utils::OwnerReadFiles st;
+//             utils::OwnerReadFiles st;
 //             EXPECT_TRUE(st.isValid(fs));
 //         }
 
 //         {
-//             Utils::OwnerWriteFile st;
+//             utils::OwnerWriteFile st;
 //             EXPECT_TRUE(st.isValid(fs));
 //         }
 //     }
@@ -105,12 +105,12 @@ class TestData {
 //                                         boost::filesystem::path("data.mat");
 //         boost::filesystem::file_status fs = boost::filesystem::status(aFile);
 //         {
-//             Utils::OwnerReadFiles st;
+//             utils::OwnerReadFiles st;
 //             EXPECT_TRUE(st.isValid(fs));
 //         }
 
 //         {
-//             Utils::OwnerWriteFile st;
+//             utils::OwnerWriteFile st;
 //             EXPECT_TRUE(st.isValid(fs));
 //         }
 //     }
@@ -121,7 +121,7 @@ class TestData {
 //         Map supportedExts = {".txt", ".dat", ".mat"};
 //         std::sort(supportedExts.begin(), supportedExts.end());
 
-//         Utils::SearchFileExtension<std::vector<std::string>>
+//         utils::SearchFileExtension<std::vector<std::string>>
 //         st(supportedExts);
 
 //         {
@@ -145,12 +145,12 @@ class TestData {
 //         const boost::regex expression2("file1");
 
 //         {
-//             Utils::SearchFileName st(expression1);
+//             utils::SearchFileName st(expression1);
 //             EXPECT_TRUE(st.isValid(aFile));
 //         }
 
 //         {
-//             Utils::SearchFileName st(expression2);
+//             utils::SearchFileName st(expression2);
 //             EXPECT_FALSE(st.isValid(aFile));
 //         }
 //     }
@@ -159,7 +159,7 @@ class TestData {
 TEST(FileSearchDefault, Positive) {
     TemporaryDirectory tmpDir;
     TestData testData(tmpDir.getPath());
-    // Utils::FileFinder fSearch;
+    // utils::FileFinder fSearch;
     // fSearch.search(tmpDir.getPath());
     // std::cout << "Search path: " << tmpDir.getPath().string() << std::endl;
     // fSearch.print();
@@ -176,6 +176,6 @@ TEST(FileSearchDefault, Positive) {
 }
 
 // TEST(FileSearchDefault, Negative) {
-//     Utils::FileFinder fSearch;
+//     utils::FileFinder fSearch;
 //     ASSERT_ANY_THROW(fSearch.search(boost::filesystem::path("foo")));
 // }

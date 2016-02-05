@@ -73,8 +73,7 @@ namespace {
     }
 }
 
-namespace Utils {
-    // Display utilities
+namespace utils {
     template <typename Data> void disp(Data &data, const std::string &message) {
         std::cout << message << "[ ";
         std::for_each(data.begin(), data.end(),

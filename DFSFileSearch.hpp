@@ -18,7 +18,7 @@
 // CPPFormat
 #include "cppformat/format.h"
 
-namespace Utils {
+namespace utils {
     /**
      * This class define a file search algorithm using the depth-first search. 
      * Derived class will need to overwrite virtual functions.

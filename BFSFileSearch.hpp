@@ -13,14 +13,10 @@
 #define BOOST_THREAD_VERSION 4
 #include "boost/config.hpp"
 #include "boost/filesystem.hpp"
-
-// Headers from utils package.
-#include "utils/Utils.hpp"
-
-// CPPFormat
+#include "Utils.hpp"
 #include "cppformat/format.h"
 
-namespace Utils {
+namespace utils {
     /**
      * This class define a file search algorithm using the depth-first search.
      * Derived class will need to overwrite virtual functions.

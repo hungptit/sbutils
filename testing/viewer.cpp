@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database))
+        dataFile = (boost::filesystem::path(utils::FileDatabaseInfo::Database))
                        .string();
     }
 
@@ -82,12 +82,12 @@ int main(int argc, char *argv[]) {
     }
 
     if (vm.count("keys")) {
-        Utils::Reader reader(dataFile);
+        utils::Reader reader(dataFile);
         for (auto &aKey : reader.keys()) {
             std::cout << aKey << std::endl;
         }
     } else {
-        Utils::Timer timer;
+        utils::Timer timer;
         auto locateObj =
             ThreadedLocate(dataFile, stems, extensions, searchStrings);
         (isThreaded) ? locateObj.locate_t() : locateObj.locate();

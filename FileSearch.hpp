@@ -11,13 +11,10 @@
 #include "boost/config.hpp"
 #include "boost/filesystem.hpp"
 
-// Headers from utils package.
+#include "cppformat/format.h"
 #include "utils/Utils.hpp"
 
-// CPPFormat
-#include "cppformat/format.h"
-
-namespace Utils {
+namespace utils {
     /**
      * Find all file using the algorithm provided by the base class.
      *
@@ -26,26 +23,24 @@ namespace Utils {
       public:
         explicit FileSearchBase() {}
 
-        explicit FileSearchBase(size_t size) {
-            Data.reserve(size);
-        }
+        explicit FileSearchBase(size_t size) { Data.reserve(size); }
 
         auto getData() { return Data; }
 
         template <typename StemContainer, typename ExtContainer>
-        std::vector<Utils::FileInfo> filter(StemContainer &stems, ExtContainer &exts) {
-            std::vector<Utils::FileInfo> results;
+        std::vector<utils::FileInfo> filter(StemContainer &stems,
+                                            ExtContainer &exts) {
+            std::vector<utils::FileInfo> results;
             for (auto item : Data) {
                 auto stem = std::get<1>(item);
                 auto ext = std::get<2>(item);
                 bool flag = (std::find(stems.begin(), stems.end(),
                                        std::get<1>(item)) == stems.end()) &&
-                    ((std::find(exts.begin(), exts.end(),
-                                std::get<2>(item)) == exts.end()));
+                            ((std::find(exts.begin(), exts.end(),
+                                        std::get<2>(item)) == exts.end()));
                 if (flag) {
                     results.emplace_back(item);
                 }
-
             }
             return results;
         }
@@ -73,7 +68,7 @@ namespace Utils {
         };
 
       private:
-        std::vector<Utils::FileInfo> Data;
+        std::vector<utils::FileInfo> Data;
     };
 
     template <typename Base, typename StemContainer, typename ExtContainer>
@@ -115,7 +110,7 @@ namespace Utils {
         };
 
       private:
-        std::vector<Utils::FileInfo> Data;
+        std::vector<utils::FileInfo> Data;
         StemContainer Stems;
         ExtContainer Exts;
     };

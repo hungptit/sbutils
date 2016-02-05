@@ -2,7 +2,19 @@
 #define Timer_hpp
 
 #include <chrono>
-namespace Utils {
+
+namespace utils {
+    enum DispOpt { MICROSECOND = 1000000, MILLISECOND = 1000, SECOND = 1 };
+    template <DispOpt val> std::string getUnitString();
+
+    template <> std::string getUnitString<MICROSECOND>() {
+        return " microseconds";
+    }
+    template <> std::string getUnitString<MILLISECOND>() {
+        return " milliseconds";
+    }
+    template <> std::string getUnitString<SECOND>() { return " seconds"; }
+
     class Timer {
       public:
         Timer() {
@@ -22,16 +34,6 @@ namespace Utils {
         clock::time_point StartTime;
         double TicksPerSeconds;
     };
-
-    enum DispOpt { MICROSECOND = 1000000, MILLISECOND = 1000, SECOND = 1 };
-    template <DispOpt val> std::string getUnitString();
-    template <> std::string getUnitString<MICROSECOND>() {
-        return " microseconds";
-    }
-    template <> std::string getUnitString<MILLISECOND>() {
-        return " milliseconds";
-    }
-    template <> std::string getUnitString<SECOND>() { return " seconds"; }
 
     template <DispOpt val> class ElapsedTime {
       public:

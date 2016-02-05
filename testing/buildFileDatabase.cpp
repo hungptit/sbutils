@@ -56,22 +56,22 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database))
+        dataFile = (boost::filesystem::path(utils::FileDatabaseInfo::Database))
                        .string();
     }
 
     // Build file information database
-    Utils::Writer writer(dataFile);
+    utils::Writer writer(dataFile);
     for (const auto &aFolder : folders) {
         // Search for files
-        const std::string aPath = Utils::getAbslutePath(aFolder);
-        Utils::FileSearchBase<Utils::DFSFileSearchBase> fSearch;
+        const std::string aPath = utils::getAbslutePath(aFolder);
+        utils::FileSearchBase<utils::DFSFileSearchBase> fSearch;
         fSearch.search(aPath);
 
         // Serialized file information to string
         std::ostringstream os;
         auto data = fSearch.getData();
-        Utils::save<Utils::OArchive, decltype(data)>(data, os);
+        utils::save<utils::OArchive, decltype(data)>(data, os);
         const auto value = os.str();
 
         // Write searched info to database.

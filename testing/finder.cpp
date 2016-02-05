@@ -17,8 +17,8 @@ int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-    Utils::Timer timer;
-    
+    utils::Timer timer;
+
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
@@ -87,12 +87,12 @@ int main(int argc, char *argv[]) {
     }
 
     // Search for files in the given folders.
-    Utils::BasicFileSearch<Utils::DFSFileSearchBase, std::vector<std::string>,
+    utils::BasicFileSearch<utils::DFSFileSearchBase, std::vector<std::string>,
                            std::vector<std::string>> searchAlg(stems,
                                                                extensions);
 
     for (auto &val : folders) {
-        searchAlg.search(val);
+      searchAlg.search(val);
     }
 
     auto data = searchAlg.getData();
@@ -116,8 +116,8 @@ int main(int argc, char *argv[]) {
         });
     }
     if (!jsonFile.empty()) {
-        std::ostringstream os;
-        Utils::save<cereal::JSONOutputArchive, decltype(data)>(data, os);
+      std::ostringstream os;
+        utils::save<cereal::JSONOutputArchive, decltype(data)>(data, os);
         std::ofstream myfile(jsonFile);
         myfile << os.str() << std::endl;
     }

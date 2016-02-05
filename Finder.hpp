@@ -58,7 +58,7 @@ namespace Utils {
             }
 
             // Read all keys from the database
-            Utils::Reader reader(dataFile);
+            utils::Reader reader(dataFile);
             auto allKeys = reader.keys();
             printKeys(Params, allKeys);
 
@@ -70,7 +70,7 @@ namespace Utils {
                 loadAllKeys = true;
             } else {
                 for (auto aPath : folders) {
-                    auto aKey = Utils::findParent(allKeys, aPath);
+                    auto aKey = utils::findParent(allKeys, aPath);
                     if (aKey.empty()) {
                         loadAllKeys =
                             true; // Cannot find a current key. We need to
@@ -95,7 +95,7 @@ namespace Utils {
                 if (!results.empty()) {
                     decltype(database) data;
                     std::istringstream is(results);
-                    Utils::load<Utils::IArchive, decltype(data)>(data, is);
+                    utils::load<utils::IArchive, decltype(data)>(data, is);
                     std::move(data.begin(), data.end(),
                               std::back_inserter(database));
                 }

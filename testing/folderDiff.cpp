@@ -44,20 +44,20 @@ namespace {
         }
     }
 
-    auto diff(Utils::Reader &reader, std::string &aPath, bool verbose) {
-        boost::filesystem::path p(Utils::normalize_path(aPath));
+    auto diff(utils::Reader &reader, std::string &aPath, bool verbose) {
+        boost::filesystem::path p(utils::normalize_path(aPath));
         auto aKey = p.string();
         if (verbose) {
             std::cout << "Current path: " << p << "\n";
             std::cout << "Current key: " << aKey << "\n";
         }
 
-        Utils::Timer timer;
+        utils::Timer timer;
 
-        typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
+        typedef utils::FileSearchBase<utils::BFSFileSearchBase> FileSearch;
         FileSearch finder;
-        typedef std::vector<Utils::FileInfo> Container;
-        Utils::FolderDiff<Container> diff;
+        typedef std::vector<utils::FileInfo> Container;
+        utils::FolderDiff<Container> diff;
 
         diff.find(finder, aKey);
         if (verbose) {
@@ -84,11 +84,11 @@ namespace {
 
     auto diffFolders(std::vector<std::string> &folders, std::string &dataFile,
                      bool verbose) {
-        Utils::Reader reader(dataFile);
-        std::vector<Utils::FileInfo> allEditedFiles, allNewFiles,
+        utils::Reader reader(dataFile);
+        std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
         for (auto aPath : folders) {
-            std::vector<Utils::FileInfo> editedFiles, newFiles, deletedFiles;
+            std::vector<utils::FileInfo> editedFiles, newFiles, deletedFiles;
             std::tie(editedFiles, newFiles, deletedFiles) =
                 diff(reader, aPath, verbose);
             std::move(editedFiles.begin(), editedFiles.end(),
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(Utils::FileDatabaseInfo::Database))
+        dataFile = (boost::filesystem::path(utils::FileDatabaseInfo::Database))
                        .string();
     }
 
@@ -184,8 +184,8 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        Utils::ElapsedTime<Utils::MILLISECOND> e;
-        std::vector<Utils::FileInfo> allEditedFiles, allNewFiles,
+        utils::ElapsedTime<utils::MILLISECOND> e;
+        std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
         std::tie(allEditedFiles, allNewFiles, allDeletedFiles) =
             diffFolders(folders, dataFile, verbose);
