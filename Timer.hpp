@@ -24,21 +24,22 @@ namespace Utils {
     };
 
     enum DispOpt { MICROSECOND = 1000000, MILLISECOND = 1000, SECOND = 1 };
+    
     template <DispOpt val> std::string getUnitString();
     template <> std::string getUnitString<MICROSECOND>() {
-        return " microseconds";
+        return "microseconds";
     }
     template <> std::string getUnitString<MILLISECOND>() {
-        return " milliseconds";
+        return "milliseconds";
     }
-    template <> std::string getUnitString<SECOND>() { return " seconds"; }
+    template <> std::string getUnitString<SECOND>() { return "seconds"; }
 
     template <DispOpt val> class ElapsedTime {
       public:
         ~ElapsedTime() {
             std::cout << "Elapsed time: "
                       << Timer_.toc() * val / Timer_.ticksPerSecond()
-                      << getUnitString<val>() << std::endl;
+                      << " " << getUnitString<val>() << std::endl;
         }
 
       private:

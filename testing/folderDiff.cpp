@@ -129,10 +129,10 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        std::cout << "Usage: viewer [options]\n";
+        // std::cout << "Usage:  [options]\n";
         std::cout << desc;
         std::cout << "Examples:" << std::endl;
-        std::cout << "\t viewer -d .database -s AutoFix" << std::endl;
+        std::cout << "\t viewer matlab/src matlab/test" << std::endl;
         return 0;
     }
 

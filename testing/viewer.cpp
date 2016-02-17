@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 
     if (vm.count("keys")) {
         Utils::Reader reader(dataFile);
-        for (auto &aKey : reader.keys()) {
+        for (auto const &aKey : reader.keys()) {
             std::cout << aKey << std::endl;
         }
     } else {

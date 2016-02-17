@@ -69,7 +69,7 @@ namespace Utils {
             if (folders.empty()) {
                 loadAllKeys = true;
             } else {
-                for (auto aPath : folders) {
+                for (auto const &aPath : folders) {
                     auto aKey = Utils::findParent(allKeys, aPath);
                     if (aKey.empty()) {
                         loadAllKeys =

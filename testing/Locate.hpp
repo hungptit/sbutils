@@ -104,7 +104,7 @@ namespace {
 
         Container filter(const Container &data) {
             Container results;
-            for (auto info : data) {
+            for (auto const &info : data) {
                 bool flag = (Stems.empty() ||
                              std::find(Stems.begin(), Stems.end(),
                                        std::get<1>(info)) != Stems.end()) &&
@@ -129,9 +129,9 @@ namespace {
             std::istringstream is(Reader.read(aKey));
             Container data;
             Utils::load<Utils::IArchive, decltype(data)>(data, is);
-            std::cout << "Deserialize time: "
-                      << timer.toc() / timer.ticksPerSecond() << " seconds"
-                      << std::endl;
+            // std::cout << "Deserialize time: "
+            //           << timer.toc() / timer.ticksPerSecond() << " seconds"
+            //           << std::endl;
             return data;
         }
     };
