@@ -38,8 +38,8 @@ namespace {
      */
     class ThreadedLocate {
       public:
-        typedef std::set<Utils::FileInfo> Set;
-        typedef std::vector<Utils::FileInfo> Container;
+        typedef std::set<utils::FileInfo> Set;
+        typedef std::vector<utils::FileInfo> Container;
 
         ThreadedLocate(const std::string &dataFile) : Reader(dataFile) {}
 
@@ -91,7 +91,7 @@ namespace {
         Container getResults() const { return Results; }
 
       private:
-        Utils::Reader Reader;
+        utils::Reader Reader;
         std::vector<std::string> Keys;
         std::vector<std::string> Stems;
         std::vector<std::string> Extensions;
@@ -118,20 +118,20 @@ namespace {
             return results;
         }
 
-        void updateSearchResults(const std::vector<Utils::FileInfo> &results) {
+        void updateSearchResults(const std::vector<utils::FileInfo> &results) {
             boost::unique_lock<boost::mutex> guard(UpdateResults);
             std::move(results.begin(), results.end(),
                       std::back_inserter(Results)); // C++11 feature
         }
 
         Container deserialize(const std::string &aKey) {
-            Utils::Timer timer;
+            utils::Timer timer;
             std::istringstream is(Reader.read(aKey));
             Container data;
-            Utils::load<Utils::IArchive, decltype(data)>(data, is);
-            // std::cout << "Deserialize time: "
-            //           << timer.toc() / timer.ticksPerSecond() << " seconds"
-            //           << std::endl;
+            utils::load<utils::IArchive, decltype(data)>(data, is);
+            std::cout << "Deserialize time: "
+                      << timer.toc() / timer.ticksPerSecond() << " seconds"
+                      << std::endl;
             return data;
         }
     };

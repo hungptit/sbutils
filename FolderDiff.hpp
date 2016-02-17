@@ -4,7 +4,7 @@
 #include "boost/unordered_map.hpp"
 #include "boost/unordered_set.hpp"
 
-namespace Utils {
+namespace utils {
     template <typename Container> class FolderDiff {
       public:
         template <typename FileSearch>
@@ -19,7 +19,7 @@ namespace Utils {
             auto const results = reader.read(aKey);
             if (!results.empty()) {
                 std::istringstream is(results);
-                Utils::load<Utils::IArchive, Container>(dict, is);
+                utils::load<utils::IArchive, Container>(dict, is);
             }
             // std::cout << "Dictionary sizes: " << dict.size() << "\n";
             return dict;

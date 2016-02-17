@@ -41,8 +41,8 @@ int main(int argc, char *argv[]) {
                                       ".internal", ".includecache", ".marks"}};
 
     {
-        Utils::Timer timer;
-        Utils::FileSearchBase<Utils::DFSFileSearchBase> finder;
+        utils::Timer timer;
+        utils::FileSearchBase<utils::DFSFileSearchBase> finder;
 
         std::cout << "Number of file: " << finder.search(aPath) << std::endl;
 
@@ -55,8 +55,8 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        Utils::Timer timer;
-        typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
+        utils::Timer timer;
+        typedef utils::FileSearchBase<utils::BFSFileSearchBase> FileSearch;
         FileSearch finder;
         std::cout << "Number of file: " << finder.search(aPath) << std::endl;
         std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
@@ -70,10 +70,10 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> stems = {{"CMakeLists"}};
         std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
                                           ".internal", ".includecache", ".marks"}};
-        Utils::Timer timer;
-        typedef Utils::FileSearchBase<Utils::DFSFileSearchBase> Boo;
-        typedef Utils::BasicFileSearch<Boo, std::vector<std::string>, std::vector<std::string>> Foo;
-        typedef Utils::BasicFileSearch<Utils::DFSFileSearchBase, std::vector<std::string>, std::vector<std::string>> Hoo;
+        utils::Timer timer;
+        typedef utils::FileSearchBase<utils::DFSFileSearchBase> Boo;
+        typedef utils::BasicFileSearch<Boo, std::vector<std::string>, std::vector<std::string>> Foo;
+        typedef utils::BasicFileSearch<utils::DFSFileSearchBase, std::vector<std::string>, std::vector<std::string>> Hoo;
 
         // Foo finder(stems, exts);
         Foo finder(stems, exts);
@@ -83,28 +83,28 @@ int main(int argc, char *argv[]) {
     }
 
     {                    
-      typedef std::vector<Utils::FileInfo> Container;
+      typedef std::vector<utils::FileInfo> Container;
       const std::string dataFile = ".database";
-      Utils::Reader reader(dataFile);
-      Utils::FolderDiff<Container> diff;
+      utils::Reader reader(dataFile);
+      utils::FolderDiff<Container> diff;
       const std::string aKey("/local-ssd/sandbox/exportfcns");
 
-      typedef Utils::FileSearchBase<Utils::BFSFileSearchBase> FileSearch;
+      typedef utils::FileSearchBase<utils::BFSFileSearchBase> FileSearch;
       FileSearch finder;
 
       // Find files
-      Utils::Timer timer;
+      utils::Timer timer;
       diff.find(finder, aKey);
       std::cout << "Find time: " << timer.toc() / timer.ticksPerSecond()
                 << " seconds" << std::endl;
-      // Utils::print(finder.getData());
+      // utils::print(finder.getData());
       
       // Read data
       timer.tic();
       auto dict = diff.read(reader, aKey);
       std::cout << "Read time: " << timer.toc() / timer.ticksPerSecond()
                 << " seconds" << std::endl;
-      // Utils::print(dict);
+      // utils::print(dict);
       
       // Find the diff
       timer.tic();
@@ -115,14 +115,14 @@ int main(int argc, char *argv[]) {
 
       std::cout << "---- Modified files: "
                 << editedFiles.size() << " ----\n";
-      Utils::print(editedFiles);
+      utils::print(editedFiles);
       
       std::cout << "---- New files: "
                 << newFiles.size() << " ----\n";
-      Utils::print(newFiles);
+      utils::print(newFiles);
 
       std::cout << "---- Deleted files: "
                 << deletedFiles.size() << " ----\n";
-      Utils::print(deletedFiles);
+      utils::print(deletedFiles);
     }
 }
