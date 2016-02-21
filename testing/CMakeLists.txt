@@ -13,7 +13,7 @@ ENABLE_TESTING()
 # Used libraries
 set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
-set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/libleveldb.a")
+set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/out-static/libleveldb.a")
 
 # Find Boost libraries
 set(Boost_USE_STATIC_LIBS ON)
