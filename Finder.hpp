@@ -7,7 +7,7 @@
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
 
-namespace Utils {
+namespace utils {
     enum {
         VERBOSE,
         DATAFILE,

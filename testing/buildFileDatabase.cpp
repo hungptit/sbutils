@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
         ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
-
+    
     po::positional_options_description p;
     p.add("folders", -1);
     po::variables_map vm;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
         std::cout << desc;
         return 0;
     }
-
+    
     bool verbose = false;
     if (vm.count("verbose")) {
         verbose = true;

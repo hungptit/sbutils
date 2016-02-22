@@ -2,6 +2,10 @@
 #define Utils_hpp_
 
 // Cereal
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/archives/xml.hpp>
 #include <cereal/types/array.hpp>
 #include <cereal/types/bitset.hpp>
 #include <cereal/types/chrono.hpp>
@@ -22,10 +26,6 @@
 #include <cereal/types/utility.hpp>
 #include <cereal/types/valarray.hpp>
 #include <cereal/types/vector.hpp>
-#include <cereal/archives/binary.hpp>
-#include <cereal/archives/json.hpp>
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/archives/xml.hpp>
 
 // Boost libraries
 #include "boost/date_time/gregorian/gregorian.hpp"
@@ -161,6 +161,14 @@ namespace utils {
         return results;
     }
 
+    std::string read(const std::string &textFile) {
+        boost::iostreams::mapped_file mmap(
+            textFile, boost::iostreams::mapped_file::readonly);
+        auto begin = mmap.const_data();
+        auto end = begin + mmap.size();
+        return std::string(begin, end);
+    }
+
     std::vector<boost::filesystem::path>
     getFilesFromTxtFile(const boost::filesystem::path &dataFile,
                         bool verbose = false) {
@@ -190,7 +198,8 @@ namespace utils {
         auto pos = aPath.size() - 1;
         auto sepChar = boost::filesystem::path::preferred_separator;
         for (; pos != 0; --pos) {
-            if (aPath[pos] != sepChar) break;
+            if (aPath[pos] != sepChar)
+                break;
         }
         return aPath.substr(0, pos + 1);
     }
