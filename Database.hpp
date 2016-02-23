@@ -13,8 +13,7 @@ namespace utils {
   private:
     Reader DB;
     std::vector<std::string> Vertexes;
-    std::vector<std::tuple<int, int>> Edges;
-    
+    std::vector<std::tuple<int, int>> Edges;    
   }
 }
 
