@@ -41,10 +41,15 @@ namespace utils {
          *
          * @return
          */
-        value_type getData(const index_type idx) {
+        const value_type get(const index_type idx) {
             assert(idx < Table.size());
             return Table[idx];
         }
+
+        Container & data() const {
+            return Table;
+        }
+
 
         void disp() {
             std::cout << "--- Table ---\n";
