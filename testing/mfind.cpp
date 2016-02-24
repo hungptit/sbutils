@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
-        ("use-relative-path,r", "Use relative path.")
         ("toJSON,j", po::value<std::string>(), "Output results in a JSON file.")
         ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
         ("file-stems,s", po::value<std::vector<std::string>>(), "File stems.")
@@ -42,18 +41,13 @@ int main(int argc, char *argv[]) {
     if (vm.count("help")) {
         std::cout << desc;
         std::cout << "Examples:" << std::endl;
-        std::cout << "\t findEditedFiles ./ -d .database" << std::endl;
+        std::cout << "\t mfind ./ -d .database" << std::endl;
         return EXIT_SUCCESS;
     }
 
     auto verbose = false;
     if (vm.count("verbose")) {
         verbose = true;
-    }
-
-    auto useRelativePath = false;
-    if (vm.count("use-relative-path")) {
-        useRelativePath = true;
     }
 
     std::string jsonFile;
