@@ -43,3 +43,12 @@
     * info: Store the list of relative folder paths -> std::vector<std::string>. These are vertexes.
     * graph: Store the graph -> Describe the edges std::vector<std::tuple<int, int>>
     * #dddd: File information.
+
+## Fun ##
+* Wrote a simple graph algorithm using the sparse matrix representation
+    * Implement DFS and BFS given a vertex id.
+    * Constructor
+        * A list of vertexes. Vertex IDs are position of vectexes in this vector. 
+    * A list of edges which are a vector of <u, v> where u and v are vertex ids.
+    * Can export results to dot format.
+    * Can render the results on-the-fly.

@@ -1,3 +1,4 @@
+#include "gtest/gtest.h"
 #include <array>
 #include <chrono>
 #include <fstream>
@@ -23,6 +24,7 @@
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
+#include "utils/LookupTable.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
 
@@ -32,98 +34,44 @@
 
 #include "gtest/gtest.h"
 
-int main(int argc, char *argv[]) {
-    boost::filesystem::path aPath((argc == 2) ? argv[1] : "./");
+template <typename Container>
+auto createTestData() {
+    Container data = {std::make_tuple("foo", 1), std::make_tuple("boo", 2),
+                      std::make_tuple("foo", 2), std::make_tuple("foo", 3)};
+    return data;
+}
 
-    std::array<std::string, 1> stems = {{"foo"}};
-    std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o", ".bin",
-                                      ".internal", ".includecache", ".marks"}};
-
+int main() {
     {
-        utils::Timer timer;
-        utils::FileSearchBase<utils::DFSFileSearchBase> finder;
+        using Container = std::vector<std::tuple<std::string, size_t>>;
+        auto data = createTestData<Container>();
 
-        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
+        {
+            utils::LookupTable<Container> table(data);
+            table.disp();
+            auto results = table.getIdx("foo");
 
-        for (auto aFile : finder.filter(stems, exts)) {
-            std::cout << aFile << "\n";
+            std::cout << "--- Results ---\n";
+            std::for_each(std::get<0>(results), std::get<1>(results),
+                          [](auto &val) { std::cout << val << "\n"; });
+            
+            std::cout << table.get(3) << "\n";
+            std::cout << table.get(2) << "\n";
+            std::cout << table.get(0) << "\n";
         }
 
-        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-    }
+        {
+            utils::LookupTable<Container, 1> table(data);
+            table.disp();
 
-    {
-        utils::Timer timer;
-        typedef utils::FileSearchBase<utils::BFSFileSearchBase> FileSearch;
-        FileSearch finder;
-        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
-        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-        // for (auto aFile : finder.getData()) {
-        //     std::cout << aFile << "\n";
-        // }
-    }
+            std::cout << "--- Results ---\n";
+            auto results = table.getIdx(2);
+            std::for_each(std::get<0>(results), std::get<1>(results),
+                          [](auto &val) { std::cout << val << "\n"; });
 
-    {
-        std::vector<std::string> stems = {{"CMakeLists"}};
-        std::vector<std::string> exts = {{".txt", ".cmake", ".make", ".o",
-                                          ".bin", ".internal", ".includecache",
-                                          ".marks"}};
-        utils::Timer timer;
-        typedef utils::FileSearchBase<utils::DFSFileSearchBase> Boo;
-        typedef utils::BasicFileSearch<Boo, std::vector<std::string>,
-                                       std::vector<std::string>> Foo;
-        typedef utils::BasicFileSearch<utils::DFSFileSearchBase,
-                                       std::vector<std::string>,
-                                       std::vector<std::string>> Hoo;
-
-        // Foo finder(stems, exts);
-        Foo finder(stems, exts);
-        std::cout << "Number of file: " << finder.search(aPath) << std::endl;
-        std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-    }
-
-    {
-        typedef std::vector<utils::FileInfo> Container;
-        const std::string dataFile = ".database";
-        utils::Reader reader(dataFile);
-        utils::FolderDiff<Container> diff;
-        const std::string aKey("/local-ssd/sandbox/exportfcns");
-
-        typedef utils::FileSearchBase<utils::BFSFileSearchBase> FileSearch;
-        FileSearch finder;
-
-        // Find files
-        utils::Timer timer;
-        diff.find(finder, aKey);
-        std::cout << "Find time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-        // utils::print(finder.getData());
-
-        // Read data
-        timer.tic();
-        auto dict = diff.read(reader, aKey);
-        std::cout << "Read time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-        // utils::print(dict);
-
-        // Find the diff
-        timer.tic();
-        Container editedFiles, newFiles, deletedFiles;
-        std::tie(editedFiles, newFiles, deletedFiles) =
-            diff.diff(finder.getData(), dict);
-        std::cout << "Diff time: " << timer.toc() / timer.ticksPerSecond()
-                  << " seconds" << std::endl;
-
-        std::cout << "---- Modified files: " << editedFiles.size() << " ----\n";
-        utils::print(editedFiles);
-
-        std::cout << "---- New files: " << newFiles.size() << " ----\n";
-        utils::print(newFiles);
-
-        std::cout << "---- Deleted files: " << deletedFiles.size() << " ----\n";
-        utils::print(deletedFiles);
+            std::cout << table.get(3) << "\n";
+            std::cout << table.get(2) << "\n";
+            std::cout << table.get(0) << "\n";
+        }
     }
 }
