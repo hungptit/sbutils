@@ -1,5 +1,3 @@
-#include "boost/program_options.hpp"
-#include "cppformat/format.h"
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -7,6 +5,8 @@
 #include <tuple>
 #include <vector>
 
+#include "boost/program_options.hpp"
+#include "cppformat/format.h"
 #include "utils/BFSFileSearch.hpp"
 #include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
