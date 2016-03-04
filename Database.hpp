@@ -62,11 +62,19 @@ namespace utils {
         
         void create()
 
+<<<<<<< HEAD
+  private:
+    Reader DB;
+    std::vector<std::string> Vertexes;
+    std::vector<std::tuple<int, int>> Edges;    
+  }
+=======
       private:
         std::vector<vertex_type> Vertexes;
         std::vector<edge_type> Edges;
         std::unordered_set<vertex_type, size_t> VertexesLookupTable;        
     };
+>>>>>>> 75183dac3570ff69bb68d07245a4dd67014e6dc6
 }
 
 #endif

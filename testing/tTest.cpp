@@ -1,3 +1,4 @@
+#include "gtest/gtest.h"
 #include <array>
 #include <chrono>
 #include <fstream>
@@ -53,7 +54,7 @@ int main() {
             std::cout << "--- Results ---\n";
             std::for_each(std::get<0>(results), std::get<1>(results),
                           [](auto &val) { std::cout << val << "\n"; });
-
+            
             std::cout << table.get(3) << "\n";
             std::cout << table.get(2) << "\n";
             std::cout << table.get(0) << "\n";

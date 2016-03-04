@@ -32,9 +32,23 @@
     * Have a function which return the differences between two vectors. This should be a template function so we can test it separately.
     * Get the improved version of viewer where users can give a folder that they want to locate.
         * File information are stored into keys then we can use task based parallelism approach.
-        * Users can specified fllowing constraint: search folders, file extensions, file stems, and may be file patterns.
+        * Users can specified following constraint: search folders, file extensions, file stems, and may be file patterns.
 
 * Todo
     * Change commands to mlocate, mdiff, mupdatedb, mcopy with better help.
     * Support JSON output format.
     * Use cppformat instead of iostream.
+
+* Database
+    * info: Store the list of relative folder paths -> std::vector<std::string>. These are vertexes.
+    * graph: Store the graph -> Describe the edges std::vector<std::tuple<int, int>>
+    * #dddd: File information.
+
+## Fun ##
+* Wrote a simple graph algorithm using the sparse matrix representation
+    * Implement DFS and BFS given a vertex id.
+    * Constructor
+        * A list of vertexes. Vertex IDs are position of vectexes in this vector. 
+    * A list of edges which are a vector of <u, v> where u and v are vertex ids.
+    * Can export results to dot format.
+    * Can render the results on-the-fly.
