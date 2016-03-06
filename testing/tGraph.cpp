@@ -7,15 +7,10 @@
 template <typename Index>
 std::vector<std::tuple<Index, Index>> createTestData() {
     std::vector<std::tuple<Index, Index>> edges{
-        std::make_tuple(0, 1),
-        std::make_tuple(0, 2),
-        std::make_tuple(0, 3),
-        std::make_tuple(1, 4),
-        std::make_tuple(2, 5),
-        std::make_tuple(5, 7),
-        std::make_tuple(3, 5),
-        std::make_tuple(3, 6),
-        std::make_tuple(4, 7),
+        std::make_tuple(0, 1), std::make_tuple(0, 2), std::make_tuple(2, 2),
+        std::make_tuple(0, 3), std::make_tuple(1, 4), std::make_tuple(2, 5),
+        std::make_tuple(5, 7), std::make_tuple(3, 5), std::make_tuple(3, 6),
+        std::make_tuple(4, 7), std::make_tuple(6, 4), std::make_tuple(6, 1),
         std::make_tuple(7, 6)};
     std::sort(edges.begin(), edges.end());
     return edges;
@@ -38,8 +33,7 @@ int main() {
     auto edges = createTestData<int>();
     std::cout << "==== Edge information ====\n";
     utils::print(edges);
-    utils::DirectedSparseGraph<int> g;
-    g.build(edges, vertex_num(edges));
+    utils::SparseGraph<int> g(edges, vertex_num(edges), true);
 
     std::cout << "==== Obtained edge information ====\n";
     auto e = g.edges(0);
@@ -47,11 +41,40 @@ int main() {
     utils::print(results);
 
     std::cout << "==== Graph information ====\n";
-    graph_info(g);
+    utils::graph_info(g);
 
     std::vector<std::string> v{"-0-", "-1-", "-2-", "-3-",
                                "-4-", "-5-", "-6-", "-7-"};
     std::string dotFile("test.dot");
     utils::gendot(g, v, dotFile);
     utils::viewdot(dotFile);
+
+    // DFS
+    {
+        utils::DFS<decltype(g)> alg;
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.dfs(g, 0));
+
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.dfs(g, 1));
+
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.dfs(g, 7));
+
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.dfs(g, 10));
+    }
+
+    // BFS
+    {
+        utils::BFS<decltype(g)> alg;
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.bfs(g, 1));
+
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.bfs(g, 7));
+
+        fmt::print("Visited vertexes\n");
+        utils::print(alg.bfs(g, 0));
+    }
 }
