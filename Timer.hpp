@@ -35,12 +35,13 @@ namespace utils {
         double TicksPerSeconds;
     };
 
+
     template <DispOpt val> class ElapsedTime {
       public:
         ~ElapsedTime() {
             std::cout << "Elapsed time: "
                       << Timer_.toc() * val / Timer_.ticksPerSecond()
-                      << getUnitString<val>() << std::endl;
+                      << " " << getUnitString<val>() << std::endl;
         }
 
       private:

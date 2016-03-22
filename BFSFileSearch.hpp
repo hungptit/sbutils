@@ -36,7 +36,7 @@ namespace utils {
                 directory_iterator endIter;
                 directory_iterator dirIter(aPath);
                 for (; dirIter != endIter; ++dirIter) {
-                    auto currentPath = dirIter->path();
+                    auto & currentPath = dirIter->path();
                     auto status = dirIter->status();
                     auto ftype = status.type();
                     if (ftype == boost::filesystem::regular_file) {
