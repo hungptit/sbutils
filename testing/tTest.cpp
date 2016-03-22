@@ -70,9 +70,15 @@ int main() {
             std::for_each(std::get<0>(results), std::get<1>(results),
                           [](auto &val) { std::cout << val << "\n"; });
 
+<<<<<<< HEAD
             // std::cout << table.get(3) << "\n";
             // std::cout << table.get(2) << "\n";
             // std::cout << table.get(0) << "\n";
+=======
+            std::cout << table.get(3) << "\n";
+            std::cout << table.get(2) << "\n";
+            std::cout << table.get(0) << "\n";
+>>>>>>> 2f032142075578259b29d742c728f59cc80d2cd9
         }
     }
 }

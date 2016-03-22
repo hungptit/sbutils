@@ -104,7 +104,7 @@ namespace {
 
         Container filter(const Container &data) {
             Container results;
-            for (auto info : data) {
+            for (auto const &info : data) {
                 bool flag = (Stems.empty() ||
                              std::find(Stems.begin(), Stems.end(),
                                        std::get<1>(info)) != Stems.end()) &&
