@@ -71,7 +71,7 @@ int main() {
 
             std::cout << table.get(3) << "\n";
             std::cout << table.get(2) << "\n";
-            std::cout << table.get1(0) << "\n";
+            std::cout << table.get(0) << "\n";
         }
     }
 }

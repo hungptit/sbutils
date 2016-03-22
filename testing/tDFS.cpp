@@ -58,8 +58,9 @@ namespace {
             for (auto const & item : vertexes) {
                 counter += std::get<1>(item).size();
             }
-            fmt::print("Number of vertexes: {}\n", counter);
+            fmt::print("Number of vertexes: {}\n", vertexes.size());
             fmt::print("Number of edgess: {}\n", edges.size());
+            fmt::print("Number of files: {}\n", counter);
         }
 
       private:
@@ -69,13 +70,41 @@ namespace {
         std::vector<std::tuple<std::string, container_type>> vertexes; // Vertex information
     };
 
-    template <typename Visitor>
-    size_t dfs_file_search(std::vector<path> &searchPaths, Visitor &visitor) {
+    /** 
+     * Search for files in given folders using depth-first-search algorithm.
+     *
+     * @param searchPaths 
+     * @param visitor 
+     *
+     * @return 
+     */
+    template <typename Visitor, typename Container>
+    size_t dfs_file_search(Container &searchPaths, Visitor &visitor) {
         size_t counter = 0;
         std::vector<path> folders(searchPaths.begin(), searchPaths.end());
         while (!folders.empty()) {
             auto aPath = folders.back();
             folders.pop_back();
+            visitor.visit(aPath, folders);
+        }
+        return counter;
+    }
+
+    /** 
+     * Search for files in given folders using breath-first-search algorithm.
+     *
+     * @param searchPaths 
+     * @param visitor 
+     *
+     * @return 
+     */
+    template <typename Visitor, typename Container>
+    size_t bfs_file_search(Container &searchPaths, Visitor &visitor) {
+        size_t counter = 0;
+        Container folders(searchPaths.begin(), searchPaths.end());
+        while (!folders.empty()) {
+            auto aPath = folders.front();
+            folders.pop_front();
             visitor.visit(aPath, folders);
         }
         return counter;
@@ -132,18 +161,36 @@ int main(int argc, char *argv[]) {
 
     // Build file information database
     utils::Writer writer(dataFile);
-
-    for (int i = 0 ; i < 10; i++) 
+    
+    constexpr int LOOP = 5;
+    
+    for (int i = 0 ; i < LOOP; i++) 
     {
+        using Container = std::vector<boost::filesystem::path>;
         utils::ElapsedTime<utils::MILLISECOND> timer;
-        Visitor<std::vector<boost::filesystem::path>> visitor;
-        decltype(visitor)::path_container searchFolders;
+        Visitor<Container> visitor;
+        Container searchFolders;
         for (auto val : folders) {
             searchFolders.emplace_back(val);
         }
 
         // Travel the file structure tree using DFS algorithm
-        dfs_file_search<decltype(visitor)>(searchFolders, visitor);
+        dfs_file_search<decltype(visitor), decltype(searchFolders)>(searchFolders, visitor);
+        visitor.print();
+    }
+
+    for (int i = 0 ; i < LOOP; i++) 
+    {
+        using Container = std::deque<boost::filesystem::path>;
+        utils::ElapsedTime<utils::MILLISECOND> timer;
+        Visitor<Container> visitor;
+        Container searchFolders;
+        for (auto val : folders) {
+            searchFolders.emplace_back(val);
+        }
+
+        // Travel the file structure tree using DFS algorithm
+        bfs_file_search<decltype(visitor), decltype(searchFolders)>(searchFolders, visitor);
         visitor.print();
     }
 
