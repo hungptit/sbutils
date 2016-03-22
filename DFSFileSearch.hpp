@@ -2,9 +2,9 @@
 #define DFSFileSearch_hpp_
 
 // STL headers
+#include <array>
 #include <string>
 #include <tuple>
-#include <array>
 #include <vector>
 
 // Boost libraries
@@ -20,7 +20,7 @@
 
 namespace utils {
     /**
-     * This class define a file search algorithm using the depth-first search. 
+     * This class define a file search algorithm using the depth-first search.
      * Derived class will need to overwrite virtual functions.
      */
     class DFSFileSearchBase {
@@ -30,11 +30,15 @@ namespace utils {
 
         size_t search(const path &aPath) {
             size_t counter = 0;
-            std::stack<path, std::vector<path>> folders;
-            folders.push(aPath);
+
+            // std::stack<path, std::vector<path>> folders;
+            // folders.push(aPath);
+
+            std::vector<path> folders;
+            folders.emplace_back(aPath);
             while (!folders.empty()) {
-                auto aPath = folders.top();
-                folders.pop();
+                auto aPath = folders.back();
+                folders.pop_back();
                 directory_iterator endIter;
                 directory_iterator dirIter(aPath);
                 for (; dirIter != endIter; ++dirIter) {
@@ -48,7 +52,7 @@ namespace utils {
                         }
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (isValidDir(currentPath)) {
-                            folders.push(currentPath);
+                            folders.emplace_back(currentPath);
                         }
                     } else {
                         unexpected(currentPath);
@@ -64,7 +68,7 @@ namespace utils {
         virtual void update(const path &aPath,
                             boost::filesystem::file_status &fs) = 0;
         virtual void unexpected(const path &aPath) = 0;
-    };    
+    };
 }
 
 #endif

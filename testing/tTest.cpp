@@ -27,6 +27,7 @@
 #include "utils/LookupTable.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
+#include "utils/Print.hpp"
 
 #include <sstream>
 #include <string>
@@ -52,12 +53,12 @@ int main() {
             auto results = table.getIdx("foo");
 
             std::cout << "--- Results ---\n";
-            std::for_each(std::get<0>(results), std::get<1>(results),
-                          [](auto &val) { std::cout << val << "\n"; });
+            // std::for_each(std::get<0>(results), std::get<1>(results),
+            //               [](auto &val) { std::cout << val << "\n"; });
             
-            std::cout << table.get(3) << "\n";
-            std::cout << table.get(2) << "\n";
-            std::cout << table.get(0) << "\n";
+            // std::cout << table.get(3) << "\n";
+            // std::cout << table.get(2) << "\n";
+            // std::cout << table.get(0) << "\n";
         }
 
         {
@@ -69,9 +70,9 @@ int main() {
             std::for_each(std::get<0>(results), std::get<1>(results),
                           [](auto &val) { std::cout << val << "\n"; });
 
-            std::cout << table.get(3) << "\n";
-            std::cout << table.get(2) << "\n";
-            std::cout << table.get1(0) << "\n";
+            // std::cout << table.get(3) << "\n";
+            // std::cout << table.get(2) << "\n";
+            // std::cout << table.get(0) << "\n";
         }
     }
 }

@@ -79,8 +79,8 @@ namespace {
         void print(bool verbose = false) {
             Set results(Results.begin(), Results.end());
             if (verbose) {
-                std::for_each(results.begin(), results.end(),
-                              [](auto &item) { std::cout << item << "\n"; });
+                // std::for_each(results.begin(), results.end(),
+                //               [](auto &item) { std::cout << item << "\n"; });
             } else {
                 std::for_each(results.begin(), results.end(), [](auto &item) {
                     fmt::print("{}\n", std::get<0>(item));

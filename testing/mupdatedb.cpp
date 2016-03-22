@@ -78,11 +78,11 @@ int main(int argc, char *argv[]) {
         writer.write(aPath, value);
 
         // Display the information if the verbose flag is set.
-        if (verbose) {
-            for (auto const &info : data) {
-                std::cout << info << "\n";
-            }
-        }
+        // if (verbose) {
+        //     for (auto const &info : data) {
+        //         std::cout << info << "\n";
+        //     }
+        // }
     }
     return 0;
 }

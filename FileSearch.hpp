@@ -12,14 +12,17 @@
 #include "boost/filesystem.hpp"
 
 #include "cppformat/format.h"
-#include "utils/Utils.hpp"
+#include "Utils.hpp"
+#include "FileUtils.hpp"
 
 namespace utils {
     /**
      * Find all file using the algorithm provided by the base class.
      *
      */
-    template <typename Base> class FileSearchBase : public Base {
+using FileInfo = std::tuple<std::string, std::string, std::string, int, std::time_t>;
+  
+  template <typename Base> class FileSearchBase : public Base {
       public:
         explicit FileSearchBase() {}
 
@@ -28,9 +31,9 @@ namespace utils {
         auto getData() { return Data; }
 
         template <typename StemContainer, typename ExtContainer>
-        std::vector<utils::FileInfo> filter(StemContainer &stems,
+        std::vector<FileInfo> filter(StemContainer &stems,
                                             ExtContainer &exts) {
-            std::vector<utils::FileInfo> results;
+          std::vector<FileInfo> results;
             for (auto item : Data) {
                 auto stem = std::get<1>(item);
                 auto ext = std::get<2>(item);
@@ -68,7 +71,7 @@ namespace utils {
         };
 
       private:
-        std::vector<utils::FileInfo> Data;
+    std::vector<FileInfo> Data;
     };
 
     template <typename Base, typename StemContainer, typename ExtContainer>
@@ -110,7 +113,7 @@ namespace utils {
         };
 
       private:
-        std::vector<utils::FileInfo> Data;
+      std::vector<FileInfo> Data;
         StemContainer Stems;
         ExtContainer Exts;
     };

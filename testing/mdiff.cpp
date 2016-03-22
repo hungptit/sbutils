@@ -26,6 +26,11 @@
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
 
+#include "utils/Print.hpp"
+#include "utils/FileUtils.hpp"
+#include "utils/Print.hpp"
+#include "cppformat/format.h"
+
 #include <sstream>
 #include <string>
 #include <vector>
@@ -34,12 +39,12 @@ namespace {
     // TODO: Need to add filter to this function.
     template <typename Container> void print(Container &data, bool verbose) {
         if (verbose) {
-            for (auto item : data) {
-                std::cout << item << "\n";
-            }
+            // for (auto item : data) {
+            //     std::cout << item << "\n";
+            // }
         } else {
             for (auto item : data) {
-                fmt::print("{}\n", std::get<0>(item));
+              fmt::print("{}\n", std::get<0>(item));
             }
         }
     }

@@ -19,7 +19,7 @@ namespace utils {
             auto const results = reader.read(aKey);
             if (!results.empty()) {
                 std::istringstream is(results);
-                utils::load<utils::IArchive, Container>(dict, is);
+                load<IArchive, Container>(dict, is);
             }
             // std::cout << "Dictionary sizes: " << dict.size() << "\n";
             return dict;
