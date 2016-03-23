@@ -12,12 +12,6 @@
 #include <boost/iostreams/device/mapped_file.hpp> // for readLines
 
 namespace utils {
-    // Constant strings
-    struct FileDatabaseInfo {
-        static const std::string Database;
-    };
-    const std::string FileDatabaseInfo::Database = ".database";
-
     // Text file I/O
     std::vector<std::string> readLines(const std::string &dataFile) {
         boost::iostreams::mapped_file mmap(
