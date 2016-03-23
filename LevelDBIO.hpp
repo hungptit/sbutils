@@ -1,6 +1,7 @@
 #ifndef LevelDBIO_HPP_
 #define LevelDBIO_HPP_
 
+#include <iostream>
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 
