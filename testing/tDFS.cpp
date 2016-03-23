@@ -13,11 +13,24 @@
 
 namespace {
     typedef std::tuple<std::string, std::string, std::string, int, std::time_t,
-                       uintmax_t>
-        FileInfo;
+                       uintmax_t> FileInfo;
 
     using path = boost::filesystem::path;
-
+    using Index = int;
+    template <typename Container>
+    std::unordered_map<std::string, Index>
+    generateLookupTable(Container &data) {
+        std::vector<std::pair<std::string, Index>> values;
+        values.reserve(data.size());
+        int counter = 0;
+        for (auto item : data) {
+            values.emplace_back(std::make_pair(std::get<0>(item), counter));
+            counter++;
+        }
+        std::unordered_map<std::string, int> results(values.begin(),
+                                                     values.end());
+        return results;
+    }
 
     template <typename PathContainer> class Visitor {
       public:
@@ -26,7 +39,7 @@ namespace {
         using directory_iterator = boost::filesystem::directory_iterator;
         using path_container = std::vector<path>;
 
-        container_type getResults() {return Results;}
+        container_type getResults() { return Results; }
 
         void visit(path &aPath, PathContainer &folders) {
             namespace fs = boost::filesystem;
@@ -38,14 +51,16 @@ namespace {
                 auto ftype = status.type();
                 std::string currentPathStr = currentPath.string();
                 if (ftype == boost::filesystem::regular_file) {
-                    vertex_data.emplace_back(std::make_tuple(currentPathStr, currentPath.stem().string(),
-                                                             currentPath.extension().string(), status.permissions(),
-                                                             fs::last_write_time(aPath), fs::file_size(currentPath)));
+                    vertex_data.emplace_back(std::make_tuple(
+                        currentPathStr, currentPath.stem().string(),
+                        currentPath.extension().string(), status.permissions(),
+                        fs::last_write_time(aPath),
+                        fs::file_size(currentPath)));
                 } else if (ftype == boost::filesystem::directory_file) {
-                    edges.emplace_back(std::make_tuple(aPath.string(), currentPath.string()));
+                    edges.emplace_back(
+                        std::make_tuple(aPath.string(), currentPath.string()));
                     folders.emplace_back(currentPath);
                 } else {
-                    
                 }
             }
 
@@ -55,28 +70,74 @@ namespace {
 
         void print() {
             size_t counter = 0;
-            for (auto const & item : vertexes) {
+            for (auto const &item : vertexes) {
                 counter += std::get<1>(item).size();
             }
-            fmt::print("Number of vertexes: {}\n", vertexes.size());
-            fmt::print("Number of edgess: {}\n", edges.size());
-            fmt::print("Number of files: {}\n", counter);
+            fmt::print("Number of vertexes: {0}\n", vertexes.size());
+            fmt::print("Number of edgess: {0}\n", edges.size());
+            fmt::print("Number of files: {0}\n", counter);
+        }
+
+        void compact() {
+            // Sort vertexes
+            if (!std::is_sorted(vertexes.begin(), vertexes.end())) {
+                std::sort(vertexes.begin(), vertexes.end());
+            }
+
+            // Display the sorted vertex for debuging purpose.
+            fmt::MemoryWriter writer;
+            for (auto item : vertexes) {
+                writer << std::get<0>(item) << "\n";
+            }
+            fmt::print("== Vertexes ==\n{}", writer.str());
+
+            // Create a lookup table
+            using Index = int;
+            std::vector<std::pair<std::string, Index>> values;
+            std::vector<std::string> vertexIDs;
+            values.reserve(vertexes.size());
+            vertexIDs.reserve(
+                vertexes.size()); // Will be saved to database for fast lookup.
+            Index counter = 0;
+            for (auto item : vertexes) {
+                auto aPath = std::get<0>(item);
+                vertexIDs.push_back(aPath);
+                values.push_back(std::make_pair(aPath, counter));
+                counter++;
+            }
+            std::unordered_map<std::string, int> lookupTable(values.begin(),
+                                                             values.end());
+
+            // Now create a tree for the given folder hierachy.
+            std::vector<std::tuple<Index, Index>> allEdges;
+            allEdges.reserve(edges.size());
+            for (auto anEdge : edges) {
+                allEdges.push_back(
+                    std::make_tuple(lookupTable[std::get<0>(anEdge)],
+                                    lookupTable[std::get<1>(anEdge)]));
+            }
+
+            // Sort edges information before constructing the graph.
+            std::sort(allEdges.begin(), allEdges.end());
         }
 
       private:
         container_type Results;
-        container_type vertex_data; // Hold a list of all files for a given folders.
-        std::vector<std::tuple<std::string, std::string>> edges; // Edge information
-        std::vector<std::tuple<std::string, container_type>> vertexes; // Vertex information
+        container_type
+            vertex_data; // Hold a list of all files for a given folders.
+        std::vector<std::tuple<std::string, std::string>>
+            edges; // Edge information
+        std::vector<std::tuple<std::string, container_type>>
+            vertexes; // Vertex information
     };
 
-    /** 
+    /**
      * Search for files in given folders using depth-first-search algorithm.
      *
-     * @param searchPaths 
-     * @param visitor 
+     * @param searchPaths
+     * @param visitor
      *
-     * @return 
+     * @return
      */
     template <typename Visitor, typename Container>
     size_t dfs_file_search(Container &searchPaths, Visitor &visitor) {
@@ -90,13 +151,13 @@ namespace {
         return counter;
     }
 
-    /** 
+    /**
      * Search for files in given folders using breath-first-search algorithm.
      *
-     * @param searchPaths 
-     * @param visitor 
+     * @param searchPaths
+     * @param visitor
      *
-     * @return 
+     * @return
      */
     template <typename Visitor, typename Container>
     size_t bfs_file_search(Container &searchPaths, Visitor &visitor) {
@@ -161,10 +222,10 @@ int main(int argc, char *argv[]) {
 
     // Build file information database
     utils::Writer writer(dataFile);
-    
+
     constexpr int LOOP = 5;
-    
-    for (int i = 0 ; i < LOOP; i++) 
+
+    // for (int i = 0; i < LOOP; i++)
     {
         using Container = std::vector<boost::filesystem::path>;
         utils::ElapsedTime<utils::MILLISECOND> timer;
@@ -175,24 +236,26 @@ int main(int argc, char *argv[]) {
         }
 
         // Travel the file structure tree using DFS algorithm
-        dfs_file_search<decltype(visitor), decltype(searchFolders)>(searchFolders, visitor);
+        dfs_file_search<decltype(visitor), decltype(searchFolders)>(
+            searchFolders, visitor);
         visitor.print();
+        visitor.compact();
     }
 
-    for (int i = 0 ; i < LOOP; i++) 
-    {
-        using Container = std::deque<boost::filesystem::path>;
-        utils::ElapsedTime<utils::MILLISECOND> timer;
-        Visitor<Container> visitor;
-        Container searchFolders;
-        for (auto val : folders) {
-            searchFolders.emplace_back(val);
-        }
+    // for (int i = 0; i < LOOP; i++) {
+    //     using Container = std::deque<boost::filesystem::path>;
+    //     utils::ElapsedTime<utils::MILLISECOND> timer;
+    //     Visitor<Container> visitor;
+    //     Container searchFolders;
+    //     for (auto val : folders) {
+    //         searchFolders.emplace_back(val);
+    //     }
 
-        // Travel the file structure tree using DFS algorithm
-        bfs_file_search<decltype(visitor), decltype(searchFolders)>(searchFolders, visitor);
-        visitor.print();
-    }
+    //     // Travel the file structure tree using DFS algorithm
+    //     bfs_file_search<decltype(visitor), decltype(searchFolders)>(
+    //         searchFolders, visitor);
+    //     visitor.print();
+    // }
 
     // for (const auto &aFolder : folders) {
     //     // Search for files
@@ -218,4 +281,3 @@ int main(int argc, char *argv[]) {
     // }
     return 0;
 }
-

@@ -2,6 +2,9 @@
 #define LevelDBIO_HPP_
 
 #include <iostream>
+#include <string>
+#include <vector>
+
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 

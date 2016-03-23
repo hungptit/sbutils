@@ -1,11 +1,12 @@
 #ifndef Finder_hpp_
 #define Finder_hpp_
 
-#include "utils/BFSFileSearch.hpp"
-#include "utils/DFSFileSearch.hpp"
-#include "utils/FileSearch.hpp"
-#include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
+#include "LevelDBIO.hpp"
+#include "BFSFileSearch.hpp"
+#include "DFSFileSearch.hpp"
+#include "FileSearch.hpp"
+#include "Timer.hpp"
+#include "Serialization.hpp"
 
 namespace utils {
     enum {
@@ -58,7 +59,7 @@ namespace utils {
             }
 
             // Read all keys from the database
-            utils::Reader reader(dataFile);
+            Reader reader(dataFile);
             auto allKeys = reader.keys();
             printKeys(Params, allKeys);
 
@@ -70,7 +71,7 @@ namespace utils {
                 loadAllKeys = true;
             } else {
                 for (auto aPath : folders) {
-                    auto aKey = utils::findParent(allKeys, aPath);
+                  auto aKey = findParent(allKeys, aPath);
                     if (aKey.empty()) {
                         loadAllKeys =
                             true; // Cannot find a current key. We need to
@@ -95,7 +96,7 @@ namespace utils {
                 if (!results.empty()) {
                     decltype(database) data;
                     std::istringstream is(results);
-                    utils::load<utils::IArchive, decltype(data)>(data, is);
+                    load<IArchive, decltype(data)>(data, is);
                     std::move(data.begin(), data.end(),
                               std::back_inserter(database));
                 }
