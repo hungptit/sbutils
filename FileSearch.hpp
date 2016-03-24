@@ -197,8 +197,6 @@ namespace utils {
         return counter;
     }
 
-    template <typename Writer> void write(const std::string &dataFile) {}
-
     //   /**
     //      * Find all file using the algorithm provided by the base class.
     //      *

@@ -1,18 +1,15 @@
 #ifndef Serialization_hpp_
 #define Serialization_hpp_
 
+#include <array>
 #include <deque>
 #include <list>
-#include <vector>
-
 #include <map>
 #include <set>
-
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-
-#include <array>
-#include <string>
+#include <vector>
 
 // Cereal
 #include <cereal/archives/binary.hpp>
@@ -40,11 +37,34 @@
 #include <cereal/types/valarray.hpp>
 #include <cereal/types/vector.hpp>
 
+// SparseGgraph class
+#include "Resources.hpp"
+#include "SparseGraph.hpp"
+
 namespace utils {
     // Define the default serilized formats
-    typedef cereal::BinaryOutputArchive OArchive;
-    typedef cereal::BinaryInputArchive IArchive;
+    using DefaultOArchive = cereal::BinaryOutputArchive;
+    using DefaultIArchive = cereal::BinaryInputArchive;
 
+    template <typename OArchive, typename SparseGraph, typename VertexContainer>
+    void save_sparse_graph(OArchive &oar, const SparseGraph &g,
+                           VertexContainer &vids) {
+        oar(cereal::make_nvp(Resources::VIDKey, vids),
+            cereal::make_nvp(Resources::VertexKey, g.getVertexes()),
+            cereal::make_nvp(Resources::EdgeKey, g.getEdges()));
+    }
+
+    template <typename OArchive, typename Container>
+    void save(OArchive &oar, const std::string &name, Container &value) {
+        oar(cereal::make_nvp(name, value));
+    }
+
+    template <typename IArchive, typename Container>
+    void load(IArchive &iar, Container &data) {
+        iar(data);
+    }
+
+    // TODO: Will need to cleanup below methods
     template <typename OArchive, typename Container>
     void save(const Container &data, std::ostringstream &os) {
         OArchive oar(os);

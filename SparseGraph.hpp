@@ -24,7 +24,9 @@ namespace utils {
 
     /**
      * This class has a simple data sructure for a directed graph.
-     * @todo Support weighted graph.
+     * @todo Support weighted graph. Might need to introduce edge_type to
+     * support weight.
+     *
      */
     template <typename Index> class SparseGraph {
       public:
@@ -35,16 +37,18 @@ namespace utils {
         using edge_iterator = typename EdgeContainer::const_iterator;
         using vetex_iterator = typename VertexContainer::const_iterator;
 
-        /// Construct an empty graph
         explicit SparseGraph(const bool isDirected) : IsDirected(isDirected) {}
 
-        /// Construct a graph given edge's information.
         explicit SparseGraph(std::vector<std::tuple<Index, Index>> &data,
                              const std::size_t N, const bool isDirected)
             : IsDirected(isDirected) {
 
             build(data, N);
         }
+
+        explicit SparseGraph(VertexContainer &v, EdgeContainer &e,
+                             bool isDirected)
+            : Vertexes(v), Edges(e), IsDirected(isDirected) {}
 
         /// This function assume that input data is sorted by vertex ID.
         void build(std::vector<std::tuple<Index, Index>> &data,
@@ -69,14 +73,14 @@ namespace utils {
         }
         const VertexContainer &getVertexes() const { return Vertexes; }
         const EdgeContainer &getEdges() const { return Edges; }
+
         bool isDirected() { return IsDirected; };
 
-      protected:
-        bool IsDirected = true;
+      private:
         VertexContainer Vertexes;
         EdgeContainer Edges;
+        bool IsDirected;
     };
-
 
     // TODO: Need to provide a visitor
     template <typename Graph> class DFS {
@@ -95,7 +99,7 @@ namespace utils {
                     Stack.pop_back();
                     if (status[currentVid] == UNDISCOVERED) {
                         visit(vertexes, edges, status, currentVid, results);
-                    }                    
+                    }
                 }
             } else {
                 std::cerr << "Invalid of value for vertex id: " << vid << "\n";

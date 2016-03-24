@@ -14,10 +14,11 @@
 #include "utils/FileSearch.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
+#include "utils/Resources.hpp"
+#include "utils/Serialization.hpp"
 #include "utils/SparseGraph.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"
-#include "utils/Serialization.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(utils::FileDatabaseInfo::Database))
+        dataFile = (boost::filesystem::path(utils::Resources::Database))
                        .string();
     }
 
@@ -98,76 +99,64 @@ int main(int argc, char *argv[]) {
     // size_t counter = 0;
     // for (auto item : vertexes) {
     //   writer << counter << " : " << std::get<0>(item) << "\n";
-    //   auto aPath = std::get<0>(item);      
+    //   auto aPath = std::get<0>(item);
     //   counter++;
     // }
     // fmt::print("== Vertexes ==\n{}", writer.str());
     // utils::graph_info(g);
 
-    // // Generate a tree picture and view it using xdot.
-    // std::string dotFile("fg.dot");
-    // utils::gendot(g, vertexIDs, dotFile);
-    // utils::viewdot(dotFile);
+    // Generate a tree picture and view it using xdot.
+    std::string dotFile("fg.dot");
+    utils::gendot(g, vertexIDs, dotFile);
+    utils::viewdot(dotFile);
 
-    {
-      // Build file information database
-      utils::Writer writer(dataFile);
+    
+    // using IArchive = cereal::JSONInputArchive;
+    // using OArchive = cereal::JSONOutputArchive;
 
-      // Will need to write in batch mode.
-
-      // Write out vertex IDs
-      {
-        std::ostringstream os;
-        utils::save<utils::OArchive, decltype(vertexIDs)>(vertexIDs, os);
-        const auto value = os.str();
-        writer.write("vertexes", value);
-      }
-
-      // Write out graph information
-      {
-        std::ostringstream os;
-        utils::save<utils::OArchive, decltype(vertexIDs)>(vertexIDs, os);
-        writer.write("vertex_ids", os.str());
-        //fmt::print("{}\n", os.str());
-        os.str(std::string());
-
-        auto v = g.getVertexes();
-        utils::save<utils::OArchive, decltype(v)>(v, os);
-        writer.write("vertexes", os.str());
-        //fmt::print("{}\n", os.str());
-        os.str(std::string());
-        
-        auto e = g.getVertexes();
-        utils::save<utils::OArchive, decltype(e)>(e, os);
-        writer.write("edges", os.str());
-        //        fmt::print("{}\n", os.str());
-        os.str(std::string());
-      }
-
-      // Write out all vertex data
-      size_t counter = 0;
-      for (auto item : vertexes) {
-        std::ostringstream os;
-        auto data = std::get<1>(item);
-        utils::save<utils::OArchive, decltype(data)>(data, os);
-        writer.write(std::to_string(counter), os.str());
-        counter ++;
-      }
-    }
+    using IArchive = cereal::BinaryInputArchive;
+    using OArchive = cereal::BinaryOutputArchive;
 
     // {
-    //   utils::Reader reader(dataFile);
-    //   {
-    //     std::string aKey("vertex_ids");
-    //     std::istringstream is(reader.read(aKey));
-    //     std::vector<std::string> vertex_ids;
-    //     utils::load<utils::IArchive, decltype(vertex_ids)>(vertex_ids, is);
-    //     fmt::print("Saved vertex ids:\n");
-    //     for (auto item : vertex_ids) {
-    //       fmt::print("{}\n", item);
+    //     // Build file information database
+    //     utils::Writer writer(dataFile);
+
+    //     // Write out the graph information
+    //     std::ostringstream os;
+    //     OArchive output(os);
+    //     utils::save_sparse_graph(output, g, vertexIDs);
+    //     writer.write(utils::Resources::GraphKey, os.str());
+    //     // fmt::print("{}\n", os.str());
+
+    //     // Write out all vertex data
+    //     size_t counter = 0;
+    //     for (auto item : vertexes) {
+    //         os.str(std::string()); // Reset a string stream
+    //         auto data = std::get<1>(item);
+    //         auto aKey = std::to_string(counter);
+    //         save(output, aKey, data);
+    //         writer.write(aKey, os.str());
+    //         fmt::print("{}\n", os.str());
+    //         counter++;
     //     }
-    //   }
     // }
-    
+
+    {
+        utils::Reader reader(dataFile);
+        using Index = int;
+        std::istringstream is(reader.read(utils::Resources::GraphKey));
+        std::vector<std::string> vids;
+        std::vector<Index> v;
+        std::vector<Index> e;
+        IArchive input(is);
+        input(vids, v, e);
+        fmt::print("Saved vertex ids:\n");
+        utils::SparseGraph<int> g(v, e, true);
+        for (auto item : vids) {
+            fmt::print("{}\n", item);
+        }
+        utils::graph_info(g);
+    }
+
     return 0;
 }
