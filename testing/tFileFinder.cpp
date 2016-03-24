@@ -1,6 +1,4 @@
 #include "boost/filesystem.hpp"
-#include "utils/Utils.hpp"
-#include "utils/TemporaryDirectory.hpp"
 #include "gtest/gtest.h"
 #include <array>
 #include <fstream>
@@ -9,71 +7,118 @@
 #include <tuple>
 #include <vector>
 
-class TestData {
-  public:
-    TestData(const boost::filesystem::path &currentPath) : TmpDir(currentPath) {
-        init();
+#include "utils/FileSearch.hpp"
+#include "utils/Print.hpp"
+#include "utils/TemporaryDirectory.hpp"
+
+#include "gtest/gtest.h"
+
+namespace {
+    class TestData {
+      public:
+        using path = boost::filesystem::path;
+        TestData(const path &currentPath) : TmpDir(currentPath) { init(); }
+        ~TestData() {}
+
+      private:
+        boost::filesystem::path TmpDir;
+
+        void createTestFile(const path &aFile) {
+            std::ofstream outfile(aFile.string());
+            outfile << "Fake data for testing.\n";
+            outfile.close();
+            if (boost::filesystem::exists(aFile)) {
+                std::cout << aFile.string() << " is created" << std::endl;
+            } else {
+                std::cout << "Cannot create " << aFile.string() << std::endl;
+            }
+        }
+
+        path createFolder(const path &rootFolder, const path &aPath) {
+            auto fullPath = rootFolder / aPath;
+            boost::filesystem::create_directories(fullPath);
+            return fullPath;
+        }
+
+        void init() {
+            auto dataFolder = createFolder(TmpDir, "data");
+            createTestFile(dataFolder / path("data.mat"));
+
+            auto gitFolder = createFolder(TmpDir, ".git");
+            createTestFile(gitFolder / path("test.cpp"));
+
+            createFolder(TmpDir, ".sbtools");
+            createFolder(TmpDir, "CMakeFiles");
+
+            auto srcFolder = createFolder(TmpDir, "src");
+            createTestFile(srcFolder / path("test.cpp"));
+            createTestFile(srcFolder / path("read.cpp"));
+            createTestFile(srcFolder / path("write.cpp"));
+            createTestFile(srcFolder / path("write.p"));
+            createTestFile(srcFolder / path("write.txt"));
+            createTestFile(srcFolder / path("foo.m"));
+            createTestFile(srcFolder / path("foo.mat"));
+            createTestFile(srcFolder / path("foo.p"));
+
+            auto binFolder = createFolder(TmpDir, "bin");
+            createTestFile(binFolder / path("test"));
+
+            auto docFolder = createFolder(TmpDir, "doc");
+        }
+    };
+}
+
+TEST(Filter, Positive) {
+    {
+        utils::DonotFilter filter;
+        EXPECT_TRUE(filter.isValidExt(".git"));
+        EXPECT_TRUE(filter.isValidStem(""));
     }
-    ~TestData() {}
 
-  private:
-    boost::filesystem::path TmpDir;
-
-    void createTestFile(const boost::filesystem::path &aFile) {
-        std::ofstream outfile(aFile.string());
-        outfile << "Fake data for testing.\n";
-        outfile.close();
-        if (boost::filesystem::exists(aFile)) {
-            std::cout << aFile.string() << " is created" << std::endl;
-        } else {
-            std::cout << "Cannot create " << aFile.string() << std::endl;
-        }
+    {
+        utils::NormalFilter filter;
+        EXPECT_FALSE(filter.isValidExt(".git"));
+        EXPECT_FALSE(filter.isValidStem("CMakeFiles"));
+        EXPECT_TRUE(filter.isValidExt(".cpp"));
+        EXPECT_TRUE(filter.isValidStem("foo"));
     }
 
-    void init() {
-        {
-            // Create data folder
-            boost::filesystem::path dataFolder =
-                TmpDir / boost::filesystem::path("data");
-            boost::filesystem::create_directories(dataFolder);
-
-            // Create a data file
-            auto aDataFile = dataFolder / boost::filesystem::path("data.mat");
-            createTestFile(aDataFile);
-            boost::filesystem::permissions(aDataFile,
-                                           boost::filesystem::owner_read |
-                                               boost::filesystem::owner_write);
-        }
-
-        {
-            // Create src folder
-            boost::filesystem::path srcFolder =
-                TmpDir / boost::filesystem::path("src");
-            boost::filesystem::create_directories(srcFolder);
-            auto aSrcFile = srcFolder / boost::filesystem::path("test.cpp");
-            createTestFile(aSrcFile);
-            boost::filesystem::permissions(aSrcFile,
-                                           boost::filesystem::owner_write |
-                                               boost::filesystem::owner_read);
-            createTestFile(srcFolder / boost::filesystem::path("read.cpp"));
-            createTestFile(srcFolder / boost::filesystem::path("write.cpp"));
-        }
-
-        {
-            // Create bin folder
-            boost::filesystem::path binFolder =
-                TmpDir / boost::filesystem::path("bin");
-            boost::filesystem::create_directories(binFolder);
-            auto aBinFile = binFolder / boost::filesystem::path("test");
-            createTestFile(aBinFile);
-            boost::filesystem::permissions(aBinFile,
-                                           boost::filesystem::owner_exe |
-                                               boost::filesystem::group_exe |
-                                               boost::filesystem::owner_read |
-                                               boost::filesystem::group_read);
-        }
+    {
+        utils::MWFilter filter;
+        EXPECT_FALSE(filter.isValidExt(".sbtools"));
+        EXPECT_FALSE(filter.isValidStem("doxygen"));
+        EXPECT_FALSE(filter.isValidStem("doc"));
+        EXPECT_TRUE(filter.isValidStem("CMakeFiles"));
+        EXPECT_TRUE(filter.isValidExt(".cpp"));
+        EXPECT_TRUE(filter.isValidStem("foo"));
     }
-};
+}
+
+TEST(FileDatabase, Positive) {
+  utils::TemporaryDirectory tmpDir;
+  TestData testData(tmpDir.getPath());
+}
+
+template <typename Filter, size_t expectSize>
+void test_file_search(utils::TemporaryDirectory &tmpDir) {
+    using Container = std::vector<boost::filesystem::path>;
+    utils::SimpleVisitor<Container, Filter> visitor;
+    Container searchFolders{tmpDir.getPath()};
+    utils::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
+        searchFolders, visitor);
+    auto results = visitor.getResults();
+    std::cout << "== Results ==\n";
+    utils::print(results);
+    EXPECT_EQ(results.size(), expectSize);
+}
+
+TEST(FileSearch, Positive) {
+    utils::TemporaryDirectory tmpDir;
+    TestData testData(tmpDir.getPath());
+    test_file_search<utils::DonotFilter, 11>(tmpDir);
+    test_file_search<utils::NormalFilter, 10>(tmpDir);
+    test_file_search<utils::MWFilter, 11>(tmpDir);
+}
 
 // TEST(FileSearchStrategy, Positive) {
 //     utils::TemporaryDirectory tmpDir;
@@ -157,8 +202,8 @@ class TestData {
 // }
 
 TEST(FileSearchDefault, Positive) {
-    TemporaryDirectory tmpDir;
-    TestData testData(tmpDir.getPath());
+    // utils::TemporaryDirectory tmpDir;
+    //   TestData testData(tmpDir.getPath());
     // utils::FileFinder fSearch;
     // fSearch.search(tmpDir.getPath());
     // std::cout << "Search path: " << tmpDir.getPath().string() << std::endl;

@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 // Boost libraries
 #define BOOST_THREAD_VERSION 4
@@ -55,7 +56,7 @@ namespace utils {
         }
 
       private:
-        const std::array<std::string, 2> ExcludedExtensions = {{".sbtools"}};
+        const std::array<std::string, 1> ExcludedExtensions = {{".sbtools"}};
         const std::array<std::string, 2> ExcludedStems = {{"doc", "doxygen"}};
     };
 
@@ -153,6 +154,48 @@ namespace utils {
         // Data that will be used to filter search space.
         std::array<std::string, 1> ExcludedExtensions = {{".git"}};
         std::array<std::string, 1> ExcludedStems = {{"CMakeFiles"}};
+    };
+
+    template <typename PathContainer, typename Filter> class SimpleVisitor {
+      public:
+        using container_type = std::vector<FileInfo>;
+        using path = boost::filesystem::path;
+        using directory_iterator = boost::filesystem::directory_iterator;
+        using path_container = std::vector<path>;
+
+        const container_type &getResults() const { return Results; }
+
+        void visit(path &aPath, PathContainer &folders) {
+            namespace fs = boost::filesystem;
+            directory_iterator endIter;
+            directory_iterator dirIter(aPath);
+            for (; dirIter != endIter; ++dirIter) {
+                auto currentPath = dirIter->path();
+                auto status = dirIter->status();
+                auto ftype = status.type();
+                auto aStem = currentPath.stem().string();
+                auto anExtension = currentPath.extension().string();
+                if (ftype == boost::filesystem::regular_file) {
+                    Results.emplace_back(std::make_tuple(
+                        currentPath.string(), aStem, currentPath.extension().string(),
+                        status.permissions(), fs::last_write_time(aPath),
+                        fs::file_size(currentPath)));
+                } else if (ftype == boost::filesystem::directory_file) {
+                    if (CustomFilter.isValidStem(aStem) &&
+                        CustomFilter.isValidExt(anExtension)) {
+                        folders.emplace_back(currentPath);
+                    }
+                } else {
+                  // Donot do anything here
+                }
+            }
+        }
+
+      private:
+        Filter CustomFilter;
+        std::array<std::string, 1> ExcludedExtensions = {{".git"}};
+        std::array<std::string, 1> ExcludedStems = {{"CMakeFiles"}};
+        std::vector<FileInfo> Results;
     };
 
     /**
