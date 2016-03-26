@@ -47,7 +47,9 @@ namespace {
             auto gitFolder = createFolder(TmpDir, ".git");
             createTestFile(gitFolder / path("test.cpp"));
 
-            createFolder(TmpDir, ".sbtools");
+            auto sbtoolsFolder = createFolder(TmpDir, ".sbtools");
+            createTestFile(sbtoolsFolder / path("foo.p"));
+
             createFolder(TmpDir, "CMakeFiles");
 
             auto srcFolder = createFolder(TmpDir, "src");
@@ -100,14 +102,14 @@ TEST(FileDatabase, Positive) {
 }
 
 template <typename Filter, size_t expectSize>
-void test_file_search(utils::TemporaryDirectory &tmpDir) {
+void test_file_search(boost::filesystem::path &tmpDir) {
     using Container = std::vector<boost::filesystem::path>;
     utils::SimpleVisitor<Container, Filter> visitor;
-    Container searchFolders{tmpDir.getPath()};
+    Container searchFolders{tmpDir};
     utils::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
         searchFolders, visitor);
     auto results = visitor.getResults();
-    std::cout << "== Results ==\n";
+    std::cout << "== Search results ==\n";
     utils::print(results);
     EXPECT_EQ(results.size(), expectSize);
 }
@@ -115,112 +117,13 @@ void test_file_search(utils::TemporaryDirectory &tmpDir) {
 TEST(FileSearch, Positive) {
     utils::TemporaryDirectory tmpDir;
     TestData testData(tmpDir.getPath());
-    test_file_search<utils::DonotFilter, 11>(tmpDir);
-    test_file_search<utils::NormalFilter, 10>(tmpDir);
-    test_file_search<utils::MWFilter, 11>(tmpDir);
+    auto tmpPath = tmpDir.getPath();
+    test_file_search<utils::DonotFilter, 12>(tmpPath);
+    test_file_search<utils::NormalFilter, 11>(tmpPath);
+    test_file_search<utils::MWFilter, 11>(tmpPath);
 }
 
-// TEST(FileSearchStrategy, Positive) {
-//     utils::TemporaryDirectory tmpDir;
-//     {
-//         TestData testData(tmpDir.getPath());
-//         boost::filesystem::path aFile = tmpDir.getPath() /
-//                                         boost::filesystem::path("src") /
-//                                         boost::filesystem::path("test.cpp");
-//         boost::filesystem::file_status fs = boost::filesystem::status(aFile);
-//         {
-//             utils::SearchAllFiles st;
-//             EXPECT_TRUE(st.isValid(fs));
-//         }
-
-//         {
-//             utils::OwnerReadFiles st;
-//             EXPECT_TRUE(st.isValid(fs));
-//         }
-
-//         {
-//             utils::OwnerWriteFile st;
-//             EXPECT_TRUE(st.isValid(fs));
-//         }
-//     }
-
-//     {
-//         boost::filesystem::path aFile = tmpDir.getPath() /
-//                                         boost::filesystem::path("data") /
-//                                         boost::filesystem::path("data.mat");
-//         boost::filesystem::file_status fs = boost::filesystem::status(aFile);
-//         {
-//             utils::OwnerReadFiles st;
-//             EXPECT_TRUE(st.isValid(fs));
-//         }
-
-//         {
-//             utils::OwnerWriteFile st;
-//             EXPECT_TRUE(st.isValid(fs));
-//         }
-//     }
-
-//     // File extension strategy
-//     {
-//         typedef std::vector<std::string> Map;
-//         Map supportedExts = {".txt", ".dat", ".mat"};
-//         std::sort(supportedExts.begin(), supportedExts.end());
-
-//         utils::SearchFileExtension<std::vector<std::string>>
-//         st(supportedExts);
-
-//         {
-//             boost::filesystem::path aFile =
-//             boost::filesystem::path("data.mat");
-//             EXPECT_TRUE(st.isValid(aFile));
-//         }
-
-//         {
-//             boost::filesystem::path aFile =
-//             boost::filesystem::path("data.foo");
-//             EXPECT_FALSE(st.isValid(aFile));
-//         }
-//     }
-
-//     // File name strategy
-//     {
-//         std::string fileName = "/this/is/a/test/file.foo";
-//         boost::filesystem::path aFile = boost::filesystem::path(fileName);
-//         const boost::regex expression1(".*this.*/file.foo");
-//         const boost::regex expression2("file1");
-
-//         {
-//             utils::SearchFileName st(expression1);
-//             EXPECT_TRUE(st.isValid(aFile));
-//         }
-
-//         {
-//             utils::SearchFileName st(expression2);
-//             EXPECT_FALSE(st.isValid(aFile));
-//         }
-//     }
-// }
-
-TEST(FileSearchDefault, Positive) {
-    // utils::TemporaryDirectory tmpDir;
-    //   TestData testData(tmpDir.getPath());
-    // utils::FileFinder fSearch;
-    // fSearch.search(tmpDir.getPath());
-    // std::cout << "Search path: " << tmpDir.getPath().string() << std::endl;
-    // fSearch.print();
-    // auto &data = fSearch.getData();
-    // EXPECT_TRUE(data.size() == 8);
-    // if (!data.empty() > 0) {
-    //     EXPECT_TRUE(
-    //         std::get<0>(data[0]) ==
-    //         (tmpDir.getPath() / boost::filesystem::path("bin")).string());
-    //     EXPECT_TRUE(std::get<0>(data[1]) ==
-    //                 (tmpDir.getPath() / boost::filesystem::path("bin") /
-    //                  boost::filesystem::path("test")).string());
-    // }
+TEST(FileSearc, Negative) {
+    boost::filesystem::path tmpPath("foo");
+    ASSERT_ANY_THROW((test_file_search<utils::DonotFilter, 12>(tmpPath)));
 }
-
-// TEST(FileSearchDefault, Negative) {
-//     utils::FileFinder fSearch;
-//     ASSERT_ANY_THROW(fSearch.search(boost::filesystem::path("foo")));
-// }

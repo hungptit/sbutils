@@ -77,14 +77,15 @@ namespace utils {
                 auto currentPath = dirIter->path();
                 auto status = dirIter->status();
                 auto ftype = status.type();
+                boost::system::error_code errcode;
                 std::string currentPathStr = currentPath.string();
                 auto aStem = currentPath.stem().string();
                 auto anExtension = currentPath.extension().string();
                 if (ftype == boost::filesystem::regular_file) {
                     vertex_data.emplace_back(std::make_tuple(
                         currentPathStr, aStem, currentPath.extension().string(),
-                        status.permissions(), fs::last_write_time(aPath),
-                        fs::file_size(currentPath)));
+                        status.permissions(), fs::last_write_time(aPath, errcode),
+                        fs::file_size(currentPath, errcode)));
                 } else if (ftype == boost::filesystem::directory_file) {
                     if (CustomFilter.isValidStem(aStem) &&
                         CustomFilter.isValidExt(anExtension)) {
