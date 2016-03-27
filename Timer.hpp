@@ -35,17 +35,19 @@ namespace utils {
         double TicksPerSeconds;
     };
 
-
     template <DispOpt val> class ElapsedTime {
       public:
+        explicit ElapsedTime() : Message("Elapsed time: ") {}
+        explicit ElapsedTime(const std::string &msg) : Message(msg) {}
+
         ~ElapsedTime() {
-            std::cout << "Elapsed time: "
-                      << Timer_.toc() * val / Timer_.ticksPerSecond()
+            std::cout << Message << Timer_.toc() * val / Timer_.ticksPerSecond()
                       << " " << getUnitString<val>() << std::endl;
         }
 
       private:
         Timer Timer_;
+        std::string Message;
     };
 }
 #endif

@@ -73,9 +73,8 @@ namespace utils {
         }
         const VertexContainer &getVertexes() const { return Vertexes; }
         const EdgeContainer &getEdges() const { return Edges; }
-
         bool isDirected() { return IsDirected; };
-
+      
       private:
         VertexContainer Vertexes;
         EdgeContainer Edges;

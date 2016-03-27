@@ -4,8 +4,8 @@
 // STL headers
 #include <array>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 // Boost libraries
 #define BOOST_THREAD_VERSION 4
@@ -18,12 +18,74 @@
 #include "Utils.hpp"
 
 namespace utils {
-    struct DonotFilter {
+    enum { PATH = 0, STEM = 1, EXTENSION = 2 };
+
+    template <typename Container> class ExtFilter {
+      public:
+        explicit ExtFilter(Container &exts) : Extensions(exts) {}
+
+        bool isValid(FileInfo &info) {
+            if (Extensions.empty()) {
+                return true;
+            } else {
+                return (std::find(Extensions.begin(), Extensions.end(),
+                                  std::get<EXTENSION>(info)) !=
+                        Extensions.end());
+            }
+        }
+
+      private:
+        Container Extensions;
+    };
+
+    template <typename Container> class StemFilter {
+      public:
+        explicit StemFilter(Container &stems) : Stems(stems) {}
+
+        bool isValid(FileInfo &info) {
+            if (Stems.empty()) {
+                return true;
+            } else {
+
+                return (std::find(Stems.begin(), Stems.end(),
+                                  std::get<STEM>(info)) != Stems.end());
+            }
+        }
+
+      private:
+        std::vector<std::string> Stems;
+    };
+
+    template <typename Iterator, typename Filter1>
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
+                                        Filter1 &f1) {
+        std::vector<utils::FileInfo> results;
+        for (auto it = begin; it != end; ++it) {
+            if (f1.isValid(*it)) {
+                results.emplace_back(*it);
+            }
+        }
+        return results;
+    }
+
+    template <typename Iterator, typename Filter1, typename Filter2>
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
+                                        Filter1 &f1, Filter2 &f2) {
+        std::vector<utils::FileInfo> results;
+        for (auto it = begin; it != end; ++it) {
+            if (f1.isValid(*it) && f2.isValid(*it)) {
+                results.emplace_back(*it);
+            }
+        }
+        return results;
+    }
+
+    struct DoNothing {
         bool isValidStem(const std::string &) { return true; }
         bool isValidExt(const std::string &) { return true; }
     };
 
-    class NormalFilter {
+    class NormalPolicy {
       public:
         bool isValidExt(const std::string &anExtension) {
             return std::find(ExcludedExtensions.begin(),
@@ -42,7 +104,7 @@ namespace utils {
             {"CMakeFiles", "CMakeTmp"}};
     };
 
-    class MWFilter {
+    class MWPolicy {
       public:
         bool isValidExt(const std::string &anExtension) {
             return std::find(ExcludedExtensions.begin(),
@@ -84,7 +146,8 @@ namespace utils {
                 if (ftype == boost::filesystem::regular_file) {
                     vertex_data.emplace_back(std::make_tuple(
                         currentPathStr, aStem, currentPath.extension().string(),
-                        status.permissions(), fs::last_write_time(aPath, errcode),
+                        status.permissions(),
+                        fs::last_write_time(aPath, errcode),
                         fs::file_size(currentPath, errcode)));
                 } else if (ftype == boost::filesystem::directory_file) {
                     if (CustomFilter.isValidStem(aStem) &&
@@ -178,8 +241,9 @@ namespace utils {
                 auto anExtension = currentPath.extension().string();
                 if (ftype == boost::filesystem::regular_file) {
                     Results.emplace_back(std::make_tuple(
-                        currentPath.string(), aStem, currentPath.extension().string(),
-                        status.permissions(), fs::last_write_time(aPath),
+                        currentPath.string(), aStem,
+                        currentPath.extension().string(), status.permissions(),
+                        fs::last_write_time(aPath),
                         fs::file_size(currentPath)));
                 } else if (ftype == boost::filesystem::directory_file) {
                     if (CustomFilter.isValidStem(aStem) &&
@@ -187,7 +251,7 @@ namespace utils {
                         folders.emplace_back(currentPath);
                     }
                 } else {
-                  // Donot do anything here
+                    // Donot do anything here
                 }
             }
         }
