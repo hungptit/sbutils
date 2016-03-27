@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     using Container = std::vector<boost::filesystem::path>;
     utils::ElapsedTime<utils::MILLISECOND> timer;
     // Visitor<Container, DonotFilter> visitor;
-    Visitor<Container, NormalFilter> visitor;
+    Visitor<Container, NormalPolicy> visitor;
     Container searchFolders;
     for (auto val : folders) {
         searchFolders.emplace_back(val);
@@ -137,8 +137,7 @@ int main(int argc, char *argv[]) {
             os.str(std::string()); // Reset a string stream
             auto data = std::get<1>(item);
             auto aKey = std::to_string(counter);
-            save(output, aKey, data);
-            writer.write(aKey, os.str());
+            output(cereal::make_nvp(aKey, os.str()));
             fmt::print("{}\n", os.str());
             counter++;
         }
