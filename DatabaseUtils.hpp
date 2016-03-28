@@ -2,24 +2,24 @@
 #define DatabaseUtils_hpp_
 
 #include "FileSearch.hpp"
+#include "FileUtils.hpp"
 #include "LevelDBIO.hpp"
-#include "utils/Resources.hpp"
-#include "utils/Serialization.hpp"
+#include "Resources.hpp"
+#include "Serialization.hpp"
 
 namespace utils {
     namespace Database {
 
-        /** 
+        /**
          * This function assumes that given keys are sorted.
          *
-         * @param reader 
-         * @param keys 
+         * @param reader
+         * @param keys
          *
-         * @return 
+         * @return
          */
         template <typename Container, typename IArchive>
-        Container load(Reader &reader,
-                       const std::vector<std::string> &keys) {
+        Container load(Reader &reader, const std::vector<std::string> &keys) {
             auto Database = reader.getDB();
             Container results;
             leveldb::Iterator *it =
@@ -39,7 +39,7 @@ namespace utils {
                     input(data);
                     std::move(data.begin(), data.end(),
                               std::back_inserter(results));
-                    
+
                     // Advance to the next key
                     ++currentKey;
                 }
@@ -56,6 +56,110 @@ namespace utils {
 
             // Return
             return results;
+        }
+
+        template <typename Graph>
+        void tree_info(const Graph &g, std::vector<std::string> &vids) {
+            utils::graph_info(g);
+            fmt::MemoryWriter writer;
+            size_t counter = 0;
+            for (auto item : vids) {
+                writer << "vid[" << counter << "] = " << item << "\n";
+                counter++;
+            }
+            std::cout << writer.str();
+        }
+
+        template <typename Container, typename ExtContainer,
+                  typename StemContainer>
+        auto filter(Container &data, ExtContainer &exts, StemContainer &stems) {
+            // utils::ElapsedTime<utils::MILLISECOND> t1("Filter time: ");
+            utils::ExtFilter<ExtContainer> f1(exts);
+            utils::StemFilter<StemContainer> f2(stems);
+            return utils::filter(data.begin(), data.end(), f1, f2);
+        }
+
+        template <typename Container>
+        Container
+        read(utils::Reader &reader, const std::vector<std::string> &folders,
+             bool verbose = false) {
+            using IArchive = utils::DefaultIArchive;
+            Container allFiles;
+
+            if (folders.empty()) {
+                // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
+                // time:
+                // ");
+                std::istringstream is(
+                    reader.read(utils::Resources::AllFileKey));
+                IArchive input(is);
+                input(allFiles);
+                if (verbose) {
+                    fmt::print("Number of files: {0}\n", allFiles.size());
+                }
+            } else {
+                // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
+                // time:
+                // ");
+                using GraphAlg = utils::SparseGraph<int>;
+                using vertex_container = typename GraphAlg::VertexContainer;
+                using edge_container = typename GraphAlg::EdgeContainer;
+                using index_type = typename GraphAlg::index_type;
+
+                // Only read the file information for given folders.
+                std::istringstream is(reader.read(utils::Resources::GraphKey));
+                std::vector<std::string> vids;
+                vertex_container v;
+                edge_container e;
+                IArchive input(is);
+                input(vids, v, e);
+                GraphAlg g(v, e, true);
+
+                if (verbose) {
+                    fmt::print("Number of vertexes: {0}\n", vids.size());
+                    fmt::print("Number of edges: {0}\n", e.size());
+                }
+
+                // Display detail information about file hierarchy tree.
+                // tree_info(g, vids);
+
+                // Now find indexes for given folders
+                std::vector<index_type> indexes;
+                for (auto item : folders) {
+                    auto aKey = utils::normalize_path(item);
+                    auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
+                    if (*it == aKey) {
+                        auto vid = std::distance(vids.begin(), it);
+                        indexes.push_back(vid);
+                    } else {
+                        fmt::print("Could not find key {} in database\n", item);
+                    }
+                }
+
+                // Use DFS to find all vertexes that are belong to given
+                // vertexes
+                utils::Graph::NormalVisitor<GraphAlg, std::vector<index_type>>
+                    visitor(vids.size());
+                // utils::Graph::dfs(g, visitor, indexes);
+                utils::DFS<GraphAlg> alg;
+                auto results = alg.dfs(g, indexes[0]);
+                // auto results = visitor.getResults();
+
+                // Now read all keys and create a list of edited file data
+                // bases.
+                {
+                    std::sort(results.begin(), results.end());
+                    std::vector<std::string> keys;
+                    for (auto index : results) {
+                        keys.push_back(utils::to_fixed_string(9, index));
+                    }
+
+                    allFiles = utils::Database::load<Container, IArchive>(
+                        reader, keys);
+                }
+            }
+
+            return allFiles;
         }
     }
 }

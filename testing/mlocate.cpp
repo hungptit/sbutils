@@ -6,7 +6,9 @@
 #include <tuple>
 #include <vector>
 
+#include "utils/DatabaseUtils.hpp"
 #include "utils/FileSearch.hpp"
+#include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
 #include "utils/Serialization.hpp"
@@ -17,7 +19,6 @@ int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     using path = boost::filesystem::path;
     using IArchive = utils::DefaultIArchive;
-    using Index = int;
 
     po::options_description desc("Allowed options");
 
@@ -25,8 +26,6 @@ int main(int argc, char *argv[]) {
   desc.add_options()
     ("help,h", "Print this help")
     ("verbose,v", "Display searched data.")
-    ("info,i", "Display general information about stored data.")
-    ("parallel,p", "Use threaded version of viewer.")
     ("keys,k", "List all keys.")
     ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
     ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
@@ -54,16 +53,6 @@ int main(int argc, char *argv[]) {
     bool verbose = false;
     if (vm.count("verbose")) {
         verbose = true;
-    }
-
-    bool info = false;
-    if (vm.count("info")) {
-        info = true;
-    }
-
-    bool isThreaded = false;
-    if (vm.count("parallel")) {
-        isThreaded = true;
     }
 
     // Search folders
@@ -109,79 +98,14 @@ int main(int argc, char *argv[]) {
             std::cout << aKey << std::endl;
         }
     } else {
-        // Now find all files which satisfy given constraints.
-        std::vector<utils::FileInfo> allFiles;
-        if (folders.empty()) {
-            utils::ElapsedTime<utils::MILLISECOND> t("Deserialization time: ");
-            std::istringstream is(reader.read(utils::Resources::AllFileKey));
-            IArchive input(is);
-            input(allFiles);
-            if (verbose) {
-                fmt::print("Number of files: {0}\n", allFiles.size());
-            }
-        } else {
-            // Only read the file information for given folders.
-            std::istringstream is(reader.read(utils::Resources::GraphKey));
-            std::vector<std::string> vids;
-            std::vector<Index> v;
-            std::vector<Index> e;
-            IArchive input(is);
-            input(vids, v, e);
-            utils::SparseGraph<int> g(v, e, true);
-
-            if (verbose) {
-                fmt::print("Number of vertexes: {0}\n", vids.size());
-                fmt::print("Number of edges: {0}\n", e.size());
-            }
-
-            // Display detail information about file hierarchy tree.
-            if (info) {
-                utils::graph_info(g);
-                fmt::MemoryWriter writer;
-                size_t counter = 0;
-                for (auto item : vids) {
-                    writer << "vid[" << counter << "] = " << item << "\n";
-                    counter++;
-                }
-                std::cout << writer.str();
-            }
-
-            // Now find indexes for given folders
-            std::vector<Index> indexes;
-            for (auto item : folders) {
-                auto aKey = item;
-                if (item.back() == '/') {
-                  aKey = item.substr(0, item.size() - 1);
-                  std::cout << aKey << "-----\n";
-                }
-
-                auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
-                if (*it == item) {
-                    auto vid = std::distance(vids.begin(), it);
-                    indexes.push_back(vid);
-                    fmt::print("vid[\"{0}\"] = {1}\n", aKey, vid);
-                } else {
-                    fmt::print(
-                        "Could not find database for file in {} directory\n",
-                        item);
-                }
-            }
+        using Container = std::vector<utils::FileInfo>;
+        auto allFiles = utils::Database::read<Container>(reader, folders, false);
+        auto results = utils::Database::filter(allFiles, extensions, stems);
+        fmt::MemoryWriter writer;
+        writer << "Search results: \n";
+        for (auto item : results) {
+            writer << std::get<utils::PATH>(item) << "\n";
         }
-
-        {
-            utils::ExtFilter<decltype(extensions)> f1(extensions);
-            utils::StemFilter<decltype(stems)> f2(stems);
-            auto results =
-                utils::filter(allFiles.begin(), allFiles.end(), f1, f2);
-
-            // Display the search results
-            fmt::MemoryWriter writer;
-            for (auto item : results) {
-                writer << std::get<0>(item) << "\n";
-            }
-            fmt::print("{}", writer.str());
-        }
+        fmt::print("{}", writer.str());
     }
-
-    return 0;
 }

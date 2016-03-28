@@ -74,12 +74,63 @@ namespace utils {
         const VertexContainer &getVertexes() const { return Vertexes; }
         const EdgeContainer &getEdges() const { return Edges; }
         bool isDirected() { return IsDirected; };
-      
+
       private:
         VertexContainer Vertexes;
         EdgeContainer Edges;
         bool IsDirected;
     };
+
+    namespace Graph {
+        enum Status { UNDISCOVERED, VISITED, DISCOVERED };
+
+        template <typename Visitor, typename Graph>
+        void dfs(Graph &g, Visitor &visitor,
+                 std::vector<typename Graph::index_type> vids) {
+            using index_type = typename Graph::index_type;
+            std::vector<index_type> stack(vids.begin(), vids.end());
+            while (!stack.empty()) {
+                auto vid = stack.back();
+                stack.pop_back();
+                visitor.visit(g, stack, vid);
+            }
+        }
+
+        template <typename Graph, typename Container> class NormalVisitor {
+          public:
+            using index_type = typename Graph::index_type;
+            using edge_container = typename Graph::EdgeContainer;
+            using results_container = std::vector<index_type>;
+
+            explicit NormalVisitor(const size_t N)
+                : VertexStates(N, UNDISCOVERED) {}
+
+            const results_container & getResults() const {return Results;}
+
+            void visit(const Graph &g, Container &stack, index_type &vid) {
+                if (VertexStates[vid] == UNDISCOVERED) {
+                    auto vertexes = g.getVertexes();
+                    auto edges = g.getEdges();
+                    VertexStates[vid] = VISITED;
+
+                    for (auto idx = vertexes[vid]; idx < vertexes[vid + 1];
+                         idx++) {
+                        stack.push_back(getChildVid(edges, idx));
+                    }
+
+                    Results.push_back(vid);
+                    VertexStates[vid] = DISCOVERED;
+                }
+            }
+
+          private:
+            std::vector<Status> VertexStates;
+            results_container Results;
+            index_type getChildVid(const edge_container &edges, size_t idx) {
+                return edges[idx];
+            }
+        };
+    }
 
     // TODO: Need to provide a visitor
     template <typename Graph> class DFS {

@@ -79,10 +79,17 @@ namespace utils {
         return results;
     }
 
-    // File related utilities
+    /** 
+     * Remove trailing slash characters
+     *
+     * @param aPath 
+     *
+     * @return 
+     */
     std::string normalize_path(const std::string &aPath) {
+        using namespace boost::filesystem;
         auto pos = aPath.size() - 1;
-        auto sepChar = boost::filesystem::path::preferred_separator;
+        auto sepChar = path::preferred_separator;
         for (; pos != 0; --pos) {
             if (aPath[pos] != sepChar)
                 break;
