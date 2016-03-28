@@ -5,13 +5,15 @@
 #include <tuple>
 #include <vector>
 
+#include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
+
 #include "cppformat/format.h"
-#include "utils/BFSFileSearch.hpp"
-#include "utils/DFSFileSearch.hpp"
+#include "utils/DatabaseUtils.hpp"
 #include "utils/FileSearch.hpp"
+#include "utils/Print.hpp"
+#include "utils/Serialization.hpp"
 #include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -81,15 +83,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Search for files in the given folders.
-    utils::BasicFileSearch<utils::DFSFileSearchBase, std::vector<std::string>,
-                           std::vector<std::string>> searchAlg(stems,
-                                                               extensions);
-
-    for (auto &val : folders) {
-      searchAlg.search(val);
+    using path = boost::filesystem::path;
+    using Container = std::vector<path>;
+    utils::SimpleVisitor<Container, utils::NormalPolicy> visitor;
+    Container searchFolders;
+    for (auto item : folders) {
+        searchFolders.emplace_back(path(item));
     }
-
-    auto data = searchAlg.getData();
+    utils::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
+        searchFolders, visitor);
+    auto results = visitor.getResults();
+    utils::ExtFilter<std::vector<std::string>> f1(extensions);
+    utils::StemFilter<std::vector<std::string>> f2(stems);
+    auto data = utils::filter(results.begin(), results.end(), f1, f2);
 
     if (verbose) {
         fmt::print("Search folders:\n");
@@ -104,14 +110,14 @@ int main(int argc, char *argv[]) {
     } else {
         fmt::print("Number of files: {}\n", data.size());
         std::for_each(data.begin(), data.end(), [](auto const &val) {
-            fmt::print("{0}\n", (path(std::get<0>(val)) /
-                                 path(std::get<1>(val) + std::get<2>(val)))
-                                    .string());
+            fmt::print("{0}\n", std::get<0>(val));
         });
     }
+
     if (!jsonFile.empty()) {
-      std::ostringstream os;
-        utils::save<cereal::JSONOutputArchive, decltype(data)>(data, os);
+        std::ostringstream os;
+        cereal::JSONOutputArchive output(os);
+        utils::save(output, "Search results", results);
         std::ofstream myfile(jsonFile);
         myfile << os.str() << std::endl;
     }
