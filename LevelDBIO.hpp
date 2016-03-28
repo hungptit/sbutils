@@ -38,7 +38,7 @@ namespace utils {
 
     class Reader {
       public:
-        Reader(const std::string &dataFile) : DataFile(dataFile) {
+        explicit Reader(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             options.create_if_missing = false;
             leveldb::Status status = leveldb::DB::Open(options, DataFile, &Database);
@@ -47,6 +47,8 @@ namespace utils {
                 std::cerr << status.ToString() << std::endl;
             }
         }
+
+        leveldb::DB * getDB() const {return Database;} 
 
         std::vector<std::string> keys() {
             std::vector<std::string> allKeys;

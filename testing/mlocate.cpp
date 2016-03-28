@@ -6,7 +6,13 @@
 #include <tuple>
 #include <vector>
 
+<<<<<<< HEAD
 #include "utils/FileSearch.hpp"
+=======
+#include "utils/DatabaseUtils.hpp"
+#include "utils/FileSearch.hpp"
+#include "utils/FileUtils.hpp"
+>>>>>>> baa8b01af6793909ae056f40248903e09cb097e3
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
 #include "utils/Serialization.hpp"
@@ -17,7 +23,10 @@ int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     using path = boost::filesystem::path;
     using IArchive = utils::DefaultIArchive;
+<<<<<<< HEAD
     using Index = int;
+=======
+>>>>>>> baa8b01af6793909ae056f40248903e09cb097e3
 
     po::options_description desc("Allowed options");
 
@@ -25,8 +34,11 @@ int main(int argc, char *argv[]) {
   desc.add_options()
     ("help,h", "Print this help")
     ("verbose,v", "Display searched data.")
+<<<<<<< HEAD
     ("info,i", "Display general information about stored data.")
     ("parallel,p", "Use threaded version of viewer.")
+=======
+>>>>>>> baa8b01af6793909ae056f40248903e09cb097e3
     ("keys,k", "List all keys.")
     ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
     ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
@@ -56,6 +68,7 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
 
+<<<<<<< HEAD
     bool info = false;
     if (vm.count("info")) {
         info = true;
@@ -66,6 +79,8 @@ int main(int argc, char *argv[]) {
         isThreaded = true;
     }
 
+=======
+>>>>>>> baa8b01af6793909ae056f40248903e09cb097e3
     // Search folders
     std::vector<std::string> folders;
     if (vm.count("folders")) {
@@ -109,6 +124,7 @@ int main(int argc, char *argv[]) {
             std::cout << aKey << std::endl;
         }
     } else {
+<<<<<<< HEAD
         // Now find all files which satisfy given constraints.
         std::vector<utils::FileInfo> allFiles;
         if (folders.empty()) {
@@ -181,7 +197,16 @@ int main(int argc, char *argv[]) {
             }
             fmt::print("{}", writer.str());
         }
+=======
+        using Container = std::vector<utils::FileInfo>;
+        auto allFiles = utils::Database::read<Container>(reader, folders, false);
+        auto results = utils::Database::filter(allFiles, extensions, stems);
+        fmt::MemoryWriter writer;
+        writer << "Search results: \n";
+        for (auto item : results) {
+            writer << std::get<utils::PATH>(item) << "\n";
+        }
+        fmt::print("{}", writer.str());
+>>>>>>> baa8b01af6793909ae056f40248903e09cb097e3
     }
-
-    return 0;
 }
