@@ -17,7 +17,7 @@
 #include "utils/Resources.hpp"
 #include "utils/Serialization.hpp"
 #include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
+#include "utils/FolderDiff.hpp"
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     // clang-format on
 
     po::positional_options_description p;
-    p.add("database", -1);
+    p.add("folders", -1);
     po::variables_map vm;
     po::store(
         po::command_line_parser(argc, argv).options(desc).positional(p).run(),
@@ -199,12 +199,12 @@ int main(int argc, char *argv[]) {
         }
 =======
         using Container = std::vector<utils::FileInfo>;
-        auto allFiles = utils::Database::read<Container>(reader, folders, false);
-        auto results = utils::Database::filter(allFiles, extensions, stems);
+        auto allFiles = utils::read_baseline<Container>(reader, folders, verbose);
+        auto results = utils::filter(allFiles, extensions, stems);
         fmt::MemoryWriter writer;
         writer << "Search results: \n";
         for (auto item : results) {
-            writer << std::get<utils::PATH>(item) << "\n";
+            writer << std::get< utils::filesystem::PATH>(item) << "\n";
         }
         fmt::print("{}", writer.str());
 >>>>>>> baa8b01af6793909ae056f40248903e09cb097e3

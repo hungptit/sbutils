@@ -6,13 +6,19 @@
             Refactored the FileSearch and cleanup finder already.
         </comment>
     </note>
+    <note priority="medium" time="1428591073" done="1459264104">
+        Rewrite FileSearch by accept only one SearchStrategy and this strategy is the combination of several strategies. We may not be able to use the variadic template with this class.
+        <comment>
+            Done
+        </comment>
+    </note>
     <note priority="veryhigh" time="1449180012">
         Use TBB to parallelize all algorithm.
     </note>
     <note priority="high" time="1448198201">
         Add codcoverage report or test option for utils.
     </note>
-    <note priority="medium" time="1428591073">
-        Rewrite FileSearch by accept only one SearchStrategy and this strategy is the combination of several strategies. We may not be able to use the variadic template with this class.
+    <note priority="medium" time="1459264152">
+        Try clang-tidy with utils
     </note>
 </todo>

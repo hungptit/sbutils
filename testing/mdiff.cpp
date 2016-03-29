@@ -17,18 +17,14 @@
 #include "boost/thread.hpp"
 #include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
+#include "boost/unordered_set.hpp"
 
-#include "utils/BFSFileSearch.hpp"
-#include "utils/DFSFileSearch.hpp"
+#include "utils/DatabaseUtils.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
 
-#include "utils/Print.hpp"
-#include "utils/FileUtils.hpp"
-#include "utils/Print.hpp"
 #include "cppformat/format.h"
 
 #include <sstream>
@@ -36,76 +32,29 @@
 #include <vector>
 
 namespace {
-    // TODO: Need to add filter to this function.
-    template <typename Container> void print(Container &data, bool verbose) {
-        if (verbose) {
-            // for (auto item : data) {
-            //     std::cout << item << "\n";
-            // }
-        } else {
-            for (auto item : data) {
-              fmt::print("{}\n", std::get<0>(item));
+    struct NormalFilter {
+      public:
+        bool isValid(utils::FileInfo &item) {
+            return (std::find(ExcludedExtensions.begin(),
+                              ExcludedExtensions.end(),
+                              std::get<utils::filesystem::EXTENSION>(item)) ==
+                    ExcludedExtensions.end());
+        }
+
+      private:
+        std::vector<std::string> ExcludedExtensions = {".p"};
+    };
+
+    template <typename Container, typename Filter>
+    void print(Container &data, Filter &f) {
+        for (auto item : data) {
+            if (f.isValid(item)) {
+                fmt::print("{}\n", std::get<utils::filesystem::PATH>(item));
             }
         }
     }
-
-    auto diff(utils::Reader &reader, std::string &aPath, bool verbose) {
-        boost::filesystem::path p(utils::normalize_path(aPath));
-        auto aKey = p.string();
-        if (verbose) {
-            std::cout << "Current path: " << p << "\n";
-            std::cout << "Current key: " << aKey << "\n";
-        }
-
-        utils::Timer timer;
-
-        typedef utils::FileSearchBase<utils::BFSFileSearchBase> FileSearch;
-        FileSearch finder;
-        typedef std::vector<utils::FileInfo> Container;
-        utils::FolderDiff<Container> diff;
-
-        diff.find(finder, aKey);
-        if (verbose) {
-            std::cout << "Find time: " << timer.toc() / timer.ticksPerSecond()
-                      << " seconds" << std::endl;
-        }
-
-        timer.tic();
-        auto dict = diff.read(reader, aKey);
-        if (verbose) {
-            std::cout << "Read time: " << timer.toc() / timer.ticksPerSecond()
-                      << " seconds" << std::endl;
-        }
-
-        timer.tic();
-
-        auto results = diff.diff(finder.getData(), dict);
-        if (verbose) {
-            std::cout << "Diff time: " << timer.toc() / timer.ticksPerSecond()
-                      << " seconds" << std::endl;
-        }
-        return results;
-    }
-
-    auto diffFolders(std::vector<std::string> &folders, std::string &dataFile,
-                     bool verbose) {
-        utils::Reader reader(dataFile);
-        std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
-            allDeletedFiles;
-        for (auto aPath : folders) {
-            std::vector<utils::FileInfo> editedFiles, newFiles, deletedFiles;
-            std::tie(editedFiles, newFiles, deletedFiles) =
-                diff(reader, aPath, verbose);
-            std::move(editedFiles.begin(), editedFiles.end(),
-                      std::back_inserter(allEditedFiles));
-            std::move(newFiles.begin(), newFiles.end(),
-                      std::back_inserter(allNewFiles));
-            std::move(deletedFiles.begin(), deletedFiles.end(),
-                      std::back_inserter(allDeletedFiles));
-        }
-        return std::make_tuple(allEditedFiles, allNewFiles, allDeletedFiles);
-    }
 }
+
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -116,7 +65,6 @@ int main(int argc, char *argv[]) {
   desc.add_options()
     ("help,h", "Print this help")
     ("verbose,v", "Display searched data.")
-    ("parallel,p", "Use threaded version of viewer.")
     ("keys,k", "List all keys.")
     ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
     ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
@@ -144,11 +92,6 @@ int main(int argc, char *argv[]) {
     bool verbose = false;
     if (vm.count("verbose")) {
         verbose = true;
-    }
-
-    bool isThreaded = false;
-    if (vm.count("parallel")) {
-        isThreaded = true;
     }
 
     // Search folders
@@ -180,8 +123,8 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(utils::FileDatabaseInfo::Database))
-                       .string();
+        dataFile =
+            (boost::filesystem::path(utils::Resources::Database)).string();
     }
 
     if (verbose) {
@@ -189,22 +132,23 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        utils::ElapsedTime<utils::MILLISECOND> e;
+        utils::ElapsedTime<utils::SECOND> e;
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
-        std::tie(allEditedFiles, allNewFiles, allDeletedFiles) =
-            diffFolders(folders, dataFile, verbose);
+        std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
+            utils::diffFolders(dataFile, folders, verbose);
 
         // Now we will display the results
         std::cout << "---- Modified files: " << allEditedFiles.size()
                   << " ----\n";
-        print(allEditedFiles, verbose);
+        NormalFilter f;
+        print(allEditedFiles, f);
 
         std::cout << "---- New files: " << allNewFiles.size() << " ----\n";
-        print(allNewFiles, verbose);
+        print(allNewFiles, f);
 
         std::cout << "---- Deleted files: " << allDeletedFiles.size()
                   << " ----\n";
-        print(allDeletedFiles, verbose);
+        print(allDeletedFiles, f);
     }
 }

@@ -2,6 +2,8 @@
 #define Timer_hpp
 
 #include <chrono>
+#include <iostream>
+#include <string>
 
 namespace utils {
     enum DispOpt { MICROSECOND = 1000000, MILLISECOND = 1000, SECOND = 1 };
