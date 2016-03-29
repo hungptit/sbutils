@@ -9,7 +9,6 @@
 #include "boost/program_options.hpp"
 
 #include "cppformat/format.h"
-#include "utils/DatabaseUtils.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/Print.hpp"
 #include "utils/Serialization.hpp"

@@ -7,9 +7,12 @@
 #include <vector>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "utils/FileSearch.hpp"
 =======
 #include "utils/DatabaseUtils.hpp"
+=======
+>>>>>>> master
 #include "utils/FileSearch.hpp"
 #include "utils/FileUtils.hpp"
 >>>>>>> baa8b01af6793909ae056f40248903e09cb097e3
