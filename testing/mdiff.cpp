@@ -19,7 +19,6 @@
 #include "boost/thread/future.hpp"
 #include "boost/unordered_set.hpp"
 
-#include "utils/DatabaseUtils.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"

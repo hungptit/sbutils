@@ -6,7 +6,6 @@
 #include <tuple>
 #include <vector>
 
-#include "utils/DatabaseUtils.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"

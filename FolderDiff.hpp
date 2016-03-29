@@ -12,6 +12,10 @@
 #include <vector>
 
 #include "SparseGraph.hpp"
+#include "LevelDBIO.hpp"
+#include "Serialization.hpp"
+#include "FileSearch.hpp"
+#include "FileUtils.hpp"
 
 namespace utils {
     /**
