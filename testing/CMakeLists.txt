@@ -68,7 +68,7 @@ if (Boost_FOUND)
 
   # Compile SQLite examples.The order of linked libraries must be preserved
   # otherwise the link process will be failed.
-  set(UNITTEST_SRC_FILES tSQLite tTest)
+  set(UNITTEST_SRC_FILES  tTest)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${LIB_CPPFORMAT} ${Boost_LIBRARIES}

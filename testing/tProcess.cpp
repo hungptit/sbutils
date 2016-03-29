@@ -3,6 +3,7 @@
 #include "utils/TemporaryDirectory.hpp"
 #include "utils/Process.hpp"
 #include "gtest/gtest.h"
+
 TEST(Basic, Positive) {
     utils::TemporaryDirectory tmpDir;
     std::string cmd("/bin/ls");

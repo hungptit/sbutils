@@ -6,16 +6,12 @@
 #include <tuple>
 #include <vector>
 
-#include "utils/BFSFileSearch.hpp"
-#include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Print.hpp"
 #include "utils/TemporaryDirectory.hpp"
 #include "utils/Timer.hpp"
-
-#include "SetupTest.hpp"
 
 using path = boost::filesystem::path;
 

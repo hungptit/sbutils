@@ -18,8 +18,6 @@
 #include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
 
-#include "utils/BFSFileSearch.hpp"
-#include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
