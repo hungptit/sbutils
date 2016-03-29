@@ -36,8 +36,8 @@ template <typename Container> auto vertex_num(const Container &data) {
 TEST(TestSparseGraph, Positive) {
     auto edges = createTestData<int>();
     std::cout << "==== Edge information ====\n";
-    utils::print(edges);
-    utils::SparseGraph<int> g(edges, vertex_num(edges), true);
+    utils::print(edges);    
+    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
 
     {
         auto vertexes = g.getVertexes();
@@ -85,7 +85,7 @@ TEST(DFS, Positive) {
     auto edges = createTestData<int>();
     std::cout << "==== Edge information ====\n";
     utils::print(edges);
-    utils::SparseGraph<int> g(edges, vertex_num(edges), true);
+    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
 
     fmt::print("Visited vertexes\n");
     {
@@ -132,7 +132,7 @@ template <typename IArchive, typename OArchive> void test_cereal() {
     auto edges = createTestData<int>();
     std::cout << "==== Edge information ====\n";
     utils::print(edges);
-    utils::SparseGraph<int> g(edges, vertex_num(edges), true);
+    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
     auto v = g.getVertexes();
     auto e = g.getEdges();
 

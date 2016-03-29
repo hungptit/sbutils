@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include "Print.hpp"
+
 namespace utils {
     template <typename Container, int main_key_idx = 0> class LookupTable {
       public:

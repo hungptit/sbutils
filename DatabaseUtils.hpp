@@ -60,7 +60,7 @@ namespace utils {
 
         template <typename Graph>
         void tree_info(const Graph &g, std::vector<std::string> &vids) {
-            utils::graph_info(g);
+            utils::graph::graph_info(g);
             fmt::MemoryWriter writer;
             size_t counter = 0;
             for (auto item : vids) {
@@ -74,9 +74,9 @@ namespace utils {
                   typename StemContainer>
         auto filter(Container &data, ExtContainer &exts, StemContainer &stems) {
             // utils::ElapsedTime<utils::MILLISECOND> t1("Filter time: ");
-            utils::ExtFilter<ExtContainer> f1(exts);
-            utils::StemFilter<StemContainer> f2(stems);
-            return utils::filter(data.begin(), data.end(), f1, f2);
+            utils::filesystem::ExtFilter<ExtContainer> f1(exts);
+            utils::filesystem::StemFilter<StemContainer> f2(stems);
+            return utils::filesystem::filter(data.begin(), data.end(), f1, f2);
         }
 
         template <typename Container>
@@ -101,7 +101,9 @@ namespace utils {
                 // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
                 // time:
                 // ");
-                using GraphAlg = utils::SparseGraph<int>;
+                using index_type = int;
+                using edge_type = int;
+                using GraphAlg = utils::SparseGraph<index_type, edge_type>;
                 using vertex_container = typename GraphAlg::VertexContainer;
                 using edge_container = typename GraphAlg::EdgeContainer;
                 using index_type = typename GraphAlg::index_type;
@@ -138,12 +140,13 @@ namespace utils {
 
                 // Use DFS to find all vertexes that are belong to given
                 // vertexes
-                utils::Graph::NormalVisitor<GraphAlg, std::vector<index_type>>
+                utils::graph::NormalVisitor<GraphAlg, std::vector<index_type>>
                     visitor(vids.size());
-                // utils::Graph::dfs(g, visitor, indexes);
-                utils::DFS<GraphAlg> alg;
-                auto results = alg.dfs(g, indexes[0]);
-                // auto results = visitor.getResults();
+                utils::graph::dfs(g, visitor, indexes);
+                auto results = visitor.getResults();
+
+                // utils::DFS<GraphAlg> alg;
+                // auto results = alg.dfs(g, indexes);
 
                 // Now read all keys and create a list of edited file data
                 // bases.
