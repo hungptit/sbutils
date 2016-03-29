@@ -69,10 +69,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Search for files in a given folders.
-    using namespace utils;
+    using namespace utils::filesystem;
     using Container = std::vector<boost::filesystem::path>;
     utils::ElapsedTime<utils::MILLISECOND> timer;
-    // Visitor<Container, DonotFilter> visitor;
     Visitor<Container, NormalPolicy> visitor;
     Container searchFolders;
     for (auto val : folders) {

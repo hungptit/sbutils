@@ -72,13 +72,13 @@ namespace {
 
 TEST(Filter, Positive) {
     {
-        utils::DonotFilter filter;
-        EXPECT_TRUE(filter.isValidExt(".git"));
-        EXPECT_TRUE(filter.isValidStem(""));
+        utils::filesystem::DoNothingPolicy f1;
+        EXPECT_TRUE(f1.isValidExt(".git"));
+        EXPECT_TRUE(f1.isValidStem(""));
     }
 
     {
-        utils::NormalFilter filter;
+        utils::filesystem::NormalPolicy filter;
         EXPECT_FALSE(filter.isValidExt(".git"));
         EXPECT_FALSE(filter.isValidStem("CMakeFiles"));
         EXPECT_TRUE(filter.isValidExt(".cpp"));
@@ -86,7 +86,7 @@ TEST(Filter, Positive) {
     }
 
     {
-        utils::MWFilter filter;
+        utils::filesystem::MWPolicy filter;
         EXPECT_FALSE(filter.isValidExt(".sbtools"));
         EXPECT_FALSE(filter.isValidStem("doxygen"));
         EXPECT_FALSE(filter.isValidStem("doc"));
@@ -104,9 +104,9 @@ TEST(FileDatabase, Positive) {
 template <typename Filter, size_t expectSize>
 void test_file_search(boost::filesystem::path &tmpDir) {
     using Container = std::vector<boost::filesystem::path>;
-    utils::SimpleVisitor<Container, Filter> visitor;
+    utils::filesystem::SimpleVisitor<Container, Filter> visitor;
     Container searchFolders{tmpDir};
-    utils::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
+    utils::filesystem::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
         searchFolders, visitor);
     auto results = visitor.getResults();
     std::cout << "== Search results ==\n";
@@ -118,12 +118,12 @@ TEST(FileSearch, Positive) {
     utils::TemporaryDirectory tmpDir;
     TestData testData(tmpDir.getPath());
     auto tmpPath = tmpDir.getPath();
-    test_file_search<utils::DonotFilter, 12>(tmpPath);
-    test_file_search<utils::NormalFilter, 11>(tmpPath);
-    test_file_search<utils::MWFilter, 11>(tmpPath);
+    test_file_search<utils::filesystem::DoNothingPolicy, 12>(tmpPath);
+    test_file_search<utils::filesystem::NormalPolicy, 11>(tmpPath);
+    test_file_search<utils::filesystem::MWPolicy, 11>(tmpPath);
 }
 
 TEST(FileSearc, Negative) {
     boost::filesystem::path tmpPath("foo");
-    ASSERT_ANY_THROW((test_file_search<utils::DonotFilter, 12>(tmpPath)));
+    ASSERT_ANY_THROW((test_file_search<utils::filesystem::DoNothingPolicy, 12>(tmpPath)));
 }

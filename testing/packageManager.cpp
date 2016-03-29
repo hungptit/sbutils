@@ -21,7 +21,6 @@
 #include "utils/Utils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Process.hpp"
-#include "utils/Finder.hpp"
 
 struct BuildInfo {
   public:

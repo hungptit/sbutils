@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     // clang-format on
 
     po::positional_options_description p;
-    p.add("database", -1);
+    p.add("folders", -1);
     po::variables_map vm;
     po::store(
         po::command_line_parser(argc, argv).options(desc).positional(p).run(),
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
         fmt::MemoryWriter writer;
         writer << "Search results: \n";
         for (auto item : results) {
-            writer << std::get<utils::PATH>(item) << "\n";
+            writer << std::get< utils::filesystem::PATH>(item) << "\n";
         }
         fmt::print("{}", writer.str());
     }

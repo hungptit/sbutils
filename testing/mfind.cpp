@@ -85,17 +85,17 @@ int main(int argc, char *argv[]) {
     // Search for files in the given folders.
     using path = boost::filesystem::path;
     using Container = std::vector<path>;
-    utils::SimpleVisitor<Container, utils::NormalPolicy> visitor;
+    utils::filesystem::SimpleVisitor<Container, utils::filesystem::NormalPolicy> visitor;
     Container searchFolders;
     for (auto item : folders) {
         searchFolders.emplace_back(path(item));
     }
-    utils::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
+    utils::filesystem::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
         searchFolders, visitor);
     auto results = visitor.getResults();
-    utils::ExtFilter<std::vector<std::string>> f1(extensions);
-    utils::StemFilter<std::vector<std::string>> f2(stems);
-    auto data = utils::filter(results.begin(), results.end(), f1, f2);
+    utils::filesystem::ExtFilter<std::vector<std::string>> f1(extensions);
+    utils::filesystem::StemFilter<std::vector<std::string>> f2(stems);
+    auto data = utils::filesystem::filter(results.begin(), results.end(), f1, f2);
 
     if (verbose) {
         fmt::print("Search folders:\n");

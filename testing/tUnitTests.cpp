@@ -9,10 +9,11 @@
 #include "utils/BFSFileSearch.hpp"
 #include "utils/DFSFileSearch.hpp"
 #include "utils/FileSearch.hpp"
+#include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
+#include "utils/Print.hpp"
 #include "utils/TemporaryDirectory.hpp"
 #include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
 
 #include "SetupTest.hpp"
 
@@ -59,14 +60,14 @@ TEST(FileSystemUtilities, Negative) {
 }
 
 TEST(TemporaryDirectory, Positive) {
-    TemporaryDirectory tmpDir;
+    utils::TemporaryDirectory tmpDir;
     std::cout << tmpDir.getPath() << std::endl;
     EXPECT_TRUE(boost::filesystem::exists(tmpDir.getPath()));
 }
 
 TEST(ExporeFolderRootLevel, Positive) {
     {
-        TemporaryDirectory tmpDir;
+        utils::TemporaryDirectory tmpDir;
         auto results = utils::exploreFolderAtRootLevel(tmpDir.getPath(), 0);
         fmt::print("Folders:\n");
         for (auto item : std::get<0>(results)) {
@@ -76,65 +77,5 @@ TEST(ExporeFolderRootLevel, Positive) {
         for (auto item : std::get<1>(results)) {
             std::cout << item << "\n";
         }
-    }
-}
-
-TEST(FileSearch, Positive) {
-    SetupTestDirectory setup;
-    auto aPath = setup.getCurrentPath();
-
-    // Search for files using DFS
-    utils::FileSearchBase<utils::DFSFileSearchBase> dfs_finder;
-    std::cout << "Number of files: " << dfs_finder.search(aPath) << std::endl;
-
-    // Search for files using BFS
-    utils::FileSearchBase<utils::BFSFileSearchBase> bfs_finder;
-    std::cout << "Number of files: " << bfs_finder.search(aPath) << std::endl;
-
-    // The number of files obtained using two algorithms should be the same
-    EXPECT_TRUE(dfs_finder.getData().size() == 6);
-    EXPECT_TRUE(dfs_finder.getData().size() == bfs_finder.getData().size());
-
-    // Test filter methods
-    std::vector<std::string> stems = {"foo"};
-    std::vector<std::string> exts = {".txt"};
-    auto results = dfs_finder.filter(stems, exts);
-    utils::print(results);
-    EXPECT_EQ(results.size(), static_cast<size_t>(2));
-}
-
-TEST(FileDatabase, Positive) {
-    SetupTestDirectory setup;
-    auto aPath = setup.getCurrentPath();
-    utils::FileSearchBase<utils::DFSFileSearchBase> dfs_finder;
-    std::cout << "Number of files: " << dfs_finder.search(aPath) << std::endl;
-
-    // Serialized file information to string
-    std::ostringstream os;
-    auto data = dfs_finder.getData();
-    utils::save<utils::OArchive, decltype(data)>(data, os);
-    const auto value = os.str();
-
-    // Write data to the database.
-    path dataFile = aPath / path(utils::FileDatabaseInfo::Database);
-    auto key = dataFile.string();
-    {
-        utils::Writer writer(dataFile.string());
-        writer.write(key, value);
-    }
-
-    // Now read the data back and compare with the original data.
-    {
-        utils::Timer timer;
-        utils::Reader reader(dataFile.string());
-        std::istringstream is(reader.read(key));
-        std::vector<utils::FileInfo> rdata;
-        utils::load<utils::IArchive, decltype(rdata)>(rdata, is);
-        std::cout << "Deserialize time: "
-                  << timer.toc() / timer.ticksPerSecond() << " seconds"
-                  << std::endl;
-        utils::print(rdata);
-        EXPECT_TRUE(rdata.size() == 6);
-        EXPECT_EQ(data, rdata);
     }
 }

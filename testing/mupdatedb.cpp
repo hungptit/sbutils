@@ -66,10 +66,10 @@ int main(int argc, char *argv[]) {
     }
 
     // Build file information database
-    using FileVisitor = utils::Visitor<decltype(folders), utils::NormalPolicy>;
+    using FileVisitor = utils::filesystem::Visitor<decltype(folders), utils::filesystem::NormalPolicy>;
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     FileVisitor visitor;
-    utils::dfs_file_search(folders, visitor);
+    utils::filesystem::dfs_file_search(folders, visitor);
 
     // Write to database
     visitor.print();
