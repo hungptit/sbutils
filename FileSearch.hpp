@@ -19,7 +19,14 @@
 
 namespace utils {
     namespace filesystem {
-        enum { PATH = 0, STEM = 1, EXTENSION = 2 };
+        enum {
+            PATH = 0,
+            STEM = 1,
+            EXTENSION = 2,
+            PERMISSION = 3,
+            TIMESTAMP = 4,
+            FILESIZE = 5
+        };
 
         template <typename Container> class ExtFilter {
           public:
@@ -205,9 +212,9 @@ namespace utils {
                 std::sort(allEdges.begin(), allEdges.end());
 
                 // Return vertex information and a folder hierarchy graph.
-                return std::make_tuple(
-                    vertexes,
-                    SparseGraph<index_type, index_type>(allEdges, vertexes.size(), true));
+                return std::make_tuple(vertexes,
+                                       SparseGraph<index_type, index_type>(
+                                           allEdges, vertexes.size(), true));
             }
 
           private:
@@ -276,7 +283,7 @@ namespace utils {
          *
          * @return
          */
-        template <typename Visitor, typename Container>
+        template <typename Container, typename Visitor>
         size_t dfs_file_search(Container &searchPaths, Visitor &visitor) {
             using path = boost::filesystem::path;
             size_t counter = 0;

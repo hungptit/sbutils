@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "utils/FileSearch.hpp"
+#include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
 #include "utils/Serialization.hpp"
 #include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("folders")) {
         auto list = vm["folders"].as<std::vector<std::string>>();
         for (auto item : list) {
-            folders.emplace_back(path(item));
+            folders.emplace_back(path(utils::normalize_path(item)));
         }
     } else {
         folders.emplace_back(boost::filesystem::current_path());
@@ -66,13 +66,20 @@ int main(int argc, char *argv[]) {
     }
 
     // Build file information database
-    using FileVisitor = utils::filesystem::Visitor<decltype(folders), utils::filesystem::NormalPolicy>;
+    using FileVisitor =
+        utils::filesystem::Visitor<decltype(folders),
+                                   utils::filesystem::NormalPolicy>;
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     FileVisitor visitor;
     utils::filesystem::dfs_file_search(folders, visitor);
 
     // Write to database
-    visitor.print();
+    if (verbose) {
+        for (auto item : folders) {
+            std::cout << "Search folder: " << item << "\n";
+        }
+        visitor.print();
+    }
     auto results = visitor.compact();
     auto vertexes = std::get<0>(results);
     auto g = std::get<1>(results);

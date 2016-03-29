@@ -97,8 +97,8 @@ TEST(Filter, Positive) {
 }
 
 TEST(FileDatabase, Positive) {
-  utils::TemporaryDirectory tmpDir;
-  TestData testData(tmpDir.getPath());
+    utils::TemporaryDirectory tmpDir;
+    TestData testData(tmpDir.getPath());
 }
 
 template <typename Filter, size_t expectSize>
@@ -106,8 +106,7 @@ void test_file_search(boost::filesystem::path &tmpDir) {
     using Container = std::vector<boost::filesystem::path>;
     utils::filesystem::SimpleVisitor<Container, Filter> visitor;
     Container searchFolders{tmpDir};
-    utils::filesystem::dfs_file_search<decltype(visitor), decltype(searchFolders)>(
-        searchFolders, visitor);
+    utils::filesystem::dfs_file_search(searchFolders, visitor);
     auto results = visitor.getResults();
     std::cout << "== Search results ==\n";
     utils::print(results);
@@ -125,5 +124,6 @@ TEST(FileSearch, Positive) {
 
 TEST(FileSearc, Negative) {
     boost::filesystem::path tmpPath("foo");
-    ASSERT_ANY_THROW((test_file_search<utils::filesystem::DoNothingPolicy, 12>(tmpPath)));
+    ASSERT_ANY_THROW(
+        (test_file_search<utils::filesystem::DoNothingPolicy, 12>(tmpPath)));
 }

@@ -204,6 +204,18 @@ namespace utils {
             std::string cmd = fmt::format("xdot {0}&", dotFile);
             std::system(cmd.c_str());
         }
+
+        template <typename Graph>
+        void tree_info(const Graph &g, std::vector<std::string> &vids) {
+            utils::graph::graph_info(g);
+            fmt::MemoryWriter writer;
+            size_t counter = 0;
+            for (auto item : vids) {
+                writer << "vid[" << counter << "] = " << item << "\n";
+                counter++;
+            }
+            std::cout << writer.str();
+        }
     }
 }
 #endif

@@ -77,7 +77,7 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb tDFS)
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff tDFS)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

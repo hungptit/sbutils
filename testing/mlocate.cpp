@@ -13,7 +13,7 @@
 #include "utils/Resources.hpp"
 #include "utils/Serialization.hpp"
 #include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
+#include "utils/FolderDiff.hpp"
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
@@ -99,8 +99,8 @@ int main(int argc, char *argv[]) {
         }
     } else {
         using Container = std::vector<utils::FileInfo>;
-        auto allFiles = utils::Database::read<Container>(reader, folders, false);
-        auto results = utils::Database::filter(allFiles, extensions, stems);
+        auto allFiles = utils::read_baseline<Container>(reader, folders, verbose);
+        auto results = utils::filter(allFiles, extensions, stems);
         fmt::MemoryWriter writer;
         writer << "Search results: \n";
         for (auto item : results) {

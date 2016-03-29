@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile = (boost::filesystem::path(utils::Resources::Database))
-                       .string();
+        dataFile =
+            (boost::filesystem::path(utils::Resources::Database)).string();
     }
 
     // Search for files in a given folders.
@@ -79,8 +79,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Travel the file structure tree using DFS algorithm
-    dfs_file_search<decltype(visitor), decltype(searchFolders)>(searchFolders,
-                                                                visitor);
+    dfs_file_search(searchFolders, visitor);
     visitor.print();
     auto results = visitor.compact();
     auto vertexes = std::get<0>(results);
@@ -109,7 +108,6 @@ int main(int argc, char *argv[]) {
     // utils::gendot(g, vertexIDs, dotFile);
     // utils::viewdot(dotFile);
 
-    
     // using IArchive = cereal::JSONInputArchive;
     // using OArchive = cereal::JSONOutputArchive;
 
