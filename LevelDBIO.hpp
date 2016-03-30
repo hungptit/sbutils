@@ -11,7 +11,10 @@
 namespace utils {
     class Writer {
       public:
-        Writer(const std::string &dataFile) : DataFile(dataFile) {
+      Writer(const Writer&) = delete;
+      Writer& operator=(const Writer&) = delete;
+
+      Writer(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             // options.cache = leveldb::NewLRUCache(100 * 1048576);  // 100MB cache
             options.create_if_missing = true;
@@ -38,6 +41,9 @@ namespace utils {
 
     class Reader {
       public:
+      Reader(const Reader&) = delete;
+      Reader& operator=(const Reader&) = delete;
+      
         explicit Reader(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             options.create_if_missing = false;
