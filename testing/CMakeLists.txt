@@ -15,13 +15,11 @@ set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
 set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/out-static/libleveldb.a")
 
-# Find Boost libraries
+# This option make sure that we use the local boost version. Note that if the
+# system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-
-# This option make sure that we use the local boost version. Note that if the
-# system boost is installed then CMake might use that boost version.
 set(Boost_NO_SYSTEM_PATHS TRUE) 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
