@@ -185,7 +185,7 @@ namespace utils {
 
         // Cleanup items that belong to both.
         // The complexity of this algorithm is O(n).
-        for (auto item : first) {
+        for (auto const &item : first) {
             auto pos = dict.find(item);
             if (pos == dict.end()) {
                 results.emplace_back(item);
@@ -235,7 +235,7 @@ namespace utils {
     }
 
     auto diffFolders(const std::string &dataFile,
-                     std::vector<std::string> &folders, bool verbose) {
+                     const std::vector<std::string> &folders, bool verbose) {
         // Search for files in the given folders.
         using path = boost::filesystem::path;
         using PathContainer = std::vector<path>;

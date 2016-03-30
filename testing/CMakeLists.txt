@@ -15,6 +15,7 @@ set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
 set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/out-static/libleveldb.a")
 
+
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
@@ -75,7 +76,7 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff tDFS)
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

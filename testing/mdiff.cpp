@@ -41,7 +41,7 @@ namespace {
         }
 
       private:
-        std::vector<std::string> ExcludedExtensions = {".p"};
+      std::vector<std::string> ExcludedExtensions = {".p", ".d", ".o", ".ts"};
     };
 
     template <typename Container, typename Filter>
@@ -83,8 +83,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("help")) {
         // std::cout << "Usage:  [options]\n";
         std::cout << desc;
-        std::cout << "Examples:" << std::endl;
-        std::cout << "\t viewer matlab/src matlab/test" << std::endl;
+        fmt::print("Example:\n\tmdiff matlab/toolbox\n");
         return 0;
     }
 
