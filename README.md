@@ -72,4 +72,16 @@ This command will copy changes that you have made in your local sandbox to the n
         	Delete 0 files
         Elapsed time: 112.374  seconds
 
+# Others #
+
+There are utility classes in **utils** that can be used independently in many C++ projects. These classes are:
+
+* Timer: Calculate the elapsed time of a code segment. This class is very similar to **tic** and **toc** command in Matlab.
+
+* TemporaryDirectory: Create a temporary folder and cleanup this folder when an object is destroyed. This class is very useful for writing unit tests.
+
+* SparseGraph: A simple graph data structure and some basic graph traversal functions such as DFS and BFS. The graph data structure is stored in CSR format for high performance graph application with millions of vertexes.
+
+* Reader/Writer: For file I/O with leveldb.
+
 # FAQs #
