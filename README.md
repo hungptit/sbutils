@@ -33,7 +33,7 @@
 
 ## mdiff ##
 
-**mdiff** lists files that have been modified, added, and removed in given folders using the baseline. Below is a sample command which will find out all the different between the current state of matlab/src folder and its baseline.
+**mdiff** lists all files that have been modified, added, and removed in given folders using the baseline. Below is a sample command which will find the differences between the current state of **matlab/toolbox/** and **matlab/test/** folders and their baseline.
 
         % mdiff matlab/toolbox/ matlab/test/
         ---- Modified files: 5 ----
@@ -53,7 +53,7 @@
 
 ## mlocate ##
 
-We can use **mlocate** to locate files in given folders. The command will be significantly faster than the **locate** if users can provide more specific constraints
+We can use **mlocate** to locate files in given folders. The command will be significantly faster than the **locate** if users can provide more specific constraints. This sample command below will find all files in matlab/test folder that have tAutoFix stem.
 
         % mlocate matlab/test/ -s tAutoFix
         Search results: 
@@ -63,7 +63,7 @@ We can use **mlocate** to locate files in given folders. The command will be sig
 
 ## mcopydiff ##
 
-This command will copy changes that you have made in your local sandbox to the network sandbox if the source and destination file sizes are different. I do not use time stamp because this it is unreliable. In this example below I will copy all changes that we have made in **matlab/** folder to **/sandbox/hungdang/tmp/test** folder.
+This command will copy changes that you have made in your local sandbox to the network sandbox if the source and destination file sizes are different. I do not use time stamp because it is unreliable. Below command will copy all changes that I have made in **matlab/** folder to **/sandbox/hungdang/tmp/test** folder.
 
         % mcopydiff -s matlab/ -d /sandbox/hungdang/tmp/test
         Summary:
