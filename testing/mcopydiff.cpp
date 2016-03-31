@@ -61,10 +61,12 @@ namespace {
         }
     }
 
-    void copyFiles(const std::vector<utils::FileInfo> &files,
+    // TODO: Need to parallelize this function
+    auto copyFiles(const std::vector<utils::FileInfo> &files,
                    const boost::filesystem::path &dstDir,
                    bool verbose = false) {
         using namespace boost::filesystem;
+        size_t nfiles = 0, nbytes = 0;
         boost::system::error_code errcode;
         auto options = copy_option::overwrite_if_exists;
         for (auto item : files) {
@@ -83,24 +85,28 @@ namespace {
                 if (!exists(parent)) {
                     create_directories(parent);
                     if (verbose)
-                    std::cout << "Create " << parent << "\n";
+                        std::cout << "Create " << parent << "\n";
                 }
             }
 
             if (needCopy) {
                 copy_file(srcFile, dstFile, options);
+                nfiles++;
+                nbytes += std::get<utils::filesystem::FILESIZE>(item);
                 if (verbose) {
                     fmt::print("Copy {0} to {1}\n", srcFile.string(),
                                dstFile.string());
                 }
             }
         }
+        return std::make_tuple(nfiles, nbytes);
     }
 
-    void deleteFiles(const std::vector<utils::FileInfo> &files,
+    auto deleteFiles(const std::vector<utils::FileInfo> &files,
                      const boost::filesystem::path &parent,
                      bool verbose = false) {
         using namespace boost::filesystem;
+        size_t nfiles = 0;
         boost::system::error_code errcode;
         for (auto const &item : files) {
             auto aFile = path(std::get<0>(item));
@@ -108,11 +114,13 @@ namespace {
             if (exists(dstFile)) {
                 permissions(dstFile, add_perms | owner_write);
                 remove(dstFile);
+                nfiles++;
                 if (verbose) {
                     fmt::print("Delete {0}\n", dstFile.string());
                 }
             }
         }
+        return nfiles;
     }
 }
 
@@ -124,9 +132,9 @@ int main(int argc, char *argv[]) {
     // clang-format off
   desc.add_options()
     ("help,h", "Print this help")
-    ("verbose,v", "Display searched data.")
+    ("verbose,v", "Display more information.")
     ("keys,k", "List all keys.")
-    ("src_dir,s", po::value<std::string>(), "Source sandbox.")
+    ("src_dir,s", po::value<std::string>(), "Source folder.")
     ("dst_dir,d", po::value<std::string>(), "Destination sandbox.")
       ("baseline,b", po::value<std::string>(), "File database.");
     // clang-format on
@@ -140,10 +148,9 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        // std::cout << "Usage:  [options]\n";
         std::cout << desc;
-        std::cout << "Examples:" << std::endl;
-        std::cout << "\t viewer matlab/src matlab/test" << std::endl;
+        fmt::print("Examples:\n\tmcopydiff -s matlab/ -d "
+                   "/sandbox/hungdang/mdlrefadvisor\n");
         return 0;
     }
 
@@ -155,11 +162,16 @@ int main(int argc, char *argv[]) {
     std::string srcDir;
     if (vm.count("src_dir")) {
         srcDir = utils::normalize_path(vm["src_dir"].as<std::string>());
+    } else {
+        throw(std::runtime_error("Need to provide the source folder path!"));
     }
 
     std::string dstDir;
     if (vm.count("dst_dir")) {
         dstDir = utils::normalize_path(vm["dst_dir"].as<std::string>());
+    } else {
+        throw(std::runtime_error(
+            "Need to provide the destination sandbox path!"));
     }
 
     // Get file database
@@ -184,13 +196,43 @@ int main(int argc, char *argv[]) {
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
         // folder.
-        fmt::print("Copying {} edited files\n", allEditedFiles.size());
-        copyFiles(allEditedFiles, dstDir, verbose);
+        auto copyEditedFileObj = [&allEditedFiles, &dstDir, verbose]() {
+            return copyFiles(allEditedFiles, dstDir, verbose);
+        };
 
-        fmt::print("Copying {} new files\n", allNewFiles.size());
-        copyFiles(allNewFiles, dstDir, verbose);
+        auto copyNewFileObj = [&allNewFiles, &dstDir, verbose]() {
+            return copyFiles(allNewFiles, dstDir, verbose);
+        };
 
-        fmt::print("Deleting {} files\n", allDeletedFiles.size());
-        deleteFiles(allDeletedFiles, dstDir, verbose);
+        auto deleteFileObj = [&allDeletedFiles, &dstDir, verbose]() {
+            return deleteFiles(allDeletedFiles, dstDir, verbose);
+        };
+
+        // auto results1 = copyEditedFileObj();
+        // auto results2 = copyNewFileObj();
+        // auto results3 = deleteFileObj();
+
+        boost::future<std::tuple<size_t, size_t>> t1 =
+            boost::async(copyEditedFileObj);
+        boost::future<std::tuple<size_t, size_t>> t2 =
+            boost::async(copyNewFileObj);
+        ;
+        boost::future<size_t> t3 = boost::async(deleteFileObj);
+        ;
+
+        t1.wait();
+        t2.wait();
+        t3.wait();
+
+        auto results1 = t1.get();
+        auto results2 = t2.get();
+        auto results3 = t3.get();
+
+        fmt::print("Summary:\n");
+        fmt::print("\tCopied {0} modified files ({1} bytes)\n",
+                   std::get<0>(results1), std::get<1>(results1));
+        fmt::print("\tCopied {0} new files ({1} bytes)\n",
+                   std::get<0>(results2), std::get<1>(results2));
+        fmt::print("\tDelete {0} files\n", results3);
     }
 }

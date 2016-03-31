@@ -18,7 +18,7 @@ using path = boost::filesystem::path;
 TEST(Display_Functions, Positive) {
     {
         std::vector<int> data = {1, 2, 3, 4, 5, 6};
-        utils::disp(data, "data: ");
+        utils::disp(data, "data: ");        
     }
 
     {
