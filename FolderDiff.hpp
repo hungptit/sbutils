@@ -11,11 +11,12 @@
 #include <functional>
 #include <vector>
 
-#include "SparseGraph.hpp"
-#include "LevelDBIO.hpp"
-#include "Serialization.hpp"
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
+#include "LevelDBIO.hpp"
+#include "Serialization.hpp"
+#include "SparseGraph.hpp"
+#include "Timer.hpp"
 
 namespace utils {
     /**
@@ -65,6 +66,7 @@ namespace utils {
         return results;
     }
 
+    // TODO: Use TBB to speed up this function.
     template <typename Container, typename ExtContainer, typename StemContainer>
     auto filter(Container &data, ExtContainer &exts, StemContainer &stems) {
         // utils::ElapsedTime<utils::MILLISECOND> t1("Filter time: ");
@@ -136,7 +138,10 @@ namespace utils {
             // vertexes
             utils::graph::NormalVisitor<GraphAlg, std::vector<index_type>>
                 visitor(vids.size());
-            utils::graph::dfs(g, visitor, indexes);
+            {
+                // utils::ElapsedTime<MILLISECOND> t("DFS time: ");
+                utils::graph::dfs(g, visitor, indexes);
+            }
             auto results = visitor.getResults();
 
             // Now read all keys and create a list of edited file data
@@ -241,9 +246,8 @@ namespace utils {
         using PathContainer = std::vector<path>;
         using Container = std::vector<utils::FileInfo>;
 
-        utils::filesystem::SimpleVisitor<PathContainer,
-                                         utils::filesystem::NormalPolicy>
-            visitor;
+        utils::filesystem::SimpleVisitor<
+            PathContainer, utils::filesystem::NormalPolicy> visitor;
         PathContainer searchFolders;
         for (auto item : folders) {
             searchFolders.emplace_back(path(item));
@@ -267,7 +271,8 @@ namespace utils {
         // searchObj();
 
         boost::future<Container> readThread = boost::async(readObj);
-        boost::future<void> findThread = boost::async(searchObj);;
+        boost::future<void> findThread = boost::async(searchObj);
+        ;
 
         readThread.wait();
         findThread.wait();
