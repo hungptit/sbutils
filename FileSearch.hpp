@@ -306,8 +306,7 @@ namespace utils {
          * @return
          */
         template <typename Visitor, typename Container>
-        size_t bfs_file_search(Container &searchPaths, Visitor &visitor) {
-            using path = boost::filesystem::path;
+        size_t bfs_file_search(Container &searchPaths, Visitor &visitor) {            
             size_t counter = 0;
             Container folders(searchPaths.begin(), searchPaths.end());
             while (!folders.empty()) {

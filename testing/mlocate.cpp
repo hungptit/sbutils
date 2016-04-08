@@ -17,9 +17,7 @@
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     using path = boost::filesystem::path;
-    using IArchive = utils::DefaultIArchive;
-    using Index = int;
-
+    
     po::options_description desc("Allowed options");
 
     // clang-format off

@@ -200,9 +200,9 @@ namespace utils {
         }
 
         /// View a dot file using xdot
-        void viewdot(const std::string &dotFile) {
+        int viewdot(const std::string &dotFile) {
             std::string cmd = fmt::format("xdot {0}&", dotFile);
-            std::system(cmd.c_str());
+            return std::system(cmd.c_str());
         }
 
         template <typename Graph>
