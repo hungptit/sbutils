@@ -37,7 +37,7 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
-find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options iostreams)
+find_package(Boost 1.60 REQUIRED regex date_time system filesystem thread graph program_options iostreams)
 
 # Include folder
 message(${PROJECTS_FOLDER})
