@@ -10,7 +10,6 @@
 #ifndef SparseGraph_hpp_
 #define SparseGraph_hpp_
 
-#include "cppformat/format.h"
 #include <deque>
 #include <fstream>
 #include <iostream>
@@ -36,8 +35,9 @@ namespace utils {
 
         explicit SparseGraph(const bool isDirected) : IsDirected(isDirected) {}
 
-        explicit SparseGraph(std::vector<std::tuple<index_type, index_type>> &data,
-                             const std::size_t N, const bool isDirected)
+        explicit SparseGraph(
+            std::vector<std::tuple<index_type, index_type>> &data,
+            const std::size_t N, const bool isDirected)
             : IsDirected(isDirected) {
 
             build(data, N);
@@ -70,7 +70,7 @@ namespace utils {
         const VertexContainer &getVertexes() const { return Vertexes; }
         const EdgeContainer &getEdges() const { return Edges; }
         bool isDirected() { return IsDirected; };
-      
+
       private:
         VertexContainer Vertexes;
         EdgeContainer Edges;
@@ -83,7 +83,7 @@ namespace utils {
         /**
          * Below classes are implementation for vertex visitors that can be used
          * with standard graph algorithms such as dfs and bfs.
-         * 
+         *
          */
 
         template <typename Graph, typename Container> class NormalVisitor {
@@ -120,11 +120,10 @@ namespace utils {
             }
         };
 
-        /// Display the graph information to stdout
-        template <typename Graph> void graph_info(Graph &g) {
+        template <typename Graph, typename Writer>
+        void graph_info(Graph &g, Writer &writer) {
             auto vertexes = g.getVertexes();
             auto edges = g.getEdges();
-            fmt::MemoryWriter writer;
             auto N = vertexes.size() - 1;
             for (std::size_t currentCol = 0; currentCol < N; ++currentCol) {
                 auto begin = vertexes[currentCol];
@@ -141,10 +140,7 @@ namespace utils {
                 }
                 writer << "}\n";
             }
-            std::cout << writer.str() << std::endl;
         }
-
-        //@{ Graph algorithms //@}
 
         template <typename Visitor, typename Graph>
         void dfs(Graph &g, Visitor &visitor,
@@ -160,11 +156,25 @@ namespace utils {
             }
         }
 
+        template <typename Visitor, typename Graph>
+        void bfs(Graph &g, Visitor &visitor,
+                 std::vector<typename Graph::index_type> vids) {
+            using index_type = typename Graph::index_type;
+            std::deque<index_type> queue(vids.begin(), vids.end());
+            while (!queue.empty()) {
+                auto vid = queue.front();
+                queue.pop_front();
+                if (visitor.isUndiscovered(vid)) {
+                    visitor.visit(g, queue, vid);
+                }
+            }
+        }
+
         /// Write input graph information to a dot file.
-        template <typename Graph>
+        template <typename Graph, typename Writer = std::stringstream>
         void gendot(Graph &g, std::vector<std::string> &v,
                     const std::string &dotfile) {
-            fmt::MemoryWriter writer;
+            Writer writer;
             writer << (g.isDirected() ? ("digraph") : ("graph"))
                    << (" G {\n"); // Header
 
@@ -201,14 +211,14 @@ namespace utils {
 
         /// View a dot file using xdot
         int viewdot(const std::string &dotFile) {
-            std::string cmd = fmt::format("xdot {0}&", dotFile);
+            const std::string cmd = "xdot " + dotFile;
             return std::system(cmd.c_str());
         }
 
-        template <typename Graph>
+        template <typename Graph, typename Writer = std::stringstream>
         void tree_info(const Graph &g, std::vector<std::string> &vids) {
             utils::graph::graph_info(g);
-            fmt::MemoryWriter writer;
+            Writer writer;
             size_t counter = 0;
             for (auto item : vids) {
                 writer << "vid[" << counter << "] = " << item << "\n";
