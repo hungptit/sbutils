@@ -3,12 +3,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
+
 # set(CMAKE_BUILD_TYPE Debug)
 set (CMAKE_BUILD_TYPE Release)
 # set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wunused-result")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ENABLE_TESTING()
 
@@ -31,7 +34,7 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
-find_package(Boost REQUIRED regex date_time system filesystem thread graph program_options iostreams)
+find_package(Boost 1.60 REQUIRED regex date_time system filesystem thread graph program_options iostreams)
 
 # Include folder
 message(${PROJECTS_FOLDER})
@@ -54,6 +57,7 @@ set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libcppformat.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 
 if (Boost_FOUND)
+  message(${Boost_LIBRARIES})
   include_directories(${BOOST_INCLUDE_DIRS})
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder tGraph)
   foreach (src_file ${UNITTEST_SRC_FILES})

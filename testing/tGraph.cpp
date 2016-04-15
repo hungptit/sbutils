@@ -117,7 +117,7 @@ TEST(DFS, Positive) {
         std::vector<std::string> v = get_vertex_ids();
         std::string dotFile("test.dot");
         utils::graph::gendot(g, v, dotFile);
-        // utils::viewdot(dotFile);
+        // utils::graph::viewdot(dotFile);
     }
 }
 

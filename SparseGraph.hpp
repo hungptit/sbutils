@@ -209,10 +209,10 @@ namespace utils {
             myfile << writer.str();
         }
 
-        /// View a dot file using xdot
-        int viewdot(const std::string &dotFile) {
-            const std::string cmd = "xdot " + dotFile;
-            return std::system(cmd.c_str());
+        /// View a dot file using dot command.
+        void viewdot(const std::string &dotFile) {
+            const std::string cmd = "dot -Txlib " + dotFile;
+            std::system(cmd.c_str());
         }
 
         template <typename Graph, typename Writer = std::stringstream>
