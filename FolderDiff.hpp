@@ -99,8 +99,8 @@ namespace utils {
             using index_type = int;
             using edge_type = int;
             using GraphAlg = utils::SparseGraph<index_type, edge_type>;
-            using vertex_container = typename GraphAlg::VertexContainer;
-            using edge_container = typename GraphAlg::EdgeContainer;
+            using vertex_container = typename GraphAlg::vertex_container;
+            using edge_container = typename GraphAlg::edge_container;
             using index_type = typename GraphAlg::index_type;
 
             // Only read the file information for given folders.
@@ -136,13 +136,8 @@ namespace utils {
 
             // Use DFS to find all vertexes that are belong to given
             // vertexes
-            utils::graph::NormalVisitor<GraphAlg, std::vector<index_type>>
-                visitor(vids.size());
-            {
-                // utils::ElapsedTime<MILLISECOND> t("DFS time: ");
-                utils::graph::dfs(g, visitor, indexes);
-            }
-            auto results = visitor.getResults();
+            using DFSVisitor = utils::graph::Visitor<decltype(g), std::vector<index_type>>;
+            auto results = utils::graph::dfs<decltype(g), DFSVisitor>(g, indexes);
 
             // Now read all keys and create a list of edited file data
             // bases.
