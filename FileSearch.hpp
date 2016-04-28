@@ -12,7 +12,7 @@
 #include "boost/config.hpp"
 #include "boost/filesystem.hpp"
 
-#include "cppformat/format.h"
+#include "fmt/format.h"
 
 #include "SparseGraph.hpp"
 #include "Utils.hpp"

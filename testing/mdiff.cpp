@@ -24,7 +24,7 @@
 #include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
 
-#include "cppformat/format.h"
+#include "fmt/format.h"
 
 #include <sstream>
 #include <string>
