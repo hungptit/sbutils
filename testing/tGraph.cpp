@@ -9,6 +9,7 @@
 #include "utils/Print.hpp"
 #include "utils/Serialization.hpp"
 #include "utils/SparseGraph.hpp"
+#include "utils/SparseGraphAlgorithms.hpp"
 
 namespace {
     template <typename Index>
@@ -96,11 +97,11 @@ TEST(TestSparseGraph, Positive) {
     // Check that we can generate a dot graph.
     {
         fmt::MemoryWriter writer;
-        utils::graph::graph_info(g, writer);
+        utils::graph_info(g, writer);
         fmt::print("{}\n", writer.str());
         std::vector<std::string> v = get_vertex_ids();
         std::string dotFile("test.dot");
-        utils::graph::gendot<decltype(g), fmt::MemoryWriter>(g, v, dotFile);
+        utils::gendot<decltype(g), fmt::MemoryWriter>(g, v, dotFile);
         // utils::viewdot(dotFile);
     }
 }
@@ -129,12 +130,12 @@ TEST(DFS, Positive) {
     // Generate a dot graph for a test graph.
     // {
     //     std::stringstream writer;
-    //     utils::graph::graph_info(g, writer);
+    //     utils::graph_info(g, writer);
     //     fmt::print("{}\n", writer.str());
     //     std::vector<std::string> v = get_vertex_ids();
     //     std::string dotFile("test.dot");
-    //     utils::graph::gendot(g, v, dotFile);
-    //     utils::graph::viewdot(dotFile);
+    //     utils::gendot(g, v, dotFile);
+    //     utils::viewdot(dotFile);
     // }
 }
 
@@ -160,12 +161,12 @@ TEST(BFS, Positive) {
     // Generate a dot graph for a test graph.
     {
         std::stringstream writer;
-        utils::graph::graph_info(g, writer);
+        utils::graph_info(g, writer);
         fmt::print("{}\n", writer.str());
         std::vector<std::string> v = get_vertex_ids();
         std::string dotFile("test.dot");
-        utils::graph::gendot(g, v, dotFile);
-        // utils::graph::viewdot(dotFile);
+        utils::gendot(g, v, dotFile);
+        // utils::viewdot(dotFile);
     }
 }
 
@@ -178,7 +179,7 @@ template <typename IArchive, typename OArchive> void test_cereal() {
     auto e = g.getEdges();
 
     fmt::MemoryWriter writer;
-    utils::graph::graph_info(g, writer);
+    utils::graph_info(g, writer);
     fmt::print("{}\n", writer.str());
     std::vector<std::string> vids = get_vertex_ids();
 
@@ -224,12 +225,12 @@ TEST(Sorted_List, Positive) {
     // Generate a dot graph for a test graph.
     {
         std::stringstream writer;
-        utils::graph::graph_info(g, writer);
+        utils::graph_info(g, writer);
         fmt::print("{}\n", writer.str());
         std::vector<std::string> v{"0", "1", "2", "3", "4", "5", "6"};
         std::string dotFile("test_dag.dot");
-        utils::graph::gendot(g, v, dotFile);
-        // utils::graph::viewdot(dotFile);
+        utils::gendot(g, v, dotFile);
+        // utils::viewdot(dotFile);
     }
 
     fmt::print("Visited vertexes\n");

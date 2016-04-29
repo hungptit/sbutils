@@ -16,6 +16,7 @@
 #include "LevelDBIO.hpp"
 #include "Serialization.hpp"
 #include "SparseGraph.hpp"
+#include "utils/SparseGraphAlgorithms.hpp"
 #include "Timer.hpp"
 
 namespace utils {

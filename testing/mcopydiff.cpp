@@ -23,7 +23,7 @@
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
-
+#include "utils/SparseGraphAlgorithms.hpp"
 #include "fmt/format.h"
 
 #include <sstream>
