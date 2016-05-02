@@ -30,12 +30,12 @@ namespace {
             std::make_tuple(0, 1), std::make_tuple(1, 3), std::make_tuple(1, 6),
             std::make_tuple(2, 0), std::make_tuple(3, 4), std::make_tuple(3, 5),
             std::make_tuple(4, 5), std::make_tuple(5, 6), std::make_tuple(2, 4),
-            std::make_tuple(0, 3)};
+              std::make_tuple(0, 3), std::make_tuple(2, 7)};
         std::sort(edges.begin(), edges.end());
         return edges;
     }
 
-    auto get_vertex_ids() {
+   std::vector<std::string> get_vertex_ids() {
         return std::vector<std::string>{"0", "1", "2", "3", "4", "5", "6", "7"};
     }
 
@@ -57,192 +57,245 @@ namespace {
     }
 }
 
-TEST(TestSparseGraph, Positive) {
-    auto edges = createTestData<int>();
-    std::cout << "==== Edge information ====\n";
-    utils::print(edges);
-    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
+// TEST(TestSparseGraph, Positive) {
+//     auto edges = createTestData<int>();
+//     std::cout << "==== Edge information ====\n";
+//     utils::print(edges);
+//     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
 
-    {
-        auto vertexes = g.getVertexes();
-        decltype(vertexes) expectedVertexes{0, 3, 4, 6, 8, 9, 10, 12, 13};
-        EXPECT_EQ(expectedVertexes, vertexes);
+//     {
+//         auto vertexes = g.getVertexes();
+//         decltype(vertexes) expectedVertexes{0, 3, 4, 6, 8, 9, 10, 12, 13};
+//         EXPECT_EQ(expectedVertexes, vertexes);
 
-        auto edges = g.getEdges();
-        decltype(edges) expectedEdges{1, 2, 3, 4, 2, 5, 5, 6, 7, 7, 1, 4, 6};
-        EXPECT_EQ(expectedEdges, edges);
-    }
+//         auto edges = g.getEdges();
+//         decltype(edges) expectedEdges{1, 2, 3, 4, 2, 5, 5, 6, 7, 7, 1, 4, 6};
+//         EXPECT_EQ(expectedEdges, edges);
+//     }
 
-    {
-        auto e = g.edges(0);
-        std::vector<int> results(std::get<0>(e), std::get<1>(e));
-        decltype(results) expectedResults{1, 2, 3};
-        EXPECT_EQ(results, expectedResults);
-    }
+//     {
+//         auto e = g.edges(0);
+//         std::vector<int> results(std::get<0>(e), std::get<1>(e));
+//         decltype(results) expectedResults{1, 2, 3};
+//         EXPECT_EQ(results, expectedResults);
+//     }
 
-    {
-        auto e = g.edges(6);
-        std::vector<int> results(std::get<0>(e), std::get<1>(e));
-        decltype(results) expectedResults{1, 4};
-        EXPECT_EQ(expectedResults, results);
-    }
+//     {
+//         auto e = g.edges(6);
+//         std::vector<int> results(std::get<0>(e), std::get<1>(e));
+//         decltype(results) expectedResults{1, 4};
+//         EXPECT_EQ(expectedResults, results);
+//     }
 
-    {
-        auto e = g.edges(7);
-        std::vector<int> results(std::get<0>(e), std::get<1>(e));
-        decltype(results) expectedResults{6};
-        EXPECT_EQ(expectedResults, results);
-    }
+//     {
+//         auto e = g.edges(7);
+//         std::vector<int> results(std::get<0>(e), std::get<1>(e));
+//         decltype(results) expectedResults{6};
+//         EXPECT_EQ(expectedResults, results);
+//     }
 
-    // Check that we can generate a dot graph.
-    {
-        fmt::MemoryWriter writer;
-        utils::graph_info(g, writer);
-        fmt::print("{}\n", writer.str());
-        std::vector<std::string> v = get_vertex_ids();
-        std::string dotFile("test.dot");
-        utils::gendot<decltype(g), fmt::MemoryWriter>(g, v, dotFile);
-        // utils::viewdot(dotFile);
-    }
-}
+//     // Check that we can generate a dot graph.
+//     {
+//         fmt::MemoryWriter writer;
+//         utils::graph_info(g, writer);
+//         fmt::print("{}\n", writer.str());
+//         std::vector<std::string> v = get_vertex_ids();
+//         std::string dotFile("test.dot");
+//         utils::gendot<decltype(g), fmt::MemoryWriter>(g, v, dotFile);
+//         // utils::viewdot(dotFile);
+//     }
+// }
 
-TEST(DFS, Positive) {
-    auto edges = createTestData<int>();
-    std::cout << "==== Edge information ====\n";
-    utils::print(edges);
-    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
+// TEST(DFS, Positive) {
+//     auto edges = createTestData<int>();
+//     std::cout << "==== Edge information ====\n";
+//     utils::print(edges);
+//     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
 
-    fmt::print("Visited vertexes\n");
-    {
-        using vertex_type = int;
-        using Container = std::vector<vertex_type>;
-        auto vertexes = g.getVertexes();
-        auto edges = g.getEdges();
+//     fmt::print("Visited vertexes\n");
+//     {
+//         using vertex_type = int;
+//         using Container = std::vector<vertex_type>;
+//         auto vertexes = g.getVertexes();
+//         auto edges = g.getEdges();
 
-        using DFSVisitor = utils::graph::Visitor<decltype(g), Container>;
-        auto results = utils::graph::dfs<decltype(g), DFSVisitor>(g, {0});
+//         using DFSVisitor = utils::graph::Visitor<decltype(g), Container>;
+//         auto results = utils::graph::dfs<decltype(g), DFSVisitor>(g, {0});
 
-        decltype(results) expectedResults{0, 3, 6, 4, 7, 1, 5, 2};
-        utils::print(results);
-        EXPECT_EQ(results, expectedResults);
-    }
+//         decltype(results) expectedResults{0, 3, 6, 4, 7, 1, 5, 2};
+//         utils::print(results);
+//         EXPECT_EQ(results, expectedResults);
+//     }
 
-    // Generate a dot graph for a test graph.
-    // {
-    //     std::stringstream writer;
-    //     utils::graph_info(g, writer);
-    //     fmt::print("{}\n", writer.str());
-    //     std::vector<std::string> v = get_vertex_ids();
-    //     std::string dotFile("test.dot");
-    //     utils::gendot(g, v, dotFile);
-    //     utils::viewdot(dotFile);
-    // }
-}
+//     // Generate a dot graph for a test graph.
+//     // {
+//     //     std::stringstream writer;
+//     //     utils::graph_info(g, writer);
+//     //     fmt::print("{}\n", writer.str());
+//     //     std::vector<std::string> v = get_vertex_ids();
+//     //     std::string dotFile("test.dot");
+//     //     utils::gendot(g, v, dotFile);
+//     //     utils::viewdot(dotFile);
+//     // }
+// }
 
-TEST(BFS, Positive) {
-    auto edges = createTestData<int>();
-    std::cout << "==== Edge information ====\n";
-    utils::print(edges);
-    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
+// TEST(DFS, Positive) {
+//     auto edges = createTestData<int>();
+//     std::cout << "==== Edge information ====\n";
+//     utils::print(edges);
+//     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
 
-    fmt::print("Visited vertexes\n");
-    {
-        using vertex_type = int;
-        using Container = std::deque<vertex_type>;
-        auto vertexes = g.getVertexes();
-        auto edges = g.getEdges();
-        using Visitor = utils::graph::Visitor<decltype(g), Container>;
-        auto results = utils::graph::bfs<decltype(g), Visitor>(g, {0});
-        decltype(results) expectedResults{0, 1, 2, 3, 4, 5, 6, 7};
-        utils::print(results);
-        EXPECT_EQ(results, expectedResults);
-    }
+//     fmt::print("Visited vertexes\n");
+//     {
+//         using vertex_type = int;
+//         using Container = std::vector<vertex_type>;
+//         auto vertexes = g.getVertexes();
+//         auto edges = g.getEdges();
 
-    // Generate a dot graph for a test graph.
-    {
-        std::stringstream writer;
-        utils::graph_info(g, writer);
-        fmt::print("{}\n", writer.str());
-        std::vector<std::string> v = get_vertex_ids();
-        std::string dotFile("test.dot");
-        utils::gendot(g, v, dotFile);
-        // utils::viewdot(dotFile);
-    }
-}
+//         using DFSVisitor = utils::graph::Visitor<decltype(g), Container>;
+//         DFSVisitor visitor(g);
+//         auto results = utils::graph::dfs<>(g, visitor, {0});
 
-template <typename IArchive, typename OArchive> void test_cereal() {
-    auto edges = createTestData<int>();
-    std::cout << "==== Edge information ====\n";
-    utils::print(edges);
-    utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
-    auto v = g.getVertexes();
-    auto e = g.getEdges();
+//         decltype(results) expectedResults{0, 3, 6, 4, 7, 1, 5, 2};
+//         utils::print(results);
+//         EXPECT_EQ(results, expectedResults);
+//     }
+// }
 
-    fmt::MemoryWriter writer;
-    utils::graph_info(g, writer);
-    fmt::print("{}\n", writer.str());
-    std::vector<std::string> vids = get_vertex_ids();
+// TEST(BFS, Positive) {
+//     auto edges = createTestData<int>();
+//     std::cout << "==== Edge information ====\n";
+//     utils::print(edges);
+//     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
 
-    // Serialize the data to output string stream
-    std::ostringstream os;
+//     fmt::print("Visited vertexes\n");
+//     {
+//         using vertex_type = int;
+//         using Container = std::deque<vertex_type>;
+//         auto vertexes = g.getVertexes();
+//         auto edges = g.getEdges();
+//         using Visitor = utils::graph::Visitor<decltype(g), Container>;
+//         auto results = utils::graph::bfs<decltype(g), Visitor>(g, {0});
+//         decltype(results) expectedResults{0, 1, 2, 3, 4, 5, 6, 7};
+//         utils::print(results);
+//         EXPECT_EQ(results, expectedResults);
+//     }
 
-    {
-        OArchive output(os);
-        utils::save_sparse_graph(output, g, vids);
-    }
+//     // Generate a dot graph for a test graph.
+//     {
+//         std::stringstream writer;
+//         utils::graph_info(g, writer);
+//         fmt::print("{}\n", writer.str());
+//         std::vector<std::string> v = get_vertex_ids();
+//         std::string dotFile("test.dot");
+//         utils::gendot(g, v, dotFile);
+//         // utils::viewdot(dotFile);
+//     }
+// }
 
-    // Deserialize the data from a string stream
-    decltype(g)::vertex_container v_read;
-    decltype(g)::edge_container e_read;
-    std::vector<std::string> vids_read;
+// template <typename IArchive, typename OArchive> void test_cereal() {
+//     auto edges = createTestData<int>();
+//     std::cout << "==== Edge information ====\n";
+//     utils::print(edges);
+//     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
+//     auto v = g.getVertexes();
+//     auto e = g.getEdges();
 
-    std::istringstream is(os.str());
-    IArchive input(is);
-    input(vids_read, v_read, e_read);
+//     fmt::MemoryWriter writer;
+//     utils::graph_info(g, writer);
+//     fmt::print("{}\n", writer.str());
+//     std::vector<std::string> vids = get_vertex_ids();
 
-    utils::print(vids_read);
-    utils::print(v_read);
-    utils::print(e_read);
+//     // Serialize the data to output string stream
+//     std::ostringstream os;
 
-    EXPECT_EQ(v, v_read);
-    EXPECT_EQ(e, e_read);
-    EXPECT_EQ(vids, vids_read);
-}
+//     {
+//         OArchive output(os);
+//         utils::save_sparse_graph(output, g, vids);
+//     }
 
-TEST(SerializationUsingCereal, Positive) {
-    using OArchive = cereal::BinaryOutputArchive;
-    using IArchive = cereal::BinaryInputArchive;
-    test_cereal<IArchive, OArchive>();
-    // test_cereal<cereal::JSONInputArchive, cereal::JSONOutputArchive>();
-}
+//     // Deserialize the data from a string stream
+//     decltype(g)::vertex_container v_read;
+//     decltype(g)::edge_container e_read;
+//     std::vector<std::string> vids_read;
 
-TEST(Sorted_List, Positive) {
+//     std::istringstream is(os.str());
+//     IArchive input(is);
+//     input(vids_read, v_read, e_read);
+
+//     utils::print(vids_read);
+//     utils::print(v_read);
+//     utils::print(e_read);
+
+//     EXPECT_EQ(v, v_read);
+//     EXPECT_EQ(e, e_read);
+//     EXPECT_EQ(vids, vids_read);
+// }
+
+// TEST(SerializationUsingCereal, Positive) {
+//     using OArchive = cereal::BinaryOutputArchive;
+//     using IArchive = cereal::BinaryInputArchive;
+//     test_cereal<IArchive, OArchive>();
+//     // test_cereal<cereal::JSONInputArchive, cereal::JSONOutputArchive>();
+// }
+
+// TEST(Sorted_List, Positive) {
+//     auto edges = dag_graph<int>();
+//     std::cout << "==== Edge information ====\n";
+//     utils::print(edges);
+//     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
+
+//     // Generate a dot graph for a test graph.
+//     {
+//         std::stringstream writer;
+//         utils::graph_info(g, writer);
+//         fmt::print("{}\n", writer.str());
+//         std::vector<std::string> v{"0", "1", "2", "3", "4", "5", "6"};
+//         std::string dotFile("test_dag.dot");
+//         utils::gendot(g, v, dotFile);
+//         // utils::viewdot(dotFile);
+//     }
+
+//     fmt::print("Visited vertexes\n");
+//     {
+//         using vertex_type = int;
+//         using Container = std::vector<vertex_type>;
+//         auto vertexes = g.getVertexes();
+//         auto edges = g.getEdges();
+//         using DFSVisitor = utils::graph::Visitor<decltype(g), Container>;
+//         auto results = utils::graph::dfs<decltype(g), DFSVisitor>(g, {0});
+//         decltype(results) expectedResults{0, 3, 5, 6, 4, 1};
+//         utils::print(results);
+//         EXPECT_EQ(results, expectedResults);
+//     }
+// }
+
+TEST(Connected_components, Positive) {
     auto edges = dag_graph<int>();
     std::cout << "==== Edge information ====\n";
     utils::print(edges);
     utils::SparseGraph<int, int> g(edges, vertex_num(edges), true);
+    using vertex_type = int;
+    using Container = std::vector<vertex_type>;
+    using DFSVisitor = utils::graph::Visitor<decltype(g), Container>;
+    DFSVisitor visitor(g);
+    auto results = utils::graph::connected_components(g, visitor);
+    decltype(results) expected_results = {{0, 3, 5, 6, 4, 1}, {2, 7}};
+    EXPECT_EQ(expected_results, results);
+    
+    for (auto item : results) {
+        fmt::print("== A component ==\n");
+        utils::print(item);
+    }
 
     // Generate a dot graph for a test graph.
     {
         std::stringstream writer;
         utils::graph_info(g, writer);
         fmt::print("{}\n", writer.str());
-        std::vector<std::string> v{"0", "1", "2", "3", "4", "5", "6"};
         std::string dotFile("test_dag.dot");
+        auto v = get_vertex_ids();
         utils::gendot(g, v, dotFile);
         // utils::viewdot(dotFile);
-    }
-
-    fmt::print("Visited vertexes\n");
-    {
-        using vertex_type = int;
-        using Container = std::vector<vertex_type>;
-        auto vertexes = g.getVertexes();
-        auto edges = g.getEdges();
-        using DFSVisitor = utils::graph::Visitor<decltype(g), Container>;
-        auto results = utils::graph::dfs<decltype(g), DFSVisitor>(g, {0});
-        decltype(results) expectedResults{0, 3, 5, 6, 4, 1};
-        utils::print(results);
-        EXPECT_EQ(results, expectedResults);
     }
 }

@@ -68,7 +68,10 @@ namespace utils {
         const vertex_container &getVertexes() const { return Vertexes; }
         const edge_container &getEdges() const { return Edges; }
         bool isDirected() { return IsDirected; };
-
+      size_t numberOfVertexes() const {
+        return Vertexes.size() - 1;
+      }
+      
       private:
         vertex_container Vertexes;
         edge_container Edges;
