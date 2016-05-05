@@ -11,7 +11,6 @@
 #define BOOST_THREAD_VERSION 4
 #include "boost/config.hpp"
 #include "boost/filesystem.hpp"
-
 #include "fmt/format.h"
 
 #include "SparseGraph.hpp"

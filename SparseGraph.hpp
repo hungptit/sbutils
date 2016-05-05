@@ -27,11 +27,9 @@ namespace utils {
       public:
         using index_type = vtype;
         using edge_type = etype;
-        using EdgeContainer = std::vector<index_type>;
-        using VertexContainer = std::vector<index_type>;
-        using ColorContainer = std::vector<int>;
-        using edge_iterator = typename EdgeContainer::const_iterator;
-        using vetex_iterator = typename VertexContainer::const_iterator;
+        using edge_container = std::vector<index_type>;
+        using vertex_container = std::vector<index_type>;
+        using edge_iterator = typename edge_container::const_iterator;
 
         explicit SparseGraph(const bool isDirected) : IsDirected(isDirected) {}
 
@@ -43,7 +41,7 @@ namespace utils {
             build(data, N);
         }
 
-        explicit SparseGraph(VertexContainer &v, EdgeContainer &e,
+        explicit SparseGraph(vertex_container &v, edge_container &e,
                              bool isDirected)
             : Vertexes(v), Edges(e), IsDirected(isDirected) {}
 
@@ -67,58 +65,18 @@ namespace utils {
             return std::make_tuple(Edges.begin() + Vertexes[vid],
                                    Edges.begin() + Vertexes[vid + 1]);
         }
-        const VertexContainer &getVertexes() const { return Vertexes; }
-        const EdgeContainer &getEdges() const { return Edges; }
+        const vertex_container &getVertexes() const { return Vertexes; }
+        const edge_container &getEdges() const { return Edges; }
         bool isDirected() { return IsDirected; };
 
       private:
-        VertexContainer Vertexes;
-        EdgeContainer Edges;
+        vertex_container Vertexes;
+        edge_container Edges;
         bool IsDirected;
     };
 
     namespace graph {
-        enum Status { UNDISCOVERED, VISITED, DISCOVERED };
-
-        /**
-         * Below classes are implementation for vertex visitors that can be used
-         * with standard graph algorithms such as dfs and bfs.
-         *
-         */
-
-        template <typename Graph, typename Container> class NormalVisitor {
-          public:
-            using index_type = typename Graph::index_type;
-            using edge_container = typename Graph::EdgeContainer;
-            using results_container = std::vector<index_type>;
-
-            explicit NormalVisitor(const size_t N) : States(N, UNDISCOVERED) {}
-
-            const results_container &getResults() const { return Results; }
-
-            void visit(const Graph &g, Container &stack, index_type &vid) {
-                // std::cout << "Visit " << vid << "\n";
-                auto const &vertexes = g.getVertexes();
-                auto const &edges = g.getEdges();
-                States[vid] = VISITED;
-                for (auto idx = vertexes[vid]; idx < vertexes[vid + 1]; idx++) {
-                    stack.push_back(getChildVid(edges, idx));
-                }
-                Results.push_back(vid);
-                States[vid] = DISCOVERED;
-            }
-
-            bool isUndiscovered(const index_type vid) const {
-                return (States[vid] == UNDISCOVERED);
-            }
-
-          private:
-            std::vector<Status> States;
-            results_container Results;
-            index_type getChildVid(const edge_container &edges, size_t idx) {
-                return edges[idx];
-            }
-        };
+        enum Status { UNDISCOVERED, DISCOVERED, PROCESSED };
 
         template <typename Graph, typename Writer>
         void graph_info(Graph &g, Writer &writer) {
@@ -142,32 +100,117 @@ namespace utils {
             }
         }
 
-        template <typename Visitor, typename Graph>
-        void dfs(Graph &g, Visitor &visitor,
-                 std::vector<typename Graph::index_type> vids) {
+        /**
+         * Below classes are implementations for vertex visitors that can be
+         * used
+         * with both dfs and bfs.
+         *
+         */
+
+        template <typename Graph, typename Container> class Visitor {
+          public:
             using index_type = typename Graph::index_type;
-            std::vector<index_type> stack(vids.begin(), vids.end());
-            while (!stack.empty()) {
-                auto vid = stack.back();
-                stack.pop_back();
-                if (visitor.isUndiscovered(vid)) {
-                    visitor.visit(g, stack, vid);
+            using edge_container = typename Graph::edge_container;
+            using results_container = std::vector<index_type>;
+
+            explicit Visitor(Graph &g)
+                : States(g.getVertexes().size() - 1, UNDISCOVERED),
+                  Vertexes(g.getVertexes()), Edges(g.getEdges()){};
+
+            void visit(Container &stack, const index_type &vid) {
+                auto const lower_bound = Vertexes[vid];
+                auto const upper_bound = Vertexes[vid + 1];
+                for (auto idx = lower_bound; idx < upper_bound; ++idx) {
+                    auto const currentVid = Edges[idx];
+                    if (!isVisited(currentVid)) {
+                        stack.push_back(currentVid);
+                    }
                 }
             }
+
+            bool isVisited(const index_type vid) {
+                return States[vid] == PROCESSED;
+            }
+
+            void visited(const index_type vid) { States[vid] = PROCESSED; }
+
+          private:
+            std::vector<Status> States;
+            const typename Graph::vertex_container Vertexes;
+            const typename Graph::edge_container Edges;
+        };
+
+        // This is a simple DFS algorithm
+        template <typename Graph, typename Visitor>
+        auto dfs(Graph &g, std::vector<typename Graph::index_type> vids) {
+            using index_type = typename Graph::index_type;
+
+            // Initialize DFS
+            std::vector<index_type> stack(vids.begin(), vids.end());
+            std::vector<index_type> results;
+            Visitor visitor(g);
+
+            // Traverse the graph.
+            while (!stack.empty()) {
+                auto const vid = stack.back();
+                stack.pop_back();
+                if (!visitor.isVisited(vid)) {
+                    results.push_back(vid);
+                    visitor.visited(vid);
+                    visitor.visit(stack, vid);
+                }
+            }
+
+            return results;
         }
 
-        template <typename Visitor, typename Graph>
-        void bfs(Graph &g, Visitor &visitor,
-                 std::vector<typename Graph::index_type> vids) {
+        template <typename Graph, typename Visitor>
+        auto
+        topological_sorted_list(Graph &g, std::vector<typename Graph::index_type> vids) {
             using index_type = typename Graph::index_type;
-            std::deque<index_type> queue(vids.begin(), vids.end());
-            while (!queue.empty()) {
-                auto vid = queue.front();
-                queue.pop_front();
-                if (visitor.isUndiscovered(vid)) {
-                    visitor.visit(g, queue, vid);
+
+            // Initialize DFS
+            std::vector<index_type> stack(vids.begin(), vids.end());
+            std::vector<index_type> results;
+            Visitor visitor(g);
+
+            // Traverse the graph.
+            while (!stack.empty()) {
+                auto const vid = stack.back();
+                stack.pop_back();
+                if (!visitor.isVisited(vid)) {
+                    results.push_back(vid);
+                    visitor.visited(vid);
+                    visitor.visit(stack, vid);
                 }
             }
+
+            return results;
+        }
+
+        template <typename Graph, typename Visitor>
+        auto bfs(Graph &g, std::vector<typename Graph::index_type> vids) {
+            using index_type = typename Graph::index_type;
+            // utils::ElapsedTime<MILLISECOND> t("DFS time: ");
+
+            // Initialize DFS
+            std::deque<index_type> queue(vids.begin(), vids.end());
+            std::vector<index_type> results;
+
+            Visitor visitor(g);
+
+            // Traverse the graph.
+            while (!queue.empty()) {
+                auto const vid = queue.front();
+                queue.pop_front();
+                if (!visitor.isVisited(vid)) {
+                    results.push_back(vid);
+                    visitor.visited(vid);
+                    visitor.visit(queue, vid);
+                }
+            }
+
+            return results;
         }
 
         /// Write input graph information to a dot file.

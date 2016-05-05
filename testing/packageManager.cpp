@@ -16,7 +16,7 @@
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 
-#include "cppformat/format.h"
+#include "fmt/format.h"
 
 #include "utils/Utils.hpp"
 #include "utils/LevelDBIO.hpp"

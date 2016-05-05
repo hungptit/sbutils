@@ -8,7 +8,7 @@
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 
-#include "cppformat/format.h"
+#include "fmt/format.h"
 #include "utils/FileSearch.hpp"
 #include "utils/Print.hpp"
 #include "utils/Serialization.hpp"
