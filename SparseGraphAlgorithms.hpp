@@ -43,7 +43,7 @@ namespace utils {
 
         // This is a simple DFS algorithm
         template <typename Graph, typename Visitor>
-        auto dfs(Graph &g, std::vector<typename Graph::index_type> vids) {
+        auto dfs(Graph &g, const std::vector<typename Graph::index_type> & vids) {
             using index_type = typename Graph::index_type;
 
             // Initialize DFS
@@ -68,7 +68,7 @@ namespace utils {
         template <typename Graph, typename Visitor>
         auto
         topological_sorted_list(Graph &g,
-                                std::vector<typename Graph::index_type> vids) {
+                                const std::vector<typename Graph::index_type> &vids) {
             using index_type = typename Graph::index_type;
 
             // Initialize DFS
@@ -91,7 +91,7 @@ namespace utils {
         }
 
         template <typename Graph, typename Visitor>
-        auto bfs(Graph &g, std::vector<typename Graph::index_type> vids) {
+        auto bfs(Graph &g, const std::vector<typename Graph::index_type> & vids) {
             using index_type = typename Graph::index_type;
             // utils::ElapsedTime<MILLISECOND> t("DFS time: ");
 

@@ -83,7 +83,7 @@ TEST(TestSparseGraph, Positive) {
     {
         auto e = g.edges(6);
         std::vector<int> results(std::get<0>(e), std::get<1>(e));
-        decltype(results) expectedResults{1, 4};
+        decltype(results) expectedResults{1, 4, 5};
         EXPECT_EQ(expectedResults, results);
     }
 
@@ -128,15 +128,15 @@ TEST(DFS, Positive) {
     }
 
     // Generate a dot graph for a test graph.
-    // {
-    //     std::stringstream writer;
-    //     utils::graph_info(g, writer);
-    //     fmt::print("{}\n", writer.str());
-    //     std::vector<std::string> v = get_vertex_ids();
-    //     std::string dotFile("test.dot");
-    //     utils::gendot(g, v, dotFile);
-    //     utils::viewdot(dotFile);
-    // }
+    {
+        std::stringstream writer;
+        utils::graph_info(g, writer);
+        fmt::print("{}\n", writer.str());
+        std::vector<std::string> v = get_vertex_ids();
+        std::string dotFile("test.dot");
+        utils::gendot(g, v, dotFile);
+        utils::viewdot(dotFile);
+    }
 }
 
 TEST(BFS, Positive) {

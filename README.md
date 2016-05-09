@@ -53,7 +53,7 @@
 
 ## mlocate ##
 
-We can use **mlocate** to locate files in given folders. The command will be significantly faster than the **locate** if users can provide more specific constraints. This sample command below will find all files in matlab/test folder that have tAutoFix stem.
+We can use **mlocate** to locate files in given folders. The command will be significantly faster than **locate** command if users can provide more specific constraints. This sample command below will find all files in matlab/test folder that have tAutoFix stem.
 
         % mlocate matlab/test/ -s tAutoFix
         Search results: 
@@ -76,11 +76,11 @@ This command will copy changes that you have made in your local sandbox to the n
 
 There are utility classes in **utils** that can be used independently in many C++ projects. These classes are:
 
-* Timer: Calculate the elapsed time of a code segment. This class is very similar to **tic** and **toc** command in Matlab.
+* Timer: Calculate the elapsed time of a code segment. This class is very similar to **tic** and **toc** command in **Matlab**.
 
 * TemporaryDirectory: Create a temporary folder and cleanup this folder when an object is destroyed. This class is very useful for writing unit tests.
 
-* SparseGraph: A simple graph data structure and some basic graph traversal functions such as DFS and BFS. The graph data structure is stored in CSR format for high performance graph application with millions of vertexes.
+* SparseGraph: A simple graph data structure and some basic graph traversal algorithms such as DFS and BFS. The graph data structure is stored in CSR format for high performance graph applications with millions of vertexes.
 
 * Reader/Writer: For file I/O with leveldb.
 
