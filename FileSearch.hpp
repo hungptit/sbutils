@@ -14,6 +14,7 @@
 #include "fmt/format.h"
 
 #include "SparseGraph.hpp"
+
 #include "Utils.hpp"
 
 namespace utils {
@@ -212,7 +213,7 @@ namespace utils {
 
                 // Return vertex information and a folder hierarchy graph.
                 return std::make_tuple(vertexes,
-                                       SparseGraph<index_type, index_type>(
+                                       graph::SparseGraph<index_type, index_type>(
                                            allEdges, vertexes.size(), true));
             }
 

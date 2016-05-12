@@ -41,7 +41,7 @@ namespace {
         }
 
       private:
-      std::vector<std::string> ExcludedExtensions = {".p", ".d", ".o", ".ts"};
+        std::vector<std::string> ExcludedExtensions = {".p", ".d", ".o", ".ts", ".xml~", ".m~"};
     };
 
     template <typename Container, typename Filter>

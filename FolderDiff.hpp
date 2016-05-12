@@ -16,7 +16,8 @@
 #include "LevelDBIO.hpp"
 #include "Serialization.hpp"
 #include "SparseGraph.hpp"
-#include "utils/SparseGraphAlgorithms.hpp"
+#include "Visitor.hpp"
+#include "SparseGraphAlgorithms.hpp"
 #include "Timer.hpp"
 
 namespace utils {
@@ -99,7 +100,7 @@ namespace utils {
             // ");
             using index_type = int;
             using edge_type = int;
-            using GraphAlg = utils::SparseGraph<index_type, edge_type>;
+            using GraphAlg = graph::SparseGraph<index_type, edge_type>;
             using vertex_container = typename GraphAlg::vertex_container;
             using edge_container = typename GraphAlg::edge_container;
             using index_type = typename GraphAlg::index_type;
@@ -137,8 +138,8 @@ namespace utils {
 
             // Use DFS to find all vertexes that are belong to given
             // vertexes
-            using DFSVisitor = utils::graph::Visitor<decltype(g), std::vector<index_type>>;
-            auto results = utils::graph::dfs<decltype(g), DFSVisitor>(g, indexes);
+            using DFSVisitor = graph::Visitor<decltype(g), std::vector<index_type>>;
+            auto results = graph::dfs<decltype(g), DFSVisitor>(g, indexes);
 
             // Now read all keys and create a list of edited file data
             // bases.

@@ -59,7 +59,7 @@ namespace graph {
     auto connected_components(Graph &g, Visitor &visitor) {
         using index_type = typename Graph::index_type;
         std::vector<std::vector<index_type>> results;
-        index_type N = g.numberOfVertexes();
+        index_type N = g.numberOfVertices();
         for (index_type vid = 0; vid < N; ++vid) {
             std::cout << "vid = " << vid << "\n";
             if (!visitor.isVisited(vid)) {

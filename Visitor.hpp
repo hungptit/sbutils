@@ -1,6 +1,9 @@
 #ifndef VISITOR_HPP
 #define VISITOR_HPP
-namespace Graph {
+
+#include <vector>
+
+namespace graph {
     enum Status { UNDISCOVERED, DISCOVERED, PROCESSED };
 
     template <typename Graph, typename Container> class Visitor {
@@ -10,8 +13,8 @@ namespace Graph {
         using results_container = std::vector<index_type>;
 
         explicit Visitor(Graph &g)
-            : States(g.getVertexes().size() - 1, UNDISCOVERED),
-              Vertexes(g.getVertexes()), Edges(g.getEdges()){};
+            : States(g.numberOfVertices(), UNDISCOVERED),
+              Vertexes(g.vertexData()), Edges(g.outEdgeData()){};
 
         void visit(Container &stack, const index_type &vid) {
             auto const lower_bound = Vertexes[vid];

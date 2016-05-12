@@ -16,7 +16,7 @@
 #include <tuple>
 #include <vector>
 
-namespace utils {
+namespace graph {
     /**
      * This class has a simple data sructure for a directed graph.  @todo
      * Support weighted graph. Might need to introduce edge_type and vertex_type
@@ -43,46 +43,46 @@ namespace utils {
 
         explicit SparseGraph(vertex_container &v, edge_container &e,
                              bool isDirected)
-            : Vertexes(v), Edges(e), IsDirected(isDirected) {}
+            : VertexData(v), OutEdgeData(e), IsDirected(isDirected) {}
 
         /// This function assume that input data is sorted by vertex ID.
         void build(std::vector<std::tuple<index_type, index_type>> &data,
                    const std::size_t N) {
-            Vertexes.assign(N + 1, 0);
-            Edges.assign(data.size(), 0);
+            VertexData.assign(N + 1, 0);
+            OutEdgeData.assign(data.size(), 0);
             index_type currentRow = 0;
             for (auto const &val : data) {
-                Vertexes[std::get<0>(val) + 1]++;
-                Edges[currentRow++] = std::get<1>(val);
+                VertexData[std::get<0>(val) + 1]++;
+                OutEdgeData[currentRow++] = std::get<1>(val);
             }
 
             for (std::size_t currentCol = 0; currentCol < N; ++currentCol) {
-                Vertexes[currentCol + 1] += Vertexes[currentCol];
+                VertexData[currentCol + 1] += VertexData[currentCol];
             }
         }
 
-        std::tuple<edge_iterator, edge_iterator> edges(index_type vid) {
-            return std::make_tuple(Edges.begin() + Vertexes[vid],
-                                   Edges.begin() + Vertexes[vid + 1]);
-        }
-        const vertex_container &getVertexes() const { return Vertexes; }
-        const edge_container &getEdges() const { return Edges; }
-        bool isDirected() { return IsDirected; };
-      size_t numberOfVertexes() const {
-        return Vertexes.size() - 1;
-      }
-      
-      private:
-        vertex_container Vertexes;
-        edge_container Edges;
-        bool IsDirected;
-    };
 
-    // Utilty functions
+        bool isDirected() { return IsDirected; };
+        const vertex_container &vertexData() const { return VertexData; }
+        const edge_container &outEdgeData() const { return OutEdgeData; }
+        const edge_container &inEdgeData() const { return InEdgeData; }
+        size_t numberOfVertices() const { return VertexData.size() - 1; }
+        auto edges(const index_type vid) const {
+            return std::make_tuple(OutEdgeData.begin() + VertexData[vid], OutEdgeData.begin() + VertexData[vid + 1]);
+        }
+
+      private:
+        vertex_container VertexData;
+        edge_container OutEdgeData;
+        edge_container InEdgeData;
+        bool IsDirected;
+    };   
+
+    // Utilty functions    
     template <typename Graph, typename Writer>
     void graph_info(Graph &g, Writer &writer) {
-        auto vertexes = g.getVertexes();
-        auto edges = g.getEdges();
+        auto vertexes = g.vertexData();
+        auto edges = g.outEdgeData();
         auto N = vertexes.size() - 1;
         for (std::size_t currentCol = 0; currentCol < N; ++currentCol) {
             auto begin = vertexes[currentCol];
@@ -125,8 +125,8 @@ namespace utils {
             i++;
         }
 
-        auto vertexes = g.getVertexes();
-        auto edges = g.getEdges();
+        auto vertexes = g.vertexData();
+        auto edges = g.outEdgeData();
 
         // Write edge's' information
         const std::string direction = g.isDirected() ? "->" : "--";
@@ -155,7 +155,7 @@ namespace utils {
 
     template <typename Graph, typename Writer = std::stringstream>
     void tree_info(const Graph &g, std::vector<std::string> &vids) {
-      graph_info(g);
+        graph_info(g);
         Writer writer;
         size_t counter = 0;
         for (auto item : vids) {
