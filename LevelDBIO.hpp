@@ -14,7 +14,7 @@ namespace utils {
       Writer(const Writer&) = delete;
       Writer& operator=(const Writer&) = delete;
 
-      Writer(const std::string &dataFile) : DataFile(dataFile) {
+      explicit Writer(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             // options.cache = leveldb::NewLRUCache(100 * 1048576);  // 100MB cache
             options.create_if_missing = true;
