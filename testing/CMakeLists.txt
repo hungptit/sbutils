@@ -5,19 +5,28 @@ set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 # set(CMAKE_BUILD_TYPE Debug)
 set (CMAKE_BUILD_TYPE Release)
+<<<<<<< HEAD
 # set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
 
 set(CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
+=======
+>>>>>>> hungptit
 
 # Uncomment below lines if using gcc
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
 # Uncomment below lines if using clang
+<<<<<<< HEAD
 # set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
+=======
+set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
+
+>>>>>>> hungptit
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -40,13 +49,13 @@ endif (Boost_NO_SYSTEM_PATHS)
 
 message(${BOOST_ROOT})
 
-find_package(Boost 1.60 REQUIRED regex date_time system filesystem thread graph program_options iostreams)
+find_package(Boost 1.60 REQUIRED date_time system filesystem thread graph program_options iostreams)
 
 # Include folder
 message(${PROJECTS_FOLDER})
 include_directories(${PROJECTS_FOLDER})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
-include_directories("${PROJECTS_FOLDER}/3p/cppformat/include")
+include_directories("${PROJECTS_FOLDER}/3p/fmt/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
@@ -59,7 +68,7 @@ set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-set(LIB_CPPFORMAT "${PROJECTS_FOLDER}/3p/cppformat/lib/libfmt.a")
+set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 
 if (Boost_FOUND)
@@ -68,14 +77,14 @@ if (Boost_FOUND)
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder tGraph)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}  ${LIB_CPPFORMAT} ${LIB_LEVELDB} ${LIB_SNAPPY} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}  ${LIB_FMT} ${LIB_LEVELDB} ${LIB_SNAPPY} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
   set(UNITTEST_SRC_FILES tProcess)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_LEVELDB} ${LIB_CPPFORMAT} ${LIB_SNAPPY} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_LEVELDB} ${LIB_FMT} ${LIB_SNAPPY} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
@@ -84,7 +93,7 @@ if (Boost_FOUND)
   set(UNITTEST_SRC_FILES  tTest)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${LIB_CPPFORMAT} ${Boost_LIBRARIES}
+    TARGET_LINK_LIBRARIES(${src_file} ${LIB_FMT} ${Boost_LIBRARIES}
       ${LIB_POCO_UTIL} ${LIB_POCO_NET} ${LIB_POCO_XML} ${LIB_POCO_SQLITE} ${LIB_POCO_FOUNDATION}
       ${LIB_POCO_DATA} ${LIB_POCO_SQLITE} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
@@ -94,7 +103,7 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_CPPFORMAT} ${LIB_SNAPPY} -lpthread -lrt)
+      ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_FMT} ${LIB_SNAPPY} -lpthread -lrt)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 
@@ -102,7 +111,7 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} 
-      ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_CPPFORMAT} ${LIB_POCO_FOUNDATION} -lpthread -lrt)
+      ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_FMT} ${LIB_POCO_FOUNDATION} -lpthread -lrt)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

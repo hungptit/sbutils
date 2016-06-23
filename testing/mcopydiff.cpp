@@ -19,12 +19,12 @@
 #include "boost/thread/future.hpp"
 #include "boost/unordered_set.hpp"
 
+#include "fmt/format.h"
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
+#include "utils/SparseGraphAlgorithms.hpp"
 #include "utils/Timer.hpp"
-
-#include "fmt/format.h"
 
 #include <sstream>
 #include <string>
@@ -130,17 +130,17 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Allowed options");
 
     // clang-format off
-  desc.add_options()
-    ("help,h", "Print this help")
-    ("verbose,v", "Display more information.")
-    ("keys,k", "List all keys.")
-    ("src_dir,s", po::value<std::string>(), "Source folder.")
-    ("dst_dir,d", po::value<std::string>(), "Destination sandbox.")
-      ("baseline,b", po::value<std::string>(), "File database.");
+    desc.add_options()
+        ("help,h", "Print this help")
+        ("verbose,v", "Display more information.")
+        ("keys,k", "List all keys.")
+        ("src_dir,s", po::value<std::vector<std::string>>(), "Source folder.")
+        ("dst_dir,d", po::value<std::vector<std::string>>(), "Destination sandbox.")
+        ("baseline,b", po::value<std::string>(), "File database.");
     // clang-format on
 
     po::positional_options_description p;
-    p.add("baseline", -1);
+    p.add("src_dir", -1);
     po::variables_map vm;
     po::store(
         po::command_line_parser(argc, argv).options(desc).positional(p).run(),
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
 
     if (vm.count("help")) {
         std::cout << desc;
-        fmt::print("Examples:\n\tmcopydiff -s matlab/ -d "
+        fmt::print("Examples:\n\tmcopydiff matlab/toolbox matlab/test -d "
                    "/sandbox/hungdang/mdlrefadvisor\n");
         return 0;
     }
@@ -159,19 +159,25 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
 
-    std::string srcDir;
+    std::vector<std::string> srcDir;
     if (vm.count("src_dir")) {
-        srcDir = utils::normalize_path(vm["src_dir"].as<std::string>());
+        auto srcPaths = vm["src_dir"].as<std::vector<std::string>>();
+        for (auto const & item : srcPaths) {
+            srcDir.emplace_back(utils::normalize_path(item));
+        }        
     } else {
         throw(std::runtime_error("Need to provide the source folder path!"));
     }
 
-    std::string dstDir;
+    std::vector<std::string> dstDir;
     if (vm.count("dst_dir")) {
-        dstDir = utils::normalize_path(vm["dst_dir"].as<std::string>());
+        auto inputArgs = vm["dst_dir"].as<std::vector<std::string>>();
+        for (auto const & anArg : inputArgs) {
+            dstDir.emplace_back(utils::normalize_path(anArg));
+        }        
     } else {
         throw(std::runtime_error(
-            "Need to provide the destination sandbox path!"));
+                  "Need to provide the destination sandbox path!"));
     }
 
     // Get file database
@@ -191,48 +197,44 @@ int main(int argc, char *argv[]) {
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
-            utils::diffFolders(dataFile, {srcDir}, verbose);
+            utils::diffFolders(dataFile, srcDir, verbose);
 
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
         // folder.
-        auto copyEditedFileObj = [&allEditedFiles, &dstDir, verbose]() {
-            return copyFiles(allEditedFiles, dstDir, verbose);
-        };
+        for (auto const &aDstDir : dstDir) {
+            auto copyEditedFileObj = [&allEditedFiles, &aDstDir, verbose]() {
+                return copyFiles(allEditedFiles, aDstDir, verbose);
+            };
 
-        auto copyNewFileObj = [&allNewFiles, &dstDir, verbose]() {
-            return copyFiles(allNewFiles, dstDir, verbose);
-        };
+            auto copyNewFileObj = [&allNewFiles, &aDstDir, verbose]() {
+                return copyFiles(allNewFiles, aDstDir, verbose);
+            };
 
-        auto deleteFileObj = [&allDeletedFiles, &dstDir, verbose]() {
-            return deleteFiles(allDeletedFiles, dstDir, verbose);
-        };
+            auto deleteFileObj = [&allDeletedFiles, &aDstDir, verbose]() {
+                return deleteFiles(allDeletedFiles, aDstDir, verbose);
+            };
 
-        // auto results1 = copyEditedFileObj();
-        // auto results2 = copyNewFileObj();
-        // auto results3 = deleteFileObj();
+            boost::future<std::tuple<size_t, size_t>> t1 =
+                boost::async(copyEditedFileObj);
+            boost::future<std::tuple<size_t, size_t>> t2 =
+                boost::async(copyNewFileObj);
+            boost::future<size_t> t3 = boost::async(deleteFileObj);
 
-        boost::future<std::tuple<size_t, size_t>> t1 =
-            boost::async(copyEditedFileObj);
-        boost::future<std::tuple<size_t, size_t>> t2 =
-            boost::async(copyNewFileObj);
-        ;
-        boost::future<size_t> t3 = boost::async(deleteFileObj);
-        ;
+            t1.wait();
+            t2.wait();
+            t3.wait();
 
-        t1.wait();
-        t2.wait();
-        t3.wait();
+            auto results1 = t1.get();
+            auto results2 = t2.get();
+            auto results3 = t3.get();
 
-        auto results1 = t1.get();
-        auto results2 = t2.get();
-        auto results3 = t3.get();
-
-        fmt::print("Summary:\n");
-        fmt::print("\tCopied {0} modified files ({1} bytes)\n",
-                   std::get<0>(results1), std::get<1>(results1));
-        fmt::print("\tCopied {0} new files ({1} bytes)\n",
-                   std::get<0>(results2), std::get<1>(results2));
-        fmt::print("\tDelete {0} files\n", results3);
+            fmt::print("==== Summary for {} ====\n", aDstDir);
+            fmt::print("\tCopied {0} modified files ({1} bytes)\n",
+                       std::get<0>(results1), std::get<1>(results1));
+            fmt::print("\tCopied {0} new files ({1} bytes)\n",
+                       std::get<0>(results2), std::get<1>(results2));
+            fmt::print("\tDelete {0} files\n", results3);
+        }
     }
 }

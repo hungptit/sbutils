@@ -41,7 +41,7 @@ namespace {
         }
 
       private:
-      std::vector<std::string> ExcludedExtensions = {".p", ".d", ".o", ".ts"};
+        std::vector<std::string> ExcludedExtensions = {".p", ".d", ".o", ".ts", ".xml~", ".m~"};
     };
 
     template <typename Container, typename Filter>
@@ -49,7 +49,7 @@ namespace {
         for (auto item : data) {
             if (f.isValid(item)) {
                 fmt::print("{}\n", std::get<utils::filesystem::PATH>(item));
-            }
+            }            
         }
     }
 }
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
         folders = vm["folders"].as<std::vector<std::string>>();
     }
 
-    // Get file stems
+    // Get file stems    
     std::vector<std::string> stems;
     if (vm.count("stems")) {
         stems = vm["stems"].as<std::vector<std::string>>();

@@ -49,9 +49,11 @@ namespace utils {
     template <typename OArchive, typename SparseGraph, typename VertexContainer>
     void save_sparse_graph(OArchive &oar, const SparseGraph &g,
                            VertexContainer &vids) {
+        auto const &vertexData = g.vertexData();
+        auto const &outEdgeData = g.outEdgeData();
         oar(cereal::make_nvp(Resources::VIDKey, vids),
-            cereal::make_nvp(Resources::VertexKey, g.getVertexes()),
-            cereal::make_nvp(Resources::EdgeKey, g.getEdges()));
+            cereal::make_nvp(Resources::VertexKey, vertexData),
+            cereal::make_nvp(Resources::EdgeKey, outEdgeData));
     }
 
     template <typename OArchive, typename Container>
