@@ -5,28 +5,14 @@ set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 # set(CMAKE_BUILD_TYPE Debug)
 set (CMAKE_BUILD_TYPE Release)
-<<<<<<< HEAD
-# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
+# For gcc-5.xx
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4")
 
-set(CMAKE_BUILD_TYPE Debug)
-# set (CMAKE_BUILD_TYPE Release)
-=======
->>>>>>> hungptit
-
-# Uncomment below lines if using gcc
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
-
-# Uncomment below lines if using clang
-<<<<<<< HEAD
-# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
-=======
+# For clang
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
->>>>>>> hungptit
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
