@@ -80,8 +80,6 @@ There are utility classes in **utils** that can be used independently in many C+
 
 * TemporaryDirectory: Create a temporary folder and cleanup this folder when an object is destroyed. This class is very useful for writing unit tests.
 
-* SparseGraph: A simple graph data structure and some basic graph traversal algorithms such as DFS and BFS. The graph data structure is stored in CSR format for high performance graph applications with millions of vertexes.
-
 * Reader/Writer: For file I/O with leveldb.
 
 # FAQs #
