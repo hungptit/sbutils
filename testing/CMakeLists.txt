@@ -21,6 +21,14 @@ set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
 set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/out-static/libleveldb.a")
 
+# Libraries used by rocksdb
+set(LIB_ROCKSDB "${PROJECTS_FOLDER}/3p/rocksdb/librocksdb.a")
+set(LIB_LZ4 "${PROJECTS_FOLDER}/3p/lz4/lib/liblz4.a")
+set(LIB_BZ2 "${PROJECTS_FOLDER}/3p/bzip2/lib/libbz2.a")
+set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
+set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
+
+
 # This option make sure that we use the local boost version. Note that if the 
 # system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
@@ -43,6 +51,12 @@ include_directories(${PROJECTS_FOLDER})
 include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
 include_directories("${PROJECTS_FOLDER}/3p/fmt/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
+
+include_directories ("${PROJECTS_FOLDER}/3p/rocksdb/include")
+include_directories ("${PROJECTS_FOLDER}/3p/lz4/include")
+include_directories ("${PROJECTS_FOLDER}/3p/bzip2/include")
+include_directories ("${PROJECTS_FOLDER}/3p/jemalloc/include")
+
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
 
@@ -55,7 +69,6 @@ set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
 set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
-set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})
@@ -82,6 +95,15 @@ if (Boost_FOUND)
     TARGET_LINK_LIBRARIES(${src_file} ${LIB_FMT} ${Boost_LIBRARIES}
       ${LIB_POCO_UTIL} ${LIB_POCO_NET} ${LIB_POCO_XML} ${LIB_POCO_SQLITE} ${LIB_POCO_FOUNDATION}
       ${LIB_POCO_DATA} ${LIB_POCO_SQLITE} -lpthread -ldl)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+
+    set(UNITTEST_SRC_FILES  tRocksDB)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${LIB_FMT} ${Boost_LIBRARIES}
+      ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY} ${LIB_JEMALLOC}
+      ${LIB_BZ2} -lpthread -ldl -lz)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   
