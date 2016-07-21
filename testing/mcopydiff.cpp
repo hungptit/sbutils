@@ -43,8 +43,7 @@ namespace {
       public:
         bool isValid(utils::FileInfo &item) const {
             return (std::find(ExcludedExtensions.begin(),
-                              ExcludedExtensions.end(),
-                              std::get<utils::filesystem::EXTENSION>(item)) ==
+                              ExcludedExtensions.end(), item.Extension) ==
                     ExcludedExtensions.end());
         }
 
@@ -56,7 +55,7 @@ namespace {
     void print(Container &data, Filter &f) {
         for (auto item : data) {
             if (f.isValid(item)) {
-                fmt::print("{}\n", std::get<utils::filesystem::PATH>(item));
+                fmt::print("{}\n", item.Path);
             }
         }
     }
@@ -70,7 +69,7 @@ namespace {
         boost::system::error_code errcode;
         auto options = copy_option::overwrite_if_exists;
         for (auto item : files) {
-            auto srcFile = path(std::get<0>(item));
+            auto srcFile = path(item.Path);
             auto dstFile = dstDir / srcFile;
             bool needCopy = true;
             if (exists(dstFile)) {
@@ -92,7 +91,7 @@ namespace {
             if (needCopy) {
                 copy_file(srcFile, dstFile, options);
                 nfiles++;
-                nbytes += std::get<utils::filesystem::FILESIZE>(item);
+                nbytes += item.Size;
                 if (verbose) {
                     fmt::print("Copy {0} to {1}\n", srcFile.string(),
                                dstFile.string());
@@ -109,7 +108,7 @@ namespace {
         size_t nfiles = 0;
         boost::system::error_code errcode;
         for (auto const &item : files) {
-            auto aFile = path(std::get<0>(item));
+            auto aFile = path(item.Path);
             auto dstFile = parent / aFile;
             if (exists(dstFile)) {
                 permissions(dstFile, add_perms | owner_write);

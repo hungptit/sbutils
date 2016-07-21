@@ -6,12 +6,13 @@
 #include <iomanip>
 #include <iostream>
 
+#include "DataStructures.hpp"
+
 namespace utils {
     // Define the file information which is (path, stem, extension, permission,
     // time_stamp, file_size)
-    using FileInfo = std::tuple<std::string, std::string, std::string, int,
-                                std::time_t, uintmax_t>;
-
+    using FileInfo = NewFileInfo<std::string>;
+       
     template <typename T> std::string to_fixed_string(const int len, T val) {
         std::ostringstream ss;
         ss << std::setw(len) << std::setfill('0') << val;

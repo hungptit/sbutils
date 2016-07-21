@@ -104,13 +104,12 @@ int main(int argc, char *argv[]) {
         }
         fmt::print("Number of files: {}\n", data.size());
         std::for_each(data.begin(), data.end(), [](auto const &val) {
-            fmt::print("({0}, {1}, {2})\n", std::get<0>(val), std::get<1>(val),
-                       std::get<2>(val));
+            fmt::print("({0}, {1}, {2}, {3})\n", val.Path, val.Size, val.Permissions, val.TimeStamp);
         });
     } else {
         fmt::print("Number of files: {}\n", data.size());
         std::for_each(data.begin(), data.end(), [](auto const &val) {
-            fmt::print("{0}\n", std::get<0>(val));
+            fmt::print("{0}\n", val.Path);
         });
     }
 

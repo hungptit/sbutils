@@ -16,9 +16,9 @@
 #include "LevelDBIO.hpp"
 #include "Serialization.hpp"
 #include "SparseGraph.hpp"
-#include "Visitor.hpp"
 #include "SparseGraphAlgorithms.hpp"
 #include "Timer.hpp"
+#include "Visitor.hpp"
 
 namespace utils {
     /**
@@ -138,7 +138,8 @@ namespace utils {
 
             // Use DFS to find all vertexes that are belong to given
             // vertexes
-            using DFSVisitor = graph::Visitor<decltype(g), std::vector<index_type>>;
+            using DFSVisitor =
+                graph::Visitor<decltype(g), std::vector<index_type>>;
             auto results = graph::dfs<decltype(g), DFSVisitor>(g, indexes);
 
             // Now read all keys and create a list of edited file data
@@ -179,25 +180,30 @@ namespace utils {
         // Create a lookup table
         using value_type = typename Container::value_type;
 
+        // TODO: Need to speedup this line using a better hash table.
         boost::unordered_set<value_type> dict(second.begin(), second.end());
 
         if (verbose) {
             std::cout << "---- Dictionary sizes: " << dict.size() << " \n";
         }
 
-        // Cleanup items that belong to both.
-        // The complexity of this algorithm is O(n).
-        for (auto const &item : first) {
-            auto pos = dict.find(item);
-            if (pos == dict.end()) {
-                results.emplace_back(item);
-            } else {
+        // Remove items that belong to both. We assume that the number of
+        // modified files is significantly less than the total number of files.
+        auto getDiff = [&dict, &results](const auto &item) {
+            auto const pos = dict.find(item);
+            if (pos != dict.end()) {
                 dict.erase(pos);
+            } else {
+                results.emplace_back(item);
             }
-        }
+        };
+
+        // TODO: Speed up this loop
+        std::for_each(first.begin(), first.end(), getDiff);
 
         // Get modified and deleted items.
         boost::unordered_map<std::string, value_type> map;
+        map.reserve(dict.size());
         for (auto item : dict) {
             map[std::get<0>(item)] = item;
         }
@@ -210,11 +216,8 @@ namespace utils {
                 auto pos = map.find(aKey);
                 if (pos != map.end()) {
                     auto dictItem = pos->second;
-                    bool isOK =
-                        (std::get<utils::filesystem::FILESIZE>(item) ==
-                         std::get<utils::filesystem::FILESIZE>(dictItem)) &&
-                        (std::get<utils::filesystem::PERMISSION>(item) ==
-                         std::get<utils::filesystem::PERMISSION>(dictItem));
+                    bool isOK = (item.Size == dictItem.Size) &&
+                                (item.Permissions == dictItem.Permissions);
                     if (!isOK) {
                         modifiedFiles.emplace_back(item);
                     }
@@ -228,9 +231,10 @@ namespace utils {
         }
 
         // Get deleted items
-        for (auto item : map) {
-            deletedFiles.emplace_back(item.second);
-        }
+        std::for_each(map.begin(), map.end(),
+                      [&deletedFiles](auto const &item) {
+                          deletedFiles.emplace_back(item.second);
+                      });
 
         // Return
         return std::make_tuple(modifiedFiles, newFiles, deletedFiles);
@@ -243,8 +247,9 @@ namespace utils {
         using PathContainer = std::vector<path>;
         using Container = std::vector<utils::FileInfo>;
 
-        utils::filesystem::SimpleVisitor<
-            PathContainer, utils::filesystem::NormalPolicy> visitor;
+        utils::filesystem::SimpleVisitor<PathContainer,
+                                         utils::filesystem::NormalPolicy>
+            visitor;
         PathContainer searchFolders;
         for (auto item : folders) {
             searchFolders.emplace_back(path(item));

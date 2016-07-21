@@ -36,24 +36,23 @@ namespace {
         bool isValid(utils::FileInfo &item) {
             return (std::find(ExcludedExtensions.begin(),
                               ExcludedExtensions.end(),
-                              std::get<utils::filesystem::EXTENSION>(item)) ==
-                    ExcludedExtensions.end());
+                              item.Extension) == ExcludedExtensions.end());
         }
 
       private:
-        std::vector<std::string> ExcludedExtensions = {".p", ".d", ".o", ".ts", ".xml~", ".m~"};
+        std::vector<std::string> ExcludedExtensions = {".p",  ".d",    ".o",
+                                                       ".ts", ".xml~", ".m~"};
     };
 
     template <typename Container, typename Filter>
     void print(Container &data, Filter &f) {
         for (auto item : data) {
             if (f.isValid(item)) {
-                fmt::print("{}\n", std::get<utils::filesystem::PATH>(item));
-            }            
+                fmt::print("{}\n", item.Path);
+            }
         }
     }
 }
-
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -98,7 +97,7 @@ int main(int argc, char *argv[]) {
         folders = vm["folders"].as<std::vector<std::string>>();
     }
 
-    // Get file stems    
+    // Get file stems
     std::vector<std::string> stems;
     if (vm.count("stems")) {
         stems = vm["stems"].as<std::vector<std::string>>();

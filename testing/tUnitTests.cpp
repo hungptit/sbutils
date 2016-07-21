@@ -6,6 +6,7 @@
 #include <tuple>
 #include <vector>
 
+#include "utils/DataStructures.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
@@ -13,12 +14,14 @@
 #include "utils/TemporaryDirectory.hpp"
 #include "utils/Timer.hpp"
 
+#include "TestData.hpp"
+
 using path = boost::filesystem::path;
 
 TEST(Display_Functions, Positive) {
     {
         std::vector<int> data = {1, 2, 3, 4, 5, 6};
-        utils::disp(data, "data: ");        
+        utils::disp(data, "data: ");
     }
 
     {
@@ -73,5 +76,49 @@ TEST(ExporeFolderRootLevel, Positive) {
         for (auto item : std::get<1>(results)) {
             std::cout << item << "\n";
         }
+    }
+}
+
+TEST(DataStructure, Positive) {
+    using IArchive = cereal::JSONInputArchive;
+    using OArchive = cereal::JSONOutputArchive;
+    using value_type = utils::NewFileInfo<std::string>;
+
+    utils::TemporaryDirectory tmpDir;
+    TestData data(tmpDir.getPath());
+        
+    auto const aPath = tmpDir.getPath() / path("data/data.mat");
+
+    {
+        value_type aFile;
+
+        std::stringstream output;
+        {
+            OArchive oar(output);
+            oar(cereal::make_nvp("Empty object", aFile));
+        }
+        fmt::print("{}\n", output.str());
+    }
+
+    {
+        namespace fs = boost::filesystem;
+        boost::system::error_code errcode;
+        auto const status = fs::status(aPath);
+        value_type aFile(status.permissions(),
+                         boost::filesystem::file_size(aPath), aPath.string(),
+                         aPath.stem().string(), aPath.extension().string(),
+                         fs::last_write_time(aPath, errcode));
+        std::stringstream output;
+        {
+            OArchive oar(output);
+            oar(cereal::make_nvp(aPath.string(), aFile));
+        }
+        fmt::print("{}\n", output.str());
+
+        std::unordered_set<value_type> dict;
+        dict.reserve(4);
+        dict.emplace(aFile);
+        dict.emplace(aFile);
+        EXPECT_TRUE(dict.size() == 1);
     }
 }

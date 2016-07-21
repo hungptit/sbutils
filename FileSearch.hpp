@@ -11,23 +11,15 @@
 #define BOOST_THREAD_VERSION 4
 #include "boost/config.hpp"
 #include "boost/filesystem.hpp"
+
 #include "fmt/format.h"
 
+#include "DataStructures.hpp"
 #include "SparseGraph.hpp"
-
 #include "Utils.hpp"
 
 namespace utils {
     namespace filesystem {
-        enum {
-            PATH = 0,
-            STEM = 1,
-            EXTENSION = 2,
-            PERMISSION = 3,
-            TIMESTAMP = 4,
-            FILESIZE = 5
-        };
-
         template <typename Container> class ExtFilter {
           public:
             explicit ExtFilter(Container &exts) : Extensions(exts) {}
@@ -37,8 +29,7 @@ namespace utils {
                     return true;
                 } else {
                     return (std::find(Extensions.begin(), Extensions.end(),
-                                      std::get<EXTENSION>(info)) !=
-                            Extensions.end());
+                                      info.Extension) != Extensions.end());
                 }
             }
 
@@ -55,8 +46,8 @@ namespace utils {
                     return true;
                 } else {
 
-                    return (std::find(Stems.begin(), Stems.end(),
-                                      std::get<STEM>(info)) != Stems.end());
+                    return (std::find(Stems.begin(), Stems.end(), info.Stem) !=
+                            Stems.end());
                 }
             }
 
@@ -154,12 +145,11 @@ namespace utils {
                     auto aStem = currentPath.stem().string();
                     auto anExtension = currentPath.extension().string();
                     if (ftype == boost::filesystem::regular_file) {
-                        vertex_data.emplace_back(std::make_tuple(
-                            currentPathStr, aStem,
-                            currentPath.extension().string(),
+                        vertex_data.emplace_back(FileInfo(
                             status.permissions(),
-                            fs::last_write_time(aPath, errcode),
-                            fs::file_size(currentPath, errcode)));
+                            fs::file_size(currentPath, errcode), currentPathStr,
+                            aStem, currentPath.extension().string(),
+                            fs::last_write_time(aPath, errcode)));
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (CustomFilter.isValidStem(aStem) &&
                             CustomFilter.isValidExt(anExtension)) {
@@ -171,6 +161,8 @@ namespace utils {
                     }
                 }
 
+                // Each vertex will store its path and a list of file at the top
+                // level.
                 vertexes.emplace_back(aPath.string(), vertex_data);
                 vertex_data.clear();
             }
@@ -188,11 +180,17 @@ namespace utils {
             auto compact() {
                 using index_type = int;
 
+                // TODO: Why do we have to sort?
+                std::sort(vertexes.begin(), vertexes.end(),
+                          [](auto const &x, auto const &y) {
+                              return std::get<0>(x) < std::get<0>(y);
+                          });
+
                 // Create a lookup table
-                std::sort(vertexes.begin(), vertexes.end());
                 std::vector<std::pair<std::string, index_type>> values;
                 values.reserve(vertexes.size());
                 index_type counter = 0;
+                
                 for (auto item : vertexes) {
                     auto aPath = std::get<0>(item);
                     values.push_back(std::make_pair(aPath, counter));
@@ -212,9 +210,9 @@ namespace utils {
                 std::sort(allEdges.begin(), allEdges.end());
 
                 // Return vertex information and a folder hierarchy graph.
-                return std::make_tuple(vertexes,
-                                       graph::SparseGraph<index_type, index_type>(
-                                           allEdges, vertexes.size(), true));
+                return std::make_tuple(
+                    vertexes, graph::SparseGraph<index_type, index_type>(
+                                  allEdges, vertexes.size(), true));
             }
 
           private:
@@ -252,11 +250,11 @@ namespace utils {
                     auto aStem = currentPath.stem().string();
                     auto anExtension = currentPath.extension().string();
                     if (ftype == boost::filesystem::regular_file) {
-                        Results.emplace_back(std::make_tuple(
+                        Results.emplace_back(FileInfo(
+                            status.permissions(), fs::file_size(currentPath),
                             currentPath.string(), aStem,
                             currentPath.extension().string(),
-                            status.permissions(), fs::last_write_time(aPath),
-                            fs::file_size(currentPath)));
+                            fs::last_write_time(aPath)));
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (CustomFilter.isValidStem(aStem) &&
                             CustomFilter.isValidExt(anExtension)) {

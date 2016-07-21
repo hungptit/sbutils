@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
         fmt::MemoryWriter writer;
         writer << "Search results: \n";
         for (auto item : results) {
-            writer << std::get< utils::filesystem::PATH>(item) << "\n";
+            writer << item.Path << "\n";
         }
         fmt::print("{}", writer.str());
     }
