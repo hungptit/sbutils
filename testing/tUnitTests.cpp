@@ -115,10 +115,21 @@ TEST(DataStructure, Positive) {
         }
         fmt::print("{}\n", output.str());
 
-        std::unordered_set<value_type> dict;
+        std::unordered_map<std::string, value_type> map;
+
+        std::vector<value_type> v{aFile, aFile};
+        std::unordered_set<value_type> dict(v.begin(), v.end());
+        
         dict.reserve(4);
         dict.emplace(aFile);
         dict.emplace(aFile);
+        
         EXPECT_TRUE(dict.size() == 1);
+        EXPECT_TRUE(dict.find(aFile) == dict.end());
+        
+        map.emplace(std::make_pair("aKey", aFile));
+        map["foo"] = aFile;
+        map["boo"] = aFile;
+        EXPECT_TRUE(map.size() == 3);
     }
 }

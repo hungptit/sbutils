@@ -19,6 +19,7 @@
 #include "SparseGraphAlgorithms.hpp"
 #include "Timer.hpp"
 #include "Visitor.hpp"
+#include "DataStructures.hpp"
 
 namespace utils {
     /**
@@ -47,7 +48,10 @@ namespace utils {
                 Container data;
                 std::istringstream is(it->value().ToString());
                 IArchive input(is);
-                input(data);
+
+                // TODO: Fix me
+                // input(data);
+                
                 std::move(data.begin(), data.end(),
                           std::back_inserter(results));
 
@@ -90,7 +94,8 @@ namespace utils {
             // ");
             std::istringstream is(reader.read(utils::Resources::AllFileKey));
             IArchive input(is);
-            input(allFiles);
+            // TODO: Fix me
+            // input(allFiles);
             if (verbose) {
                 fmt::print("Number of files: {0}\n", allFiles.size());
             }
@@ -181,7 +186,8 @@ namespace utils {
         using value_type = typename Container::value_type;
 
         // TODO: Need to speedup this line using a better hash table.
-        boost::unordered_set<value_type> dict(second.begin(), second.end());
+        // boost::unordered_set<value_type> dict(second.begin(), second.end());
+        boost::unordered_set<value_type> dict;
 
         if (verbose) {
             std::cout << "---- Dictionary sizes: " << dict.size() << " \n";
@@ -205,15 +211,14 @@ namespace utils {
         boost::unordered_map<std::string, value_type> map;
         map.reserve(dict.size());
         for (auto item : dict) {
-            map[std::get<0>(item)] = item;
+          map.emplace(std::make_pair(item.Path, item));
         }
 
         // Note: Modified files are files that are also in the dictionary,
         // however, they have a different size and permission.
         if (!map.empty()) {
             for (auto item : results) {
-                auto aKey = std::get<0>(item);
-                auto pos = map.find(aKey);
+                const auto pos = map.find(item.Path);
                 if (pos != map.end()) {
                     auto dictItem = pos->second;
                     bool isOK = (item.Size == dictItem.Size) &&
@@ -221,7 +226,7 @@ namespace utils {
                     if (!isOK) {
                         modifiedFiles.emplace_back(item);
                     }
-                    map.erase(aKey);
+                    map.erase(item.Path);
                 } else {
                     newFiles.emplace_back(item);
                 }

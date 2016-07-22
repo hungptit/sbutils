@@ -54,12 +54,6 @@ namespace utils {
         // std::for_each(data.begin(), data.end(),
         //               [](auto &val) { std::cout << val << "\n"; });
     }
-
-    template <typename Container> void print(const Container &data) {
-        // for (auto const &val : data) {
-        //     std::cout << val << "\n";
-        // }
-    }
 }
 
 #endif

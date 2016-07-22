@@ -28,7 +28,7 @@ namespace utils {
             : Permissions(std::forward<T1>(perms)),
               Size(std::forward<T2>(sizes)), Path(std::forward<T3>(path)),
               Stem(std::forward<T4>(stem)), Extension(std::forward<T5>(ext)),
-              TimeStamp(std::forward<T6>(timeStamp))  {}
+              TimeStamp(std::forward<T6>(timeStamp)) {}
 
         NewFileInfo(const NewFileInfo &info) noexcept
             : Permissions(info.Permissions), Size(info.Size), Path(info.Path),
@@ -36,9 +36,22 @@ namespace utils {
               TimeStamp(info.TimeStamp) {}
 
         NewFileInfo(NewFileInfo &&info) noexcept
-            : Permissions(info.Permissions), Size(info.Size), Path(std::move(info.Path)),
-              Stem(info.Stem), Extension(info.Extension),
-              TimeStamp(info.TimeStamp) {}
+            : Permissions(info.Permissions), Size(info.Size),
+              Path(std::move(info.Path)), Stem(info.Stem),
+              Extension(info.Extension), TimeStamp(info.TimeStamp) {}
+
+        NewFileInfo &operator=(const NewFileInfo &rhs) {
+            if (*this == rhs) {
+                return *this;
+            }
+            this->Permissions = rhs.Permissions;
+            this->Size = rhs.Size;
+            this->Path = rhs.Path;
+            this->Stem = rhs.Stem;
+            this->Extension = rhs.Extension;
+            this->TimeStamp = rhs.TimeStamp;
+            return *this;
+        }
 
         template <typename Archive> void serialize(Archive &ar) {
             ar(cereal::make_nvp("perms", Permissions),
@@ -56,6 +69,12 @@ namespace utils {
         String Extension;
         std::time_t TimeStamp;
     };
+
+    // A file path must be unique.
+    template <typename String>
+    bool Less(const NewFileInfo<String> &lhs, const NewFileInfo<String> &rhs) {
+        return (lhs.Path < rhs.Path);
+    }
 
     template <typename String>
     bool operator==(const NewFileInfo<String> &lhs,
