@@ -15,15 +15,20 @@
 
 int main(int argc, char *argv[]) {
     using namespace boost;
+    using path = boost::filesystem::path;
+    
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-
+    std::string dataFile;
+    std::string cfgFile;
+    
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
-        ("verbose,v", "Display searched data.")
+        ("verbose,v", "Display verbose information.")
         ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
-        ("database,d", po::value<std::string>(), "File database.");
+        ("config,c", po::value<std::string>(&cfgFile)->default_value(".mupdatedb.cfg"), "Search configuratiion.")
+        ("database,d", po::value<std::string>(&dataFile)->default_value(".database"), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -35,17 +40,12 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        std::cout << "Usage: buildFileDatabase [options]\n";
         std::cout << desc;
         return 0;
     }
 
-    bool verbose = false;
-    if (vm.count("verbose")) {
-        verbose = true;
-    }
-
-    using path = boost::filesystem::path;
+    bool verbose = vm.count("verbose");
+    
     std::vector<path> folders;
 
     if (vm.count("folders")) {
@@ -57,14 +57,17 @@ int main(int argc, char *argv[]) {
         folders.emplace_back(boost::filesystem::current_path());
     }
 
-    std::string dataFile;
-    if (vm.count("database")) {
-        dataFile = vm["database"].as<std::string>();
-    } else {
-        dataFile =
-            (boost::filesystem::path(utils::Resources::Database)).string();
-    }
 
+    // Display input parameters if verbose is true
+    if (verbose) {
+        fmt::print("verbose: {}\n", verbose);
+        fmt::print("config: {}\n", cfgFile);
+        fmt::print("database: {}\n", dataFile);
+        auto printObj = [](auto const &item) {fmt::print("{}\n", item.string());};
+        fmt::print("Search folders: \n");
+        std::for_each(folders.cbegin(), folders.cend(), printObj);
+    }
+    
     // Build file information database
     using FileVisitor =
         utils::filesystem::Visitor<decltype(folders),
@@ -75,11 +78,9 @@ int main(int argc, char *argv[]) {
 
     // Write to database
     if (verbose) {
-        for (auto item : folders) {
-            std::cout << "Search folder: " << item << "\n";
-        }
         visitor.print();
     }
+    
     auto results = visitor.compact();
     auto vertexes = std::get<0>(results);
     auto g = std::get<1>(results);

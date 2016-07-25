@@ -32,6 +32,8 @@ namespace {
         }
 
         void init() {
+            createTestFile(TmpDir / path("README.md"));
+
             auto dataFolder = createFolder(TmpDir, "data");
             createTestFile(dataFolder / path("data.mat"));
 

@@ -13,10 +13,44 @@
 #include "cereal/types/chrono.hpp"
 #include "cereal/types/deque.hpp"
 #include "cereal/types/string.hpp"
-#include "cereal/types/tuple.hpp"
 #include "cereal/types/vector.hpp"
 
+#include "boost/filesystem.hpp"
+
 namespace utils {
+    struct FolderNode {
+        using value_type = boost::filesystem::path;
+        value_type Path;
+        std::vector<value_type> Files;
+        std::vector<value_type> Folders;
+
+        explicit FolderNode() : Path(), Files(), Folders() {}
+
+        explicit FolderNode(const FolderNode &data)
+            : Path(data.Path), Files(data.Files), Folders(data.Folders) {}
+
+        template <typename T>
+        explicit FolderNode(T &&data)
+            : Path(std::move(data.Path)), Files(std::move(data.Files)),
+              Folders(std::move(data.Folders)) {}
+
+        void update(const value_type &aPath) {
+            Path = aPath;
+            boost::filesystem::directory_iterator endIter;
+            boost::filesystem::directory_iterator dirIter(Path);
+            for (; dirIter != endIter; ++dirIter) {
+                auto currentPath = dirIter->path();
+                if (boost::filesystem::is_directory(currentPath)) {
+                    Folders.emplace_back(std::move(currentPath));
+                } else if (boost::filesystem::is_regular_file(currentPath)) {
+                    Files.emplace_back(std::move(currentPath));
+                } else {
+                    // Ignore this case
+                }
+            }
+        }
+    };
+
     template <typename String = std::string> struct NewFileInfo {
         NewFileInfo()
             : Permissions(), Size(), Path(), Stem(), Extension(), TimeStamp() {}
@@ -28,7 +62,7 @@ namespace utils {
             : Permissions(std::forward<T1>(perms)),
               Size(std::forward<T2>(sizes)), Path(std::forward<T3>(path)),
               Stem(std::forward<T4>(stem)), Extension(std::forward<T5>(ext)),
-              TimeStamp(std::forward<T6>(timeStamp))  {}
+              TimeStamp(std::forward<T6>(timeStamp)) {}
 
         NewFileInfo(const NewFileInfo &info) noexcept
             : Permissions(info.Permissions), Size(info.Size), Path(info.Path),
@@ -36,9 +70,9 @@ namespace utils {
               TimeStamp(info.TimeStamp) {}
 
         NewFileInfo(NewFileInfo &&info) noexcept
-            : Permissions(info.Permissions), Size(info.Size), Path(std::move(info.Path)),
-              Stem(info.Stem), Extension(info.Extension),
-              TimeStamp(info.TimeStamp) {}
+            : Permissions(info.Permissions), Size(info.Size),
+              Path(std::move(info.Path)), Stem(info.Stem),
+              Extension(info.Extension), TimeStamp(info.TimeStamp) {}
 
         template <typename Archive> void serialize(Archive &ar) {
             ar(cereal::make_nvp("perms", Permissions),
