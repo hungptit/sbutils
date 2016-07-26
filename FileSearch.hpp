@@ -15,7 +15,6 @@
 #include "fmt/format.h"
 
 #include "DataStructures.hpp"
-#include "SparseGraph.hpp"
 #include "Utils.hpp"
 
 namespace utils {
@@ -45,7 +44,6 @@ namespace utils {
                 if (Stems.empty()) {
                     return true;
                 } else {
-
                     return (std::find(Stems.begin(), Stems.end(), info.Stem) !=
                             Stems.end());
                 }
@@ -59,11 +57,12 @@ namespace utils {
         std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
                                             Filter1 &f1) {
             std::vector<utils::FileInfo> results;
-            for (auto it = begin; it != end; ++it) {
-                if (f1.isValid(*it)) {
-                    results.emplace_back(*it);
+            auto filterObj = [&f1, &results](auto &item) {
+                if (f1.isValid(item)) {
+                    results.emplace_back(item);
                 }
-            }
+            };
+            std::for_each(begin, end, filterObj);
             return results;
         }
 
@@ -71,11 +70,12 @@ namespace utils {
         std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
                                             Filter1 &f1, Filter2 &f2) {
             std::vector<utils::FileInfo> results;
-            for (auto it = begin; it != end; ++it) {
-                if (f1.isValid(*it) && f2.isValid(*it)) {
-                    results.emplace_back(*it);
+            auto filterObj = [&f1, &f2, &results](auto &item) {
+                if (f1.isValid(item) && f2.isValid(item)) {
+                    results.emplace_back(item);
                 }
-            }
+            };
+            std::for_each(begin, end, filterObj);
             return results;
         }
 
@@ -131,7 +131,7 @@ namespace utils {
             using path_container = std::vector<path>;
             using vertex_type = std::tuple<std::string, container_type>;
             using index_type = int;
-            using graph_type = graph::SparseGraph<index_type, index_type>;
+            // using graph_type = graph::SparseGraph<index_type, index_type>;
 
             void visit(path &aPath, PathContainer &stack) {
                 namespace fs = boost::filesystem;
@@ -181,28 +181,24 @@ namespace utils {
 
             // TODO: Use data structures and algorithms provided by graph
             // module.
-            auto compact() {
+            auto getFolderHierarchy() {
                 using index_type = int;
-
-                // TODO: Why do we have to sort?
                 std::sort(vertexes.begin(), vertexes.end(),
                           [](auto const &x, auto const &y) {
                               return std::get<0>(x) < std::get<0>(y);
                           });
 
                 // Create a lookup table
-                std::vector<std::pair<std::string, index_type>> values;
-                values.reserve(vertexes.size());
-                index_type counter = 0;
                 std::unordered_map<std::string, index_type> lookupTable;
+                int counter = 0;
                 lookupTable.reserve(vertexes.size());
-
                 auto updateDictObj = [&](auto const &item) {
-                    auto aPath = std::get<0>(item);
-                    lookupTable.emplace({aPath, counter});
+                    lookupTable.emplace(std::make_pair(std::get<0>(item), counter));
                     ++counter;
                 };
-                
+
+                std::for_each(vertexes.begin(), vertexes.end(), updateDictObj);
+
                 // Prepare the input for our folder hierarchy graph
                 std::vector<std::tuple<index_type, index_type>> allEdges;
                 allEdges.reserve(edges.size());
@@ -214,8 +210,11 @@ namespace utils {
                 std::sort(allEdges.begin(), allEdges.end());
 
                 // Return vertex information and a folder hierarchy graph.
-                return std::make_tuple(
-                    vertexes, graph_type(allEdges, vertexes.size(), true));
+
+
+                return vertexes;
+                // return std::make_tuple(
+                //     vertexes, graph_type(allEdges, vertexes.size(), true));
             }
 
           private:

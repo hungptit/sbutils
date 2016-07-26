@@ -11,7 +11,6 @@
 namespace utils {
     // Define the file information which is (path, stem, extension, permission,
     // time_stamp, file_size)
-    using FileInfo = NewFileInfo<std::string>;
        
     template <typename T> std::string to_fixed_string(const int len, T val) {
         std::ostringstream ss;

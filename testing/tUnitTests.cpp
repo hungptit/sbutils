@@ -18,6 +18,30 @@
 
 using path = boost::filesystem::path;
 
+namespace {
+  using Container = std::vector<utils::FileInfo>;
+
+  std::tuple<Container, Container, Container> newdiff(Container &first, Container &second) {
+    using value_type  = Container::value_type;
+    Container newFiles, modifiedFiles, deletedFiles;
+    std::unordered_set<value_type> dict(second.begin(), second.end());
+
+    auto deletedFunc = [&first, &dict, &deletedFiles](auto && item) {
+      auto it = dict.find(item);
+      if (it == dict.end()) {
+        // This file has been deleted or removed.
+        deletedFiles.emplace_back(item);
+      } else {
+        dict.erase(it);
+      }
+    };
+
+    std::for_each(first.begin(), first.end(), deletedFunc);
+    
+    return std::make_tuple(std::move(newFiles), std::move(modifiedFiles), std::move(deletedFiles));
+  }
+}
+
 TEST(Display_Functions, Positive) {
     {
         std::vector<int> data = {1, 2, 3, 4, 5, 6};
@@ -125,12 +149,14 @@ TEST(DataStructure, Positive) {
         dict.emplace(aFile);
         
         EXPECT_TRUE(dict.size() == 1);
-        EXPECT_TRUE(dict.find(aFile) == dict.end());
+        EXPECT_TRUE(dict.find(aFile) != dict.end());
         
         map.emplace(std::make_pair("aKey", aFile));
         map["foo"] = aFile;
         map["boo"] = aFile;
         EXPECT_TRUE(map.size() == 3);
+
+        auto results = newdiff(v, v);
     }
 
     {
@@ -151,3 +177,4 @@ TEST(DataStructure, Positive) {
         EXPECT_TRUE(aFolder.Folders.size() == 7);
     }
 }
+

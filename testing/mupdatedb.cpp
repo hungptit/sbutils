@@ -81,56 +81,56 @@ int main(int argc, char *argv[]) {
         visitor.print();
     }
     
-    auto results = visitor.compact();
-    auto vertexes = std::get<0>(results);
-    auto g = std::get<1>(results);
-    std::vector<std::string> vids;
-    vids.reserve(vertexes.size());
-    size_t counter = 0;
-    for (auto item : vertexes) {
-        vids.push_back(std::get<0>(item));
-        counter += std::get<1>(item).size();
-    }
+    // auto results = visitor.getFolderHierarchy();
+    // auto vertexes = std::get<0>(results);
+    // auto g = std::get<1>(results);
+    // std::vector<std::string> vids;
+    // vids.reserve(vertexes.size());
+    // size_t counter = 0;
+    // for (auto item : vertexes) {
+    //     vids.push_back(std::get<0>(item));
+    //     counter += std::get<1>(item).size();
+    // }
 
-    // Build file information database
-    utils::ElapsedTime<utils::MILLISECOND> timer1("Serialization time: ");
-    utils::Writer writer(dataFile);
-    std::ostringstream os;
+    // // Build file information database
+    // utils::ElapsedTime<utils::MILLISECOND> timer1("Serialization time: ");
+    // utils::Writer writer(dataFile);
+    // std::ostringstream os;
 
-    {
-        utils::DefaultOArchive output(os);
-        utils::save_sparse_graph(output, g, vids);
-        writer.write(utils::Resources::GraphKey, os.str());
-    }
+    // {
+    //     utils::DefaultOArchive output(os);
+    //     utils::save_sparse_graph(output, g, vids);
+    //     writer.write(utils::Resources::GraphKey, os.str());
+    // }
 
-    // Write out all vertex data
-    size_t index = 0;
-    for (auto item : vertexes) {
-        utils::DefaultOArchive output(os);
-        os.str(std::string()); // Reset a string stream
-        auto data = std::get<1>(item);
-        auto aKey = utils::to_fixed_string(9, index);
-        utils::save(output, aKey, data);
-        writer.write(aKey, os.str());
-        index++;
-    }
+    // // Write out all vertex data
+    // size_t index = 0;
+    // for (auto item : vertexes) {
+    //     utils::DefaultOArchive output(os);
+    //     os.str(std::string()); // Reset a string stream
+    //     auto data = std::get<1>(item);
+    //     auto aKey = utils::to_fixed_string(9, index);
+    //     utils::save(output, aKey, data);
+    //     writer.write(aKey, os.str());
+    //     index++;
+    // }
 
-    // Write all file information
-    {
-        std::vector<utils::FileInfo> allFiles;
-        allFiles.reserve(counter);
-        for (auto item : vertexes) {
-            auto results = std::get<1>(item);
-            std::move(results.begin(), results.end(),
-                      std::back_inserter(allFiles));
-        }
+    // // Write all file information
+    // {
+    //     std::vector<utils::FileInfo> allFiles;
+    //     allFiles.reserve(counter);
+    //     for (auto item : vertexes) {
+    //         auto results = std::get<1>(item);
+    //         std::move(results.begin(), results.end(),
+    //                   std::back_inserter(allFiles));
+    //     }
 
-        utils::DefaultOArchive output(os);
-        os.str(std::string()); // Reset a string stream
-        auto aKey = utils::Resources::AllFileKey;
-        utils::save(output, aKey, allFiles);
-        writer.write(aKey, os.str());
-    }
+    //     utils::DefaultOArchive output(os);
+    //     os.str(std::string()); // Reset a string stream
+    //     auto aKey = utils::Resources::AllFileKey;
+    //     utils::save(output, aKey, allFiles);
+    //     writer.write(aKey, os.str());
+    // }
 
     // Return
     return 0;
