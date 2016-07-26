@@ -45,7 +45,6 @@ namespace utils {
                 if (Stems.empty()) {
                     return true;
                 } else {
-
                     return (std::find(Stems.begin(), Stems.end(), info.Stem) !=
                             Stems.end());
                 }
@@ -59,11 +58,12 @@ namespace utils {
         std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
                                             Filter1 &f1) {
             std::vector<utils::FileInfo> results;
-            for (auto it = begin; it != end; ++it) {
-                if (f1.isValid(*it)) {
-                    results.emplace_back(*it);
+            auto filterObj = [&f1, &results](auto &item) {
+                if (f1.isValid(item)) {
+                    results.emplace_back(item);
                 }
-            }
+            };
+            std::for_each(begin, end, filterObj);
             return results;
         }
 
@@ -71,11 +71,12 @@ namespace utils {
         std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
                                             Filter1 &f1, Filter2 &f2) {
             std::vector<utils::FileInfo> results;
-            for (auto it = begin; it != end; ++it) {
-                if (f1.isValid(*it) && f2.isValid(*it)) {
-                    results.emplace_back(*it);
+            auto filterObj = [&f1, &f2, &results](auto &item) {
+                if (f1.isValid(item) && f2.isValid(item)) {
+                    results.emplace_back(item);
                 }
-            }
+            };
+            std::for_each(begin, end, filterObj);
             return results;
         }
 
@@ -190,7 +191,7 @@ namespace utils {
                 std::vector<std::pair<std::string, index_type>> values;
                 values.reserve(vertexes.size());
                 index_type counter = 0;
-                
+
                 for (auto item : vertexes) {
                     auto aPath = std::get<0>(item);
                     values.push_back(std::make_pair(aPath, counter));

@@ -149,7 +149,7 @@ TEST(DataStructure, Positive) {
         dict.emplace(aFile);
         
         EXPECT_TRUE(dict.size() == 1);
-        EXPECT_TRUE(dict.find(aFile) == dict.end());
+        EXPECT_TRUE(dict.find(aFile) != dict.end());
         
         map.emplace(std::make_pair("aKey", aFile));
         map["foo"] = aFile;
