@@ -66,18 +66,18 @@ namespace utils {
         iar(data);
     }
 
-    // TODO: Will need to cleanup below methods
-    template <typename OArchive, typename Container>
-    void save(const Container &data, std::ostringstream &os) {
-        OArchive oar(os);
-        oar(cereal::make_nvp("data", data));
-    }
+    // // TODO: Will need to cleanup below methods
+    // template <typename OArchive, typename Container>
+    // void save(const Container &data, std::ostringstream &os) {
+    //     OArchive oar(os);
+    //     oar(cereal::make_nvp("data", data));
+    // }
 
-    template <typename OArchive, typename Container>
-    void load(Container &data, std::istringstream &is) {
-        OArchive iar(is);
-        iar(data);
-    }
+    // template <typename OArchive, typename Container>
+    // void load(Container &data, std::istringstream &is) {
+    //     OArchive iar(is);
+    //     iar(data);
+    // }
 }
 
 #endif

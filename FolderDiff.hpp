@@ -186,6 +186,7 @@ namespace utils {
         using value_type = typename Container::value_type;
 
         // TODO: Need to speedup this line using a better hash table.
+        auto it = second.begin();
         // boost::unordered_set<value_type> dict(second.begin(), second.end());
         boost::unordered_set<value_type> dict;
 
@@ -195,17 +196,17 @@ namespace utils {
 
         // Remove items that belong to both. We assume that the number of
         // modified files is significantly less than the total number of files.
-        auto getDiff = [&dict, &results](const auto &item) {
-            auto const pos = dict.find(item);
-            if (pos != dict.end()) {
-                dict.erase(pos);
-            } else {
-                results.emplace_back(item);
-            }
-        };
+        // auto getDiff = [&dict, &results](const auto &item) {
+        //     auto const pos = dict.find(item);
+        //     if (pos != dict.end()) {
+        //         dict.erase(pos);
+        //     } else {
+        //         results.emplace_back(item);
+        //     }
+        // };
 
         // TODO: Speed up this loop
-        std::for_each(first.begin(), first.end(), getDiff);
+        // std::for_each(first.begin(), first.end(), getDiff);
 
         // Get modified and deleted items.
         boost::unordered_map<std::string, value_type> map;
@@ -270,20 +271,13 @@ namespace utils {
             return utils::read_baseline<Container>(reader, folders, verbose);
         };
 
-        // utils::filesystem::dfs_file_search(searchFolders, visitor);
-        // auto baseline = utils::read_baseline<Container>(reader, folders,
-        // false);
-
-        // auto baseline = readObj();
-        // searchObj();
-
         boost::future<Container> readThread = boost::async(readObj);
         boost::future<void> findThread = boost::async(searchObj);
         ;
 
         readThread.wait();
         findThread.wait();
-        auto baseline = readThread.get();
+        const Container &baseline = readThread.get();
         findThread.get();
 
         // Return the differences between baseline and current state.
