@@ -158,5 +158,23 @@ TEST(DataStructure, Positive) {
 
         auto results = newdiff(v, v);
     }
+
+    {
+        utils::FolderNode aFolder;
+        aFolder.update(tmpDir.getPath());
+        
+        fmt::print("Current path: {}\n", aFolder.Path.string());
+        
+        auto printObj = [&](auto &aPath){fmt::print("{}\n", aPath.string());};
+
+        fmt::print("Files:\n");
+        std::for_each(aFolder.Files.cbegin(), aFolder.Files.cend(), printObj);
+
+        fmt::print("Folders:\n");
+        std::for_each(aFolder.Folders.cbegin(), aFolder.Folders.cend(), printObj);
+
+        EXPECT_TRUE(aFolder.Files.size() == 1);
+        EXPECT_TRUE(aFolder.Folders.size() == 7);
+    }
 }
 

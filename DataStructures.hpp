@@ -13,10 +13,44 @@
 #include "cereal/types/chrono.hpp"
 #include "cereal/types/deque.hpp"
 #include "cereal/types/string.hpp"
-#include "cereal/types/tuple.hpp"
 #include "cereal/types/vector.hpp"
 
+#include "boost/filesystem.hpp"
+
 namespace utils {
+    struct FolderNode {
+        using value_type = boost::filesystem::path;
+        value_type Path;
+        std::vector<value_type> Files;
+        std::vector<value_type> Folders;
+
+        explicit FolderNode() : Path(), Files(), Folders() {}
+
+        explicit FolderNode(const FolderNode &data)
+            : Path(data.Path), Files(data.Files), Folders(data.Folders) {}
+
+        template <typename T>
+        explicit FolderNode(T &&data)
+            : Path(std::move(data.Path)), Files(std::move(data.Files)),
+              Folders(std::move(data.Folders)) {}
+
+        void update(const value_type &aPath) {
+            Path = aPath;
+            boost::filesystem::directory_iterator endIter;
+            boost::filesystem::directory_iterator dirIter(Path);
+            for (; dirIter != endIter; ++dirIter) {
+                auto currentPath = dirIter->path();
+                if (boost::filesystem::is_directory(currentPath)) {
+                    Folders.emplace_back(std::move(currentPath));
+                } else if (boost::filesystem::is_regular_file(currentPath)) {
+                    Files.emplace_back(std::move(currentPath));
+                } else {
+                    // Ignore this case
+                }
+            }
+        }
+    };
+
     template <typename String = std::string> struct NewFileInfo {
         NewFileInfo()
             : Permissions(), Size(), Path(), Stem(), Extension(), TimeStamp() {}
