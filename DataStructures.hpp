@@ -120,9 +120,8 @@ namespace utils {
         std::vector<boost::filesystem::path> RootFolders;
         std::vector<Vertex<index_type>> Vertexes;
         std::vector<FileInfo> AllFiles; // All files in given folders
-
-        // using edge_type = graph::BasicEdgeData<index_type>;
-        // graph::SparseGraph<index_type, edge_type> Graph;
+        using edge_type = graph::BasicEdgeData<index_type>;
+        graph::SparseGraph<index_type, edge_type> Graph;
     };
 
     struct RootFolder {
