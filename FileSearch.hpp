@@ -15,7 +15,6 @@
 #include "fmt/format.h"
 
 #include "DataStructures.hpp"
-#include "SparseGraph.hpp"
 #include "Utils.hpp"
 
 namespace utils {
@@ -132,8 +131,9 @@ namespace utils {
             using path_container = std::vector<path>;
             using vertex_type = std::tuple<std::string, container_type>;
             using index_type = int;
+            // using graph_type = graph::SparseGraph<index_type, index_type>;
 
-            void visit(path &aPath, PathContainer &folders) {
+            void visit(path &aPath, PathContainer &stack) {
                 namespace fs = boost::filesystem;
                 directory_iterator endIter;
                 directory_iterator dirIter(aPath);
@@ -156,15 +156,16 @@ namespace utils {
                             CustomFilter.isValidExt(anExtension)) {
                             edges.emplace_back(std::make_tuple(
                                 aPath.string(), currentPath.string()));
-                            folders.emplace_back(currentPath);
+                            stack.emplace_back(currentPath);
                         }
                     } else {
                     }
                 }
 
-                // Each vertex will store its path and a list of file at the top
-                // level.
-                vertexes.emplace_back(aPath.string(), vertex_data);
+                // Each vertex will store its path and a list of files at the
+                // root
+                // level of the current folder.
+                vertexes.emplace_back(aPath.string(), std::move(vertex_data));
                 vertex_data.clear();
             }
 
@@ -178,27 +179,25 @@ namespace utils {
                 fmt::print("Number of files: {0}\n", counter);
             }
 
-            auto compact() {
+            // TODO: Use data structures and algorithms provided by graph
+            // module.
+            auto getFolderHierarchy() {
                 using index_type = int;
-
-                // TODO: Why do we have to sort?
                 std::sort(vertexes.begin(), vertexes.end(),
                           [](auto const &x, auto const &y) {
                               return std::get<0>(x) < std::get<0>(y);
                           });
 
                 // Create a lookup table
-                std::vector<std::pair<std::string, index_type>> values;
-                values.reserve(vertexes.size());
-                index_type counter = 0;
+                std::unordered_map<std::string, index_type> lookupTable;
+                int counter = 0;
+                lookupTable.reserve(vertexes.size());
+                auto updateDictObj = [&](auto const &item) {
+                    lookupTable.emplace(std::make_pair(std::get<0>(item), counter));
+                    ++counter;
+                };
 
-                for (auto item : vertexes) {
-                    auto aPath = std::get<0>(item);
-                    values.push_back(std::make_pair(aPath, counter));
-                    counter++;
-                }
-                std::unordered_map<std::string, index_type> lookupTable(
-                    values.begin(), values.end());
+                std::for_each(vertexes.begin(), vertexes.end(), updateDictObj);
 
                 // Prepare the input for our folder hierarchy graph
                 std::vector<std::tuple<index_type, index_type>> allEdges;
@@ -211,9 +210,11 @@ namespace utils {
                 std::sort(allEdges.begin(), allEdges.end());
 
                 // Return vertex information and a folder hierarchy graph.
-                return std::make_tuple(
-                    vertexes, graph::SparseGraph<index_type, index_type>(
-                                  allEdges, vertexes.size(), true));
+
+
+                return vertexes;
+                // return std::make_tuple(
+                //     vertexes, graph_type(allEdges, vertexes.size(), true));
             }
 
           private:

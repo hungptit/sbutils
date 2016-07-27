@@ -17,39 +17,14 @@
 
 #include "boost/filesystem.hpp"
 
+#include "graph/SparseGraph.hpp"
+
 namespace utils {
-    struct FolderNode {
-        using value_type = boost::filesystem::path;
-        value_type Path;
-        std::vector<value_type> Files;
-        std::vector<value_type> Folders;
 
-        explicit FolderNode() : Path(), Files(), Folders() {}
-
-        explicit FolderNode(const FolderNode &data)
-            : Path(data.Path), Files(data.Files), Folders(data.Folders) {}
-
-        template <typename T>
-        explicit FolderNode(T &&data)
-            : Path(std::move(data.Path)), Files(std::move(data.Files)),
-              Folders(std::move(data.Folders)) {}
-
-        void update(const value_type &aPath) {
-            Path = aPath;
-            boost::filesystem::directory_iterator endIter;
-            boost::filesystem::directory_iterator dirIter(Path);
-            for (; dirIter != endIter; ++dirIter) {
-                auto currentPath = dirIter->path();
-                if (boost::filesystem::is_directory(currentPath)) {
-                    Folders.emplace_back(std::move(currentPath));
-                } else if (boost::filesystem::is_regular_file(currentPath)) {
-                    Files.emplace_back(std::move(currentPath));
-                } else {
-                    // Ignore this case
-                }
-            }
-        }
-    };
+    /**
+     * Defininition for FileInfo data structure.
+     *
+     */
 
     template <typename String = std::string> struct NewFileInfo {
         NewFileInfo()
@@ -115,6 +90,73 @@ namespace utils {
                     const NewFileInfo<String> &rhs) {
         return (lhs.Size == rhs.Size) && (lhs.Path == rhs.Path);
     }
+
+    using FileInfo = NewFileInfo<std::string>;
+
+    /**
+     * Definition for the folder hirarchy.
+     *
+     */
+
+    template <typename index_type> struct Vertex {
+        std::string Path;
+        std::vector<FileInfo> Files;
+
+        explicit Vertex() : Path(), Files() {}
+        Vertex(const Vertex &data) : Path(data.Path), Files(data.Files) {}
+
+        template <typename T>
+        Vertex(T &&data)
+            : Path(std::move(data.Path)), Files(std::move(data.Files)) {}
+
+        template <typename T1, typename T2>
+        Vertex(T1 &&aPath, T2 &&files)
+            : Path(std::move(aPath)), Files(std::move(files)) {}
+    };
+
+    template <typename itype>
+    struct FolderHierarchy {
+        using index_type = itype;
+        std::vector<boost::filesystem::path> RootFolders;
+        std::vector<Vertex<index_type>> Vertexes;
+        std::vector<FileInfo> AllFiles; // All files in given folders
+
+        // using edge_type = graph::BasicEdgeData<index_type>;
+        // graph::SparseGraph<index_type, edge_type> Graph;
+    };
+
+    struct RootFolder {
+        using value_type = boost::filesystem::path;
+        value_type Path;
+        std::vector<value_type> Files;
+        std::vector<value_type> Folders;
+
+        explicit RootFolder() : Path(), Files(), Folders() {}
+
+        explicit RootFolder(const RootFolder &data)
+            : Path(data.Path), Files(data.Files), Folders(data.Folders) {}
+
+        template <typename T>
+        explicit RootFolder(T &&data)
+            : Path(std::move(data.Path)), Files(std::move(data.Files)),
+              Folders(std::move(data.Folders)) {}
+
+        void update(const value_type &aPath) {
+            Path = aPath;
+            boost::filesystem::directory_iterator endIter;
+            boost::filesystem::directory_iterator dirIter(Path);
+            for (; dirIter != endIter; ++dirIter) {
+                auto currentPath = dirIter->path();
+                if (boost::filesystem::is_directory(currentPath)) {
+                    Folders.emplace_back(std::move(currentPath));
+                } else if (boost::filesystem::is_regular_file(currentPath)) {
+                    Files.emplace_back(std::move(currentPath));
+                } else {
+                    // Ignore this case
+                }
+            }
+        }
+    };
 }
 
 namespace std {

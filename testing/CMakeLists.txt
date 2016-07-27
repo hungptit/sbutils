@@ -27,7 +27,7 @@ set(LIB_LZ4 "${PROJECTS_FOLDER}/3p/lz4/lib/liblz4.a")
 set(LIB_BZ2 "${PROJECTS_FOLDER}/3p/bzip2/lib/libbz2.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
-
+set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
 
 # This option make sure that we use the local boost version. Note that if the 
 # system boost is installed then CMake might use that boost version.
@@ -47,9 +47,9 @@ find_package(Boost 1.60 REQUIRED regex date_time system filesystem thread graph 
 
 # Include folder
 message(${PROJECTS_FOLDER})
-include_directories(${PROJECTS_FOLDER})
-include_directories("${PROJECTS_FOLDER}/3p/gtest/include")
-include_directories("${PROJECTS_FOLDER}/3p/fmt/include")
+include_directories (${PROJECTS_FOLDER})
+include_directories ("${PROJECTS_FOLDER}/3p/gtest/include")
+include_directories ("${PROJECTS_FOLDER}/3p/fmt/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 
 include_directories ("${PROJECTS_FOLDER}/3p/rocksdb/include")
@@ -63,12 +63,6 @@ include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
 # Use POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
 set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
-set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})
@@ -87,14 +81,10 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
-  # Compile SQLite examples.The order of linked libraries must be preserved
-  # otherwise the link process will be failed.
   set(UNITTEST_SRC_FILES  tTest)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${LIB_FMT} ${Boost_LIBRARIES}
-      ${LIB_POCO_UTIL} ${LIB_POCO_NET} ${LIB_POCO_XML} ${LIB_POCO_SQLITE} ${LIB_POCO_FOUNDATION}
-      ${LIB_POCO_DATA} ${LIB_POCO_SQLITE} -lpthread -ldl)
+    TARGET_LINK_LIBRARIES(${src_file} ${LIB_FMT} ${Boost_LIBRARIES} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
