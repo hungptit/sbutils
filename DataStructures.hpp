@@ -1,5 +1,5 @@
-#ifndef DataStructures_hpp_
-#define DataStructures_hpp_
+#ifndef Utils_DataStructures_hpp_
+#define Utils_DataStructures_hpp_
 
 #include <string>
 #include <utility>
