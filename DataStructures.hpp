@@ -121,7 +121,7 @@ namespace utils {
         std::vector<Vertex<index_type>> Vertexes;
         std::vector<FileInfo> AllFiles; // All files in given folders
 
-        using edge_type = graph::BasicEdgeData<index_type>;
+        // using edge_type = graph::BasicEdgeData<index_type>;
         // graph::SparseGraph<index_type, edge_type> Graph;
     };
 
