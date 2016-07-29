@@ -117,9 +117,25 @@ namespace utils {
     template <typename itype>
     struct FolderHierarchy {
         using index_type = itype;
+        using vertex_type = Vertex<index_type>;
+        using vertex_container = std::vector<Vertex<index_type>>;
+        using file_container = std::vector<FileInfo>;
+        using path_type = boost::filesystem::path;
+        
+        explicit FolderHierarchy(const std::vector<path_type> &paths) : RootFolders(paths), Vertexes(), AllFiles(), Graph() {}
+        
+        // A list of root folders.
         std::vector<boost::filesystem::path> RootFolders;
-        std::vector<Vertex<index_type>> Vertexes;
-        std::vector<FileInfo> AllFiles; // All files in given folders
+
+        // Each vertex will have its path and files at the root level. We need
+        // to traverse the tree to get all files or folders that belong to a
+        // given folder.
+        vertex_container Vertexes;
+
+        // All files that belong to given root folders.
+        file_container AllFiles;
+
+        // A tree that represents the folder hierarchy.
         using edge_type = graph::BasicEdgeData<index_type>;
         graph::SparseGraph<index_type, edge_type> Graph;
     };

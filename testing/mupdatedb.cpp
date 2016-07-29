@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
         visitor.print();
     }
     
-    // auto results = visitor.getFolderHierarchy();
+    auto results = visitor.getFolderHierarchy();
     // auto vertexes = std::get<0>(results);
     // auto g = std::get<1>(results);
     // std::vector<std::string> vids;
