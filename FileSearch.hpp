@@ -129,8 +129,8 @@ namespace utils {
             using path = boost::filesystem::path;
             using directory_iterator = boost::filesystem::directory_iterator;
             using path_container = std::vector<path>;
-            using vertex_type = std::tuple<std::string, container_type>;
             using index_type = int;
+            using vertex_type = Vertex<index_type>;
             // using graph_type = graph::SparseGraph<index_type, index_type>;
 
             void visit(path &aPath, PathContainer &stack) {
@@ -165,15 +165,17 @@ namespace utils {
                 // Each vertex will store its path and a list of files at the
                 // root
                 // level of the current folder.
-                vertexes.emplace_back(aPath.string(), std::move(vertex_data));
+                vertexes.emplace_back(
+                    vertex_type{aPath.string(), std::move(vertex_data)});
                 vertex_data.clear();
             }
 
             void print() {
                 size_t counter = 0;
-                for (auto const &item : vertexes) {
-                    counter += std::get<1>(item).size();
-                }
+                std::for_each(vertexes.begin(), vertexes.end(),
+                              [&counter](auto const &item) {
+                                  counter += item.Files.size();
+                              });
                 fmt::print("Number of vertexes: {0}\n", vertexes.size());
                 fmt::print("Number of edgess: {0}\n", edges.size());
                 fmt::print("Number of files: {0}\n", counter);
@@ -185,7 +187,7 @@ namespace utils {
                 using index_type = int;
                 std::sort(vertexes.begin(), vertexes.end(),
                           [](auto const &x, auto const &y) {
-                              return std::get<0>(x) < std::get<0>(y);
+                              return x.Path < y.Path;
                           });
 
                 // Create a lookup table
@@ -193,7 +195,7 @@ namespace utils {
                 int counter = 0;
                 lookupTable.reserve(vertexes.size());
                 auto updateDictObj = [&](auto const &item) {
-                    lookupTable.emplace(std::make_pair(std::get<0>(item), counter));
+                    lookupTable.emplace(std::make_pair(item.Path, counter));
                     ++counter;
                 };
 
@@ -210,7 +212,6 @@ namespace utils {
                 std::sort(allEdges.begin(), allEdges.end());
 
                 // Return vertex information and a folder hierarchy graph.
-
 
                 return vertexes;
                 // return std::make_tuple(
