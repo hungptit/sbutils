@@ -160,7 +160,7 @@ TEST(DataStructure, Positive) {
     }
 
     {
-        utils::FolderNode aFolder;
+        utils::RootFolder aFolder;
         aFolder.update(tmpDir.getPath());
         
         fmt::print("Current path: {}\n", aFolder.Path.string());
@@ -178,3 +178,31 @@ TEST(DataStructure, Positive) {
     }
 }
 
+TEST(DFS, Positive) {
+    using path = boost::filesystem::path;
+    using OArchive = cereal::JSONOutputArchive;
+    
+    utils::TemporaryDirectory tmpDir;
+    TestData data(tmpDir.getPath());
+    std::vector<path> folders{tmpDir.getPath()};
+    using FileVisitor =
+        utils::filesystem::Visitor<decltype(folders),
+                                   utils::filesystem::NormalPolicy>;
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+    std::stringstream output;
+    FileVisitor visitor;
+    utils::filesystem::dfs_file_search(std::move(folders), visitor);
+    // visitor.print<OArchive>();
+
+    // Get the folder hierarchy
+    auto results = visitor.getFolderHierarchy();                                   
+    {
+        OArchive oar(output);
+        oar(cereal::make_nvp("Folder hierarchy", results));
+    }
+
+    fmt::print("{}\n", output.str());
+
+    EXPECT_EQ(results.Graph.numberOfVertexes(), static_cast<size_t>(6));
+    EXPECT_TRUE(results.Graph.isDirected());
+}

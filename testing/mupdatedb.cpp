@@ -15,12 +15,12 @@
 int main(int argc, char *argv[]) {
     using namespace boost;
     using path = boost::filesystem::path;
-    
+
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
     std::string dataFile;
     std::string cfgFile;
-    
+
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
@@ -44,29 +44,30 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
-    
+
     std::vector<path> folders;
 
     if (vm.count("folders")) {
         auto list = vm["folders"].as<std::vector<std::string>>();
-        for (auto item : list) {
-            folders.emplace_back(path(utils::normalize_path(item)));
-        }
+        std::for_each(list.begin(), list.end(), [&folders](auto const &item) {
+            folders.emplace_back(path{item});
+        });
     } else {
         folders.emplace_back(boost::filesystem::current_path());
     }
-
 
     // Display input parameters if verbose is true
     if (verbose) {
         fmt::print("verbose: {}\n", verbose);
         fmt::print("config: {}\n", cfgFile);
         fmt::print("database: {}\n", dataFile);
-        auto printObj = [](auto const &item) {fmt::print("{}\n", item.string());};
+        auto printObj = [](auto const &item) {
+            fmt::print("{}\n", item.string());
+        };
         fmt::print("Search folders: \n");
         std::for_each(folders.cbegin(), folders.cend(), printObj);
     }
-    
+
     // Build file information database
     using FileVisitor =
         utils::filesystem::Visitor<decltype(folders),
@@ -77,10 +78,11 @@ int main(int argc, char *argv[]) {
 
     // Write to database
     if (verbose) {
-        visitor.print();
+        visitor.print<cereal::JSONOutputArchive>();
     }
-    
+
     auto results = visitor.getFolderHierarchy();
+
     // auto vertexes = std::get<0>(results);
     // auto g = std::get<1>(results);
     // std::vector<std::string> vids;

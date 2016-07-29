@@ -129,8 +129,8 @@ namespace utils {
             using path = boost::filesystem::path;
             using directory_iterator = boost::filesystem::directory_iterator;
             using path_container = std::vector<path>;
-            using vertex_type = std::tuple<std::string, container_type>;
             using index_type = int;
+            using vertex_type = Vertex<index_type>;
             // using graph_type = graph::SparseGraph<index_type, index_type>;
 
             void visit(path &aPath, PathContainer &stack) {
@@ -165,15 +165,30 @@ namespace utils {
                 // Each vertex will store its path and a list of files at the
                 // root
                 // level of the current folder.
-                vertexes.emplace_back(aPath.string(), std::move(vertex_data));
+                vertexes.emplace_back(
+                    vertex_type{aPath.string(), std::move(vertex_data)});
                 vertex_data.clear();
             }
 
-            void print() {
+            template <typename OArchive> void print() {
                 size_t counter = 0;
-                for (auto const &item : vertexes) {
-                    counter += std::get<1>(item).size();
+                std::for_each(vertexes.begin(), vertexes.end(),
+                              [&counter](auto const &item) {
+                                  counter += item.Files.size();
+                              });
+
+                std::stringstream output;
+
+                
+                
+                {
+                    OArchive oar(output);
+                    oar(cereal::make_nvp("All vertexes", vertexes));
                 }
+
+                fmt::print("{}\n", output.str());
+
+                fmt::print("Summary:\n");
                 fmt::print("Number of vertexes: {0}\n", vertexes.size());
                 fmt::print("Number of edgess: {0}\n", edges.size());
                 fmt::print("Number of files: {0}\n", counter);
@@ -185,7 +200,7 @@ namespace utils {
                 using index_type = int;
                 std::sort(vertexes.begin(), vertexes.end(),
                           [](auto const &x, auto const &y) {
-                              return std::get<0>(x) < std::get<0>(y);
+                              return x.Path < y.Path;
                           });
 
                 // Create a lookup table
@@ -193,28 +208,22 @@ namespace utils {
                 int counter = 0;
                 lookupTable.reserve(vertexes.size());
                 auto updateDictObj = [&](auto const &item) {
-                    lookupTable.emplace(std::make_pair(std::get<0>(item), counter));
+                    lookupTable.emplace(std::make_pair(item.Path, counter));
                     ++counter;
                 };
 
                 std::for_each(vertexes.begin(), vertexes.end(), updateDictObj);
 
                 // Prepare the input for our folder hierarchy graph
-                std::vector<std::tuple<index_type, index_type>> allEdges;
+                using graph_edge_type = graph::BasicEdgeData<index_type>;
+                std::vector<graph_edge_type> allEdges;
                 allEdges.reserve(edges.size());
                 for (auto anEdge : edges) {
-                    allEdges.push_back(
-                        std::make_tuple(lookupTable[std::get<0>(anEdge)],
-                                        lookupTable[std::get<1>(anEdge)]));
+                    allEdges.push_back(graph_edge_type(lookupTable[std::get<0>(anEdge)],
+                                                 lookupTable[std::get<1>(anEdge)]));
                 }
-                std::sort(allEdges.begin(), allEdges.end());
-
-                // Return vertex information and a folder hierarchy graph.
-
-
-                return vertexes;
-                // return std::make_tuple(
-                //     vertexes, graph_type(allEdges, vertexes.size(), true));
+                std::sort(allEdges.begin(), allEdges.end(), graph::Less<index_type, graph_edge_type>());
+                return FolderHierarchy<index_type>(std::move(vertexes), std::move(allEdges));
             }
 
           private:
@@ -284,16 +293,13 @@ namespace utils {
          * @return
          */
         template <typename Container, typename Visitor>
-        size_t dfs_file_search(Container &searchPaths, Visitor &visitor) {
-            using path = boost::filesystem::path;
-            size_t counter = 0;
-            std::vector<path> folders(searchPaths.begin(), searchPaths.end());
+        void dfs_file_search(const Container &searchPaths, Visitor &visitor) {
+            Container folders(searchPaths);
             while (!folders.empty()) {
                 auto aPath = folders.back();
                 folders.pop_back();
                 visitor.visit(aPath, folders);
             }
-            return counter;
         }
 
         /**
@@ -306,16 +312,13 @@ namespace utils {
          * @return
          */
         template <typename Visitor, typename Container>
-        size_t bfs_file_search(Container &searchPaths, Visitor &visitor) {
-            using path = boost::filesystem::path;
-            size_t counter = 0;
-            Container folders(searchPaths.begin(), searchPaths.end());
+        void bfs_file_search(const Container &searchPaths, Visitor &visitor) {
+            Container folders(searchPaths);
             while (!folders.empty()) {
                 auto aPath = folders.front();
                 folders.pop_front();
                 visitor.visit(aPath, folders);
             }
-            return counter;
         }
     }
 }

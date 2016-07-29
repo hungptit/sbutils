@@ -11,7 +11,6 @@
 #include "fmt/format.h"
 #include "utils/FileSearch.hpp"
 #include "utils/Print.hpp"
-#include "utils/Serialization.hpp"
 #include "utils/Timer.hpp"
 
 int main(int argc, char *argv[]) {
@@ -116,7 +115,11 @@ int main(int argc, char *argv[]) {
     if (!jsonFile.empty()) {
         std::ostringstream os;
         cereal::JSONOutputArchive output(os);
-        utils::save(output, "Search results", results);
+        {
+            // utils::save(output, "Search results", results);
+        }
+
+        // Write to a JSON file
         std::ofstream myfile(jsonFile);
         myfile << os.str() << std::endl;
     }

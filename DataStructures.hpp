@@ -21,6 +21,9 @@
 
 namespace utils {
 
+    using DefaultIArchive = cereal::BinaryInputArchive;
+    using DefaultOArchive = cereal::BinaryOutputArchive;
+        
     /**
      * Defininition for FileInfo data structure.
      *
@@ -112,32 +115,47 @@ namespace utils {
         template <typename T1, typename T2>
         Vertex(T1 &&aPath, T2 &&files)
             : Path(std::move(aPath)), Files(std::move(files)) {}
+
+        template <typename Archive> void serialize(Archive &ar) {
+            ar(cereal::make_nvp("path", Path),
+               cereal::make_nvp("all_files", Files));
+        }
     };
 
-    template <typename itype>
-    struct FolderHierarchy {
+    template <typename itype> struct FolderHierarchy {
         using index_type = itype;
         using vertex_type = Vertex<index_type>;
         using vertex_container = std::vector<Vertex<index_type>>;
+
+        using edge_type = graph::BasicEdgeData<index_type>;
+        using edge_container = std::vector<edge_type>;
+        
         using file_container = std::vector<FileInfo>;
-        using path_type = boost::filesystem::path;
-        
-        explicit FolderHierarchy(const std::vector<path_type> &paths) : RootFolders(paths), Vertexes(), AllFiles(), Graph() {}
-        
-        // A list of root folders.
-        std::vector<boost::filesystem::path> RootFolders;
+
+        FolderHierarchy(vertex_container &&vertexes, edge_container &&edges)
+            : Vertexes(vertexes), Graph(edges, Vertexes.size(), true), AllFiles() {}
 
         // Each vertex will have its path and files at the root level. We need
         // to traverse the tree to get all files or folders that belong to a
         // given folder.
         vertex_container Vertexes;
+        
+        // A tree that represents the folder hierarchy.
+        graph::SparseGraph<index_type, edge_type> Graph;
 
         // All files that belong to given root folders.
         file_container AllFiles;
 
-        // A tree that represents the folder hierarchy.
-        using edge_type = graph::BasicEdgeData<index_type>;
-        graph::SparseGraph<index_type, edge_type> Graph;
+        void update() {
+            
+        }
+
+        template <typename Archive> void serialize(Archive &ar) {
+            ar(cereal::make_nvp("vertexes", Vertexes),
+               cereal::make_nvp("graph", Graph),
+               cereal::make_nvp("all_files", AllFiles));
+        }
+
     };
 
     struct RootFolder {
@@ -152,10 +170,12 @@ namespace utils {
             : Path(data.Path), Files(data.Files), Folders(data.Folders) {}
 
         template <typename T>
-        explicit RootFolder(T &&data)
+        RootFolder(T &&data)
             : Path(std::move(data.Path)), Files(std::move(data.Files)),
               Folders(std::move(data.Folders)) {}
 
+        
+        
         void update(const value_type &aPath) {
             Path = aPath;
             boost::filesystem::directory_iterator endIter;

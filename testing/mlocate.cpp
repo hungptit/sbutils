@@ -10,7 +10,6 @@
 #include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
-#include "utils/Serialization.hpp"
 #include "utils/Timer.hpp"
 #include "utils/FolderDiff.hpp"
 

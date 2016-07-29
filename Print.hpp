@@ -50,7 +50,7 @@ namespace utils {
         std::cout << "]";
     }
 
-    template <typename Data> void print(Data &data) {
+    template <typename Data> void print(Data &) {
         // std::for_each(data.begin(), data.end(),
         //               [](auto &val) { std::cout << val << "\n"; });
     }

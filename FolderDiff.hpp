@@ -14,11 +14,8 @@
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
 #include "LevelDBIO.hpp"
-#include "Serialization.hpp"
-#include "SparseGraph.hpp"
-#include "SparseGraphAlgorithms.hpp"
+#include "graph/SparseGraph.hpp"
 #include "Timer.hpp"
-#include "Visitor.hpp"
 #include "DataStructures.hpp"
 
 namespace utils {
