@@ -132,9 +132,16 @@ namespace utils {
         
         using file_container = std::vector<FileInfo>;
 
-        FolderHierarchy(vertex_container &&vertexes, edge_container &&edges)
-            : Vertexes(vertexes), Graph(edges, Vertexes.size(), true), AllFiles() {}
+        template<typename T1, typename T2>
+        FolderHierarchy(T1 &&vertexes, T2 &&edges)
+            : Vertexes(std::move(vertexes)), Graph(std::move(edges), Vertexes.size(), true), AllFiles() {}
 
+        template <typename Archive> void serialize(Archive &ar) {
+            ar(cereal::make_nvp("vertexes", Vertexes),
+               cereal::make_nvp("graph", Graph),
+               cereal::make_nvp("all_files", AllFiles));
+        }
+        
         // Each vertex will have its path and files at the root level. We need
         // to traverse the tree to get all files or folders that belong to a
         // given folder.
@@ -145,17 +152,6 @@ namespace utils {
 
         // All files that belong to given root folders.
         file_container AllFiles;
-
-        void update() {
-            
-        }
-
-        template <typename Archive> void serialize(Archive &ar) {
-            ar(cereal::make_nvp("vertexes", Vertexes),
-               cereal::make_nvp("graph", Graph),
-               cereal::make_nvp("all_files", AllFiles));
-        }
-
     };
 
     struct RootFolder {
