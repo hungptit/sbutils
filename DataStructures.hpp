@@ -1,3 +1,4 @@
+
 #ifndef Utils_DataStructures_hpp_
 #define Utils_DataStructures_hpp_
 
@@ -23,7 +24,7 @@ namespace utils {
 
     using DefaultIArchive = cereal::BinaryInputArchive;
     using DefaultOArchive = cereal::BinaryOutputArchive;
-        
+
     /**
      * Defininition for FileInfo data structure.
      *
@@ -118,7 +119,7 @@ namespace utils {
 
         template <typename Archive> void serialize(Archive &ar) {
             ar(cereal::make_nvp("path", Path),
-               cereal::make_nvp("all_files", Files));
+               cereal::make_nvp("files", Files));
         }
     };
 
@@ -129,24 +130,49 @@ namespace utils {
 
         using edge_type = graph::BasicEdgeData<index_type>;
         using edge_container = std::vector<edge_type>;
-        
+
         using file_container = std::vector<FileInfo>;
 
-        template<typename T1, typename T2>
+        template <typename T1, typename T2>
         FolderHierarchy(T1 &&vertexes, T2 &&edges)
-            : Vertexes(std::move(vertexes)), Graph(std::move(edges), Vertexes.size(), true), AllFiles() {}
+            : Vertexes(std::move(vertexes)),
+              Graph(std::move(edges), Vertexes.size(), true), AllFiles() {
+            update();
+        }
+
+        void update() {
+            std::size_t counter = 0;
+            std::for_each(Vertexes.cbegin(), Vertexes.cend(),
+                          [&counter](auto const &aFolder) {
+                              counter += aFolder.Files.size();
+                          });
+            AllFiles.reserve(counter);
+
+            // TODO: Benchmark std::copy, emplace_back, , back_inserter, and insert approaches.
+            std::for_each(
+                Vertexes.cbegin(), Vertexes.cend(), [&](auto const &aFolder) {
+                  std::for_each(aFolder.Files.cbegin(), aFolder.Files.cend(), [&](auto const &item){
+                      AllFiles.emplace_back(item);
+                    });
+                });
+
+            std::sort(AllFiles.begin(), AllFiles.end(),
+                      [](const auto &first, const auto &second) {
+                          return first.Path < second.Path;
+                      });
+        }
 
         template <typename Archive> void serialize(Archive &ar) {
             ar(cereal::make_nvp("vertexes", Vertexes),
                cereal::make_nvp("graph", Graph),
                cereal::make_nvp("all_files", AllFiles));
         }
-        
+
         // Each vertex will have its path and files at the root level. We need
         // to traverse the tree to get all files or folders that belong to a
         // given folder.
         vertex_container Vertexes;
-        
+
         // A tree that represents the folder hierarchy.
         graph::SparseGraph<index_type, edge_type> Graph;
 
@@ -170,8 +196,6 @@ namespace utils {
             : Path(std::move(data.Path)), Files(std::move(data.Files)),
               Folders(std::move(data.Folders)) {}
 
-        
-        
         void update(const value_type &aPath) {
             Path = aPath;
             boost::filesystem::directory_iterator endIter;
