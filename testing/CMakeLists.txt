@@ -70,7 +70,7 @@ if (Boost_FOUND)
   set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}  ${LIB_FMT} ${LIB_LEVELDB} ${LIB_SNAPPY} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN}  ${LIB_FMT} ${LIB_LEVELDB} ${LIB_SNAPPY}  -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
@@ -101,7 +101,8 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_LEVELDB} ${LIB_FMT} ${LIB_SNAPPY} -lpthread -lrt)
+      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY} ${LIB_JEMALLOC}
+      ${LIB_BZ2} ${LIB_FMT} -lpthread -lrt -lz)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 

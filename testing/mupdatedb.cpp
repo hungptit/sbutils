@@ -6,6 +6,10 @@
 #include <tuple>
 #include <vector>
 
+#include "utils/RocksDB.hpp"
+
+#include <memory>
+
 #include "utils/FileSearch.hpp"
 #include "utils/FileUtils.hpp"
 #include "utils/LevelDBIO.hpp"
@@ -72,16 +76,34 @@ int main(int argc, char *argv[]) {
     using FileVisitor =
         utils::filesystem::Visitor<decltype(folders),
                                    utils::filesystem::NormalPolicy>;
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     FileVisitor visitor;
-    utils::filesystem::dfs_file_search(folders, visitor);
+    {
+        utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+        utils::filesystem::dfs_file_search(folders, visitor);
+    }
+    auto results = visitor.getFolderHierarchy();
 
-    // Write to database
     if (verbose) {
-        visitor.print<cereal::JSONOutputArchive>();
+        utils::print<cereal::JSONOutputArchive>(results, "Folder hierarchy");
     }
 
-    auto results = visitor.getFolderHierarchy();
+    results.info();
+
+    // Save data to a rocksdb database.
+    {
+        utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ");
+        std::unique_ptr<rocksdb::DB> db(utils::open(dataFile));
+        std::stringstream output;
+
+        // Write all data using batch mode.
+        rocksdb::WriteBatch batch;
+
+        // Serialize all data
+        { utils::DefaultOArchive oar(output); }
+
+        batch.Put(utils::Resources::Info, output.str());
+        output.clear();
+    }
 
     // auto vertexes = std::get<0>(results);
     // auto g = std::get<1>(results);
