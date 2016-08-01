@@ -148,12 +148,13 @@ namespace utils {
                           });
             AllFiles.reserve(counter);
 
-            // TODO: Benchmark std::copy, emplace_back, , back_inserter, and insert approaches.
+            // TODO: Benchmark std::copy, emplace_back, , back_inserter, and
+            // insert approaches.
             std::for_each(
                 Vertexes.cbegin(), Vertexes.cend(), [&](auto const &aFolder) {
-                  std::for_each(aFolder.Files.cbegin(), aFolder.Files.cend(), [&](auto const &item){
-                      AllFiles.emplace_back(item);
-                    });
+                    std::for_each(
+                        aFolder.Files.cbegin(), aFolder.Files.cend(),
+                        [&](auto const &item) { AllFiles.emplace_back(item); });
                 });
 
             std::sort(AllFiles.begin(), AllFiles.end(),
@@ -168,6 +169,11 @@ namespace utils {
                cereal::make_nvp("all_files", AllFiles));
         }
 
+      void info() const {
+        fmt::print("Number of vertexes: {}\n", Vertexes.size());
+        fmt::print("Number of files: {}\n", AllFiles.size());
+      }
+      
         // Each vertex will have its path and files at the root level. We need
         // to traverse the tree to get all files or folders that belong to a
         // given folder.
@@ -212,6 +218,17 @@ namespace utils {
             }
         }
     };
+
+    template <typename OArchive, typename T>
+    void print(const T &data, const std::string &title) {
+        std::stringstream output;
+        {
+            OArchive oar(output);
+            oar(cereal::make_nvp(title, data));
+        }
+
+        fmt::print("{}\n", output.str());
+    }
 }
 
 namespace std {
