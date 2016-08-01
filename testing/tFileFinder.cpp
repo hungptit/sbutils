@@ -61,13 +61,13 @@ TEST(FileSearch, Positive) {
     utils::TemporaryDirectory tmpDir;
     TestData testData(tmpDir.getPath());
     auto tmpPath = tmpDir.getPath();
-    test_file_search<utils::filesystem::DoNothingPolicy, 12>(tmpPath);
-    test_file_search<utils::filesystem::NormalPolicy, 11>(tmpPath);
-    test_file_search<utils::filesystem::MWPolicy, 11>(tmpPath);
+    test_file_search<utils::filesystem::DoNothingPolicy, 13>(tmpPath);
+    test_file_search<utils::filesystem::NormalPolicy, 12>(tmpPath);
+    test_file_search<utils::filesystem::MWPolicy, 12>(tmpPath);
 }
 
 TEST(FileSearc, Negative) {
     boost::filesystem::path tmpPath("foo");
     ASSERT_ANY_THROW(
-        (test_file_search<utils::filesystem::DoNothingPolicy, 12>(tmpPath)));
+        (test_file_search<utils::filesystem::DoNothingPolicy, 13>(tmpPath)));
 }
