@@ -22,20 +22,17 @@ int main(int argc, char *argv[]) {
 
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-    std::string dataFile;
+    std::string database;
     std::vector<std::string> keys;
 
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display verbose information.")
-        ("a,all-keys", "Display all keys in a given database")
-        ("k,key", po::value<std::vector<std::string>>(&keys), "List the content of given keys.")
+        ("all-keys,a", "Display all keys in a given database")
+        ("keys,k", po::value<std::vector<std::string>>(&keys), "List the content of given keys.")
         ("database,d", po::value<std::string>(&database)->default_value(".database"), "File database.");
     // clang-format on
-
-    bool verbose = vm.count("verbose");
-    bool displayAllKeys = = vm.count("all-keys");
 
     po::positional_options_description p;
     p.add("database", -1);
@@ -50,6 +47,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    bool verbose = vm.count("verbose");
+    bool displayAllKeys = vm.count("all-keys");
+    
     // Display input parameters if verbose is true
     if (verbose) {
         fmt::print("verbose: {}\n", verbose);
@@ -57,14 +57,37 @@ int main(int argc, char *argv[]) {
         fmt::print("database: {}\n", database);
     }
 
-    std::unique_ptr<rocksdb::DB> db(utils::open(dataFile));
-
+    // Open a given database
+    rocksdb::Options options;
+    options.create_if_missing = false;
+    std::unique_ptr<rocksdb::DB> db(utils::open(database, options));
+    assert(db != nullptr);
+    
     if (displayAllKeys) {
         // Display all keys
+        std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
+        for (it->SeekToFirst(); it->Valid(); it->Next()) {
+            fmt::print("{0}\n", it->key().ToString());
+        }
+        assert(it->status().ok()); // Check for any errors found during the scan
     } else if (!keys.empty()) {
         // Display the key-value of a given list of keys
+        std::for_each(keys.begin(), keys.end(), [&db](auto const &aKey) {
+            std::string value;
+            rocksdb::Status s = db->Get(rocksdb::ReadOptions(), aKey, &value);
+            fmt::print("{0} : {1}\n", aKey, value);
+        });
     } else {
         // Display a summary of a given RocksDB database.
+        std::size_t counter = 0;
+        std::size_t valueSizes = 0;
+        std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
+        for (it->SeekToFirst(); it->Valid(); it->Next()) {
+            ++counter;
+            valueSizes += it->value().ToString().size();
+        }
+        fmt::print("Number of keys: {}\n", counter);
+        fmt::print("Sizeof all values (bytes): {}\n", valueSizes);
     }
     
     return 0;
