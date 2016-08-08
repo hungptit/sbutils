@@ -8,6 +8,11 @@
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 
+#include "DataStructures.hpp"
+#include "Resources.hpp"
+#include "Utils.hpp"
+#include "Timer.hpp"
+
 namespace utils {
     class Writer {
       public:
@@ -43,7 +48,7 @@ namespace utils {
       public:
       Reader(const Reader&) = delete;
       Reader& operator=(const Reader&) = delete;
-      
+
         explicit Reader(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             options.create_if_missing = false;
@@ -54,7 +59,7 @@ namespace utils {
             }
         }
 
-        leveldb::DB * getDB() const {return Database;} 
+        leveldb::DB * getDB() const {return Database;}
 
         std::vector<std::string> keys() {
             std::vector<std::string> allKeys;
@@ -98,5 +103,53 @@ namespace utils {
         std::string DataFile;
         leveldb::DB *Database;
     };
+
+    template <typename T>
+    void writeToLevelDB(const std::string &database, const T &results) {
+        utils::ElapsedTime<utils::MILLISECOND> timer1("Serialization time: ");
+        Writer writer(database);
+
+        // Write all data using batch mode.
+        rocksdb::WriteBatch batch;
+
+        std::ostringstream os;
+
+        // Write out all file information
+        os.str(std::string());
+        {
+            utils::DefaultOArchive oar(os);
+            oar(utils::Resources::AllFileKey, results.AllFiles);
+        }
+        writer.write(utils::Resources::AllFileKey, os.str());
+
+        // Write out graph information
+        os.str(std::string());
+        serialize<utils::DefaultOArchive>(results.Graph, "_graph_", os);
+
+        writer.write(utils::Resources::GraphKey, os.str());
+
+        // Write out vertex information
+        os.str(std::string());
+        {
+            utils::DefaultOArchive oar(os);
+            oar("vertexes", results.Vertexes);
+        }
+
+        writer.write(utils::Resources::VertexKey, os.str());
+
+        // Write all vertexes into database and keys are the indexes.
+        size_t counter = 0;
+        for (auto const &aVertex : results.Vertexes) {
+            os.str(std::string());
+            {
+                utils::DefaultOArchive oar(os);
+                oar("vertex", aVertex);
+            }
+            std::string aKey = utils::to_fixed_string(9, counter);
+            writer.write(aKey, os.str());
+            ++counter;
+        }
+    }
+
 }
 #endif

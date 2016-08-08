@@ -18,8 +18,6 @@
 
 int main(int argc, char *argv[]) {
     using namespace boost;
-    using path = boost::filesystem::path;
-
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
     std::string database;
@@ -57,6 +55,8 @@ int main(int argc, char *argv[]) {
         fmt::print("database: {}\n", database);
     }
 
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+    
     // Open a given database
     rocksdb::Options options;
     options.create_if_missing = false;
@@ -64,10 +64,10 @@ int main(int argc, char *argv[]) {
     assert(db != nullptr);
     
     if (displayAllKeys) {
-        // Display all keys
         std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            fmt::print("{0}\n", it->key().ToString());
+            std::string aKey = it->key().ToString();
+            fmt::print("{0}\n", aKey);
         }
         assert(it->status().ok()); // Check for any errors found during the scan
     } else if (!keys.empty()) {
@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
         std::for_each(keys.begin(), keys.end(), [&db](auto const &aKey) {
             std::string value;
             rocksdb::Status s = db->Get(rocksdb::ReadOptions(), aKey, &value);
+            assert(s.ok());
             fmt::print("{0} : {1}\n", aKey, value);
         });
     } else {
@@ -84,7 +85,8 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             ++counter;
-            valueSizes += it->value().ToString().size();
+            const std::string value = it->value().ToString();
+            valueSizes += value.size();
         }
         fmt::print("Number of keys: {}\n", counter);
         fmt::print("Sizeof all values (bytes): {}\n", valueSizes);

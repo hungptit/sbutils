@@ -169,11 +169,11 @@ namespace utils {
                cereal::make_nvp("all_files", AllFiles));
         }
 
-      void info() const {
-        fmt::print("Number of vertexes: {}\n", Vertexes.size());
-        fmt::print("Number of files: {}\n", AllFiles.size());
-      }
-      
+        void info() const {
+            fmt::print("Number of vertexes: {}\n", Vertexes.size());
+            fmt::print("Number of files: {}\n", AllFiles.size());
+        }
+
         // Each vertex will have its path and files at the root level. We need
         // to traverse the tree to get all files or folders that belong to a
         // given folder.
@@ -218,6 +218,12 @@ namespace utils {
             }
         }
     };
+
+    template <typename OArchive, typename T, typename Stream>
+    void serialize(const T &data, const std::string &title, Stream &os) {
+        utils::DefaultOArchive oar(os);
+        oar(title, data);
+    }
 
     template <typename OArchive, typename T>
     void print(const T &data, const std::string &title) {

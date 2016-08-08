@@ -19,10 +19,12 @@
 int main(int argc, char *argv[]) {
     using namespace boost;
     using path = boost::filesystem::path;
-
     namespace po = boost::program_options;
+
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+
     po::options_description desc("Allowed options");
-    std::string dataFile;
+    std::string database;
     std::string cfgFile;
 
     // clang-format off
@@ -31,7 +33,7 @@ int main(int argc, char *argv[]) {
         ("verbose,v", "Display verbose information.")
         ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
         ("config,c", po::value<std::string>(&cfgFile)->default_value(".mupdatedb.cfg"), "Search configuratiion.")
-        ("database,d", po::value<std::string>(&dataFile)->default_value(".database"), "File database.");
+        ("database,d", po::value<std::string>(&database)->default_value(".database"), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]) {
     if (verbose) {
         fmt::print("verbose: {}\n", verbose);
         fmt::print("config: {}\n", cfgFile);
-        fmt::print("database: {}\n", dataFile);
+        fmt::print("database: {}\n", database);
         auto printObj = [](auto const &item) {
             fmt::print("{}\n", item.string());
         };
@@ -78,82 +80,24 @@ int main(int argc, char *argv[]) {
                                    utils::filesystem::NormalPolicy>;
     FileVisitor visitor;
     {
-        utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+        utils::ElapsedTime<utils::MILLISECOND> timer("Search time: ");
         utils::filesystem::dfs_file_search(folders, visitor);
     }
-    auto results = visitor.getFolderHierarchy();
-
-    if (verbose) {
-        utils::print<cereal::JSONOutputArchive>(results, "Folder hierarchy");
-    }
-
-    results.info();
-
+    
     // Save data to a rocksdb database.
     {
         utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ");
-        std::unique_ptr<rocksdb::DB> db(utils::open(dataFile));
-        std::stringstream output;
 
-        // Write all data using batch mode.
-        rocksdb::WriteBatch batch;
+        auto const results = visitor.getFolderHierarchy();
 
-        // Serialize all data
-        { utils::DefaultOArchive oar(output); }
+        if (verbose) {
+            utils::print<cereal::JSONOutputArchive>(results,
+                                                    "Folder hierarchy");
+        }
 
-        batch.Put(utils::Resources::Info, output.str());
-        output.clear();
+        results.info();
+        utils::writeToRocksDB(database, results);
     }
-
-    // auto vertexes = std::get<0>(results);
-    // auto g = std::get<1>(results);
-    // std::vector<std::string> vids;
-    // vids.reserve(vertexes.size());
-    // size_t counter = 0;
-    // for (auto item : vertexes) {
-    //     vids.push_back(std::get<0>(item));
-    //     counter += std::get<1>(item).size();
-    // }
-
-    // // Build file information database
-    // utils::ElapsedTime<utils::MILLISECOND> timer1("Serialization time: ");
-    // utils::Writer writer(dataFile);
-    // std::ostringstream os;
-
-    // {
-    //     utils::DefaultOArchive output(os);
-    //     utils::save_sparse_graph(output, g, vids);
-    //     writer.write(utils::Resources::GraphKey, os.str());
-    // }
-
-    // // Write out all vertex data
-    // size_t index = 0;
-    // for (auto item : vertexes) {
-    //     utils::DefaultOArchive output(os);
-    //     os.str(std::string()); // Reset a string stream
-    //     auto data = std::get<1>(item);
-    //     auto aKey = utils::to_fixed_string(9, index);
-    //     utils::save(output, aKey, data);
-    //     writer.write(aKey, os.str());
-    //     index++;
-    // }
-
-    // // Write all file information
-    // {
-    //     std::vector<utils::FileInfo> allFiles;
-    //     allFiles.reserve(counter);
-    //     for (auto item : vertexes) {
-    //         auto results = std::get<1>(item);
-    //         std::move(results.begin(), results.end(),
-    //                   std::back_inserter(allFiles));
-    //     }
-
-    //     utils::DefaultOArchive output(os);
-    //     os.str(std::string()); // Reset a string stream
-    //     auto aKey = utils::Resources::AllFileKey;
-    //     utils::save(output, aKey, allFiles);
-    //     writer.write(aKey, os.str());
-    // }
 
     // Return
     return 0;
