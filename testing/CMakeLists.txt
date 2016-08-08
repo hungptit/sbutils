@@ -6,12 +6,13 @@ set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 set(CMAKE_BUILD_TYPE Debug)
 # set (CMAKE_BUILD_TYPE Release)
 
+set(EXTRA_COMPILE_OPTIONS "-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS -DFMT_HEADER_ONLY")
 # Uncomment below lines if using gcc
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef ${EXTRA_COMPILE_OPTIONS}")
 
 # Uncomment below lines if using clang
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef -DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS -DFMT_HEADER_ONLY")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef ${EXTRA_COMPILE_OPTIONS}")
 
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -23,6 +24,7 @@ set(LIB_LEVELDB "${PROJECTS_FOLDER}/3p/leveldb/out-static/libleveldb.a")
 
 # Libraries used by rocksdb
 set(LIB_ROCKSDB "${PROJECTS_FOLDER}/3p/rocksdb/librocksdb.a")
+set(LIB_ZLIB "${PROJECTS_FOLDER}/3p/zlib/lib/libz.a")
 set(LIB_LZ4 "${PROJECTS_FOLDER}/3p/lz4/lib/liblz4.a")
 set(LIB_BZ2 "${PROJECTS_FOLDER}/3p/bzip2/lib/libbz2.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
@@ -52,6 +54,7 @@ include_directories ("${PROJECTS_FOLDER}/3p/fmt/include")
 include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
 
 include_directories ("${PROJECTS_FOLDER}/3p/rocksdb/include")
+include_directories ("${PROJECTS_FOLDER}/3p/zlib/include")
 include_directories ("${PROJECTS_FOLDER}/3p/lz4/include")
 include_directories ("${PROJECTS_FOLDER}/3p/bzip2/include")
 include_directories ("${PROJECTS_FOLDER}/3p/jemalloc/include")
@@ -91,8 +94,8 @@ if (Boost_FOUND)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES}
-      ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY} ${LIB_JEMALLOC}
-      ${LIB_BZ2} -lpthread -ldl -lz)
+      ${LIB_ROCKSDB} ${LIB_ZLIB} ${LIB_LZ4} ${LIB_SNAPPY} ${LIB_JEMALLOC}
+      ${LIB_BZ2} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   
