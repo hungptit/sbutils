@@ -42,33 +42,43 @@ namespace utils {
 
         // Write out all file information
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(results.AllFiles, utils::Resources::AllFileKey, os);
+        serialize<utils::DefaultOArchive>(results.AllFiles, os);
         batch.Put(utils::Resources::AllFileKey, os.str());
-        
+
         // Write out graph information
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(results.Graph, utils::Resources::GraphKey, os);
+        serialize<utils::DefaultOArchive>(results.Graph, os);
         batch.Put(utils::Resources::GraphKey, os.str());
 
         // Write out vertex information
+        auto const &vertexes = results.Vertexes;
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(results.Vertexes, utils::Resources::VertexKey, os);
-        batch.Put(utils::Resources::VertexKey, os.str());        
+        serialize<utils::DefaultOArchive>(vertexes, os);
+        batch.Put(utils::Resources::VertexKey, os.str());
 
-        // Write all changes to the database
-        s = db->Write(rocksdb::WriteOptions(), &batch);
-        assert(s.ok());
+        // Write out vids only
+        std::vector<std::string> vids;
+        vids.reserve(vertexes.size());
+        std::for_each(
+            vertexes.begin(), vertexes.end(),
+            [&vids](auto const &item) { vids.emplace_back(item.Path); });
+        os.str(std::string());
+        serialize<utils::DefaultOArchive>(vids, os);
+        batch.Put(utils::Resources::VIDKey, os.str());
 
         // Write all vertexes into database and keys are the indexes.
         size_t counter = 0;
-        auto const writeOpts = rocksdb::WriteOptions();
         for (auto const &aVertex : results.Vertexes) {
             os.str(std::string());
-            std::string aKey = utils::to_fixed_string(9, counter);
-            serialize<utils::DefaultOArchive>(aVertex, aKey, os);
-            db->Put(writeOpts, aKey, os.str());
+            serialize<utils::DefaultOArchive>(aVertex, os);
+            batch.Put(utils::to_fixed_string(9, counter), os.str());
             ++counter;
         }
+
+        // Write all changes to the database
+        auto const writeOpts = rocksdb::WriteOptions();
+        s = db->Write(writeOpts, &batch);
+        assert(s.ok()); // Write all changes to the database
     }
 }
 

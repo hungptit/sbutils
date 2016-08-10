@@ -62,7 +62,10 @@ namespace utils {
                     results.emplace_back(item);
                 }
             };
+
+            // TODO: Speed up this for loop using thread.
             std::for_each(begin, end, filterObj);
+            
             return results;
         }
 
@@ -70,12 +73,16 @@ namespace utils {
         std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
                                             Filter1 &f1, Filter2 &f2) {
             std::vector<utils::FileInfo> results;
+            
             auto filterObj = [&f1, &f2, &results](auto &item) {
                 if (f1.isValid(item) && f2.isValid(item)) {
                     results.emplace_back(item);
                 }
             };
+
+            // TODO: Speed up this for loop using thread.
             std::for_each(begin, end, filterObj);
+            
             return results;
         }
 
@@ -196,8 +203,8 @@ namespace utils {
 
             // TODO: Use data structures and algorithms provided by graph
             // module.
+            template <typename index_type>
             auto getFolderHierarchy() {
-                using index_type = int;
                 std::sort(vertexes.begin(), vertexes.end(),
                           [](auto const &x, auto const &y) {
                               return x.Path < y.Path;
@@ -222,7 +229,7 @@ namespace utils {
                     allEdges.push_back(graph_edge_type(lookupTable[std::get<0>(anEdge)],
                                                  lookupTable[std::get<1>(anEdge)]));
                 }
-                std::sort(allEdges.begin(), allEdges.end(), graph::Less<index_type, graph_edge_type>());
+                std::sort(allEdges.begin(), allEdges.end());
                 return FolderHierarchy<index_type>(std::move(vertexes), std::move(allEdges));
             }
 

@@ -225,6 +225,12 @@ namespace utils {
         oar(title, data);
     }
 
+    template <typename OArchive, typename T, typename Stream>
+    void serialize(const T &data, Stream &os) {
+        utils::DefaultOArchive oar(os);
+        oar(data);
+    }
+
     template <typename OArchive, typename T>
     void print(const T &data, const std::string &title) {
         std::stringstream output;

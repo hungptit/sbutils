@@ -19,6 +19,7 @@
 int main(int argc, char *argv[]) {
     using namespace boost;
     using path = boost::filesystem::path;
+    using index_type = int;
     namespace po = boost::program_options;
 
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]) {
     {
         utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ");
 
-        auto const results = visitor.getFolderHierarchy();
+        auto const results = visitor.getFolderHierarchy<index_type>();
 
         if (verbose) {
             utils::print<cereal::JSONOutputArchive>(results,

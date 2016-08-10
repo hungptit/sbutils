@@ -8,16 +8,18 @@
 
 #include "utils/FileSearch.hpp"
 #include "utils/FileUtils.hpp"
+#include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
 #include "utils/Timer.hpp"
-#include "utils/FolderDiff.hpp"
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     using path = boost::filesystem::path;
     using IArchive = utils::DefaultIArchive;
     using Index = int;
+
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
 
     po::options_description desc("Allowed options");
 
@@ -58,6 +60,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> folders;
     if (vm.count("folders")) {
         folders = vm["folders"].as<std::vector<std::string>>();
+        std::sort(folders.begin(), folders.end());
     }
 
     // Get file stems
@@ -79,32 +82,31 @@ int main(int argc, char *argv[]) {
     }
 
     // Get file database
-    std::string dataFile;
+    std::string database;
     if (vm.count("database")) {
-        dataFile = vm["database"].as<std::string>();
+        database = vm["database"].as<std::string>();
     } else {
-        dataFile = (path(utils::Resources::Database)).string();
+        database = (path(utils::Resources::Database)).string();
     }
 
     if (verbose) {
-        std::cout << "Database: " << dataFile << std::endl;
+        std::cout << "Database: " << database << std::endl;
     }
 
-    utils::ElapsedTime<utils::MILLISECOND> timer;
-    utils::Reader reader(dataFile);
-    if (vm.count("keys")) {
-        for (auto &aKey : reader.keys()) {
-            std::cout << aKey << std::endl;
-        }
-    } else {
+    {
         using Container = std::vector<utils::FileInfo>;
-        auto allFiles = utils::read_baseline<Container>(reader, folders, verbose);
-        auto results = utils::filter(allFiles, extensions, stems);
-        fmt::MemoryWriter writer;
-        writer << "Search results: \n";
-        for (auto item : results) {
-            writer << item.Path << "\n";
+        Container allFiles =
+            utils::read_baseline<Container>(database, folders, verbose);
+        Container results = utils::filter(allFiles, extensions, stems);
+
+        {
+            fmt::MemoryWriter writer;
+            writer << "Search results: \n";
+            std::for_each(
+                results.begin(), results.end(),
+                [&writer](auto const &item) { writer << item.Path << "\n"; });
+            ;
+            fmt::print("{}", writer.str());
         }
-        fmt::print("{}", writer.str());
     }
 }

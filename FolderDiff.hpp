@@ -11,12 +11,18 @@
 #include <functional>
 #include <vector>
 
+#include "DataStructures.hpp"
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
 #include "LevelDBIO.hpp"
-#include "graph/SparseGraph.hpp"
+#include "RocksDB.hpp"
 #include "Timer.hpp"
-#include "DataStructures.hpp"
+#include "graph/SparseGraph.hpp"
+
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <utility>
 
 namespace utils {
     /**
@@ -48,7 +54,7 @@ namespace utils {
 
                 // TODO: Fix me
                 // input(data);
-                
+
                 std::move(data.begin(), data.end(),
                           std::back_inserter(results));
 
@@ -72,27 +78,33 @@ namespace utils {
     // TODO: Use TBB to speed up this function.
     template <typename Container, typename ExtContainer, typename StemContainer>
     auto filter(Container &data, ExtContainer &exts, StemContainer &stems) {
-        // utils::ElapsedTime<utils::MILLISECOND> t1("Filter time: ");
+        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         utils::filesystem::ExtFilter<ExtContainer> f1(exts);
         utils::filesystem::StemFilter<StemContainer> f2(stems);
         return utils::filesystem::filter(data.begin(), data.end(), f1, f2);
     }
 
     template <typename Container>
-    Container read_baseline(utils::Reader &reader,
+    Container read_baseline(const std::string &database,
                             const std::vector<std::string> &folders,
                             bool verbose = false) {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
 
+        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline time: ");
+
+        // Open the database
+        std::unique_ptr<rocksdb::DB> db(utils::open(database));
+        rocksdb::Status s;
+
         if (folders.empty()) {
-            // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
-            // time:
-            // ");
-            std::istringstream is(reader.read(utils::Resources::AllFileKey));
+            std::string value;
+            rocksdb::Status s = db->Get(rocksdb::ReadOptions(),
+                                        utils::Resources::AllFileKey, &value);
+            assert(s.ok());
+            std::istringstream is(value);
             IArchive input(is);
-            // TODO: Fix me
-            // input(allFiles);
+            input(allFiles);
             if (verbose) {
                 fmt::print("Number of files: {0}\n", allFiles.size());
             }
@@ -101,60 +113,79 @@ namespace utils {
             // time:
             // ");
             using index_type = int;
-            using edge_type = int;
-            using GraphAlg = graph::SparseGraph<index_type, edge_type>;
-            using vertex_container = typename GraphAlg::vertex_container;
-            using edge_container = typename GraphAlg::edge_container;
-            using index_type = typename GraphAlg::index_type;
-
-            // Only read the file information for given folders.
-            std::istringstream is(reader.read(utils::Resources::GraphKey));
+            using edge_type = graph::BasicEdgeData<index_type>;
+            using Graph = graph::SparseGraph<index_type, edge_type>;
+            using vertex_container = typename Graph::vertex_container;
+            using edge_container = typename Graph::edge_container;
+            std::string value;
             std::vector<std::string> vids;
-            vertex_container v;
-            edge_container e;
-            IArchive input(is);
-            input(vids, v, e);
-            GraphAlg g(v, e, true);
 
-            if (verbose) {
-                fmt::print("Number of vertexes: {0}\n", vids.size());
-                fmt::print("Number of edges: {0}\n", e.size());
+            // TODO: Parallelize read vertex ids and read graph info.
+
+            // Read vertex ids
+            {
+                rocksdb::Status s = db->Get(rocksdb::ReadOptions(),
+                                            utils::Resources::VIDKey, &value);
+                assert(s.ok());
+                std::istringstream is(value);
+                IArchive input(is);
+                input(vids);
             }
 
-            // Display detail information about file hierarchy tree.
-            // tree_info(g, vids);
-
-            // Now find indexes for given folders
+            // Now find indexes for given folders using O(n) algorithm. Below
+            // code block assume that folders is sorted.
             std::vector<index_type> indexes;
-            for (auto item : folders) {
-                auto aKey = utils::normalize_path(item);
-                // fmt::print("sKey = {}\n", aKey);
+            for (auto const &item : folders) {
+                const std::string aKey = utils::normalize_path(item);
                 auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
                 if (*it == aKey) {
-                    auto vid = std::distance(vids.begin(), it);
-                    indexes.push_back(vid);
+                    indexes.push_back(std::distance(vids.begin(), it));
                 } else {
-                    fmt::print("Could not find key {} in database\n", item);
+                    fmt::print("Could not find key {} in database\n", aKey);
                 }
             }
 
-            // Use DFS to find all vertexes that are belong to given
-            // vertexes
-            using DFSVisitor =
-                graph::Visitor<decltype(g), std::vector<index_type>>;
-            auto results = graph::dfs<decltype(g), DFSVisitor>(g, indexes);
+            // Read graph info
+            Graph g;
+            {
+                value.clear();
+                rocksdb::Status s = db->Get(rocksdb::ReadOptions(),
+                                            utils::Resources::GraphKey, &value);
+                assert(s.ok());
+                std::istringstream is(value);
+                IArchive input(is);
+                input(g);
+            }
+
+            if (verbose) {
+                fmt::print("Number of vertexes: {0}\n", g.numberOfVertexes());
+            }
+
+            assert(vids.size() == g.numberOfVertexes());
+
+            std::vector<index_type> allVids =
+                graph::dfs_preordering<std::vector<index_type>>(g, indexes);
 
             // Now read all keys and create a list of edited file data
             // bases.
             {
-                std::sort(results.begin(), results.end());
-                std::vector<std::string> keys;
-                for (auto index : results) {
-                    keys.emplace_back(utils::to_fixed_string(9, index));
-                }
+                std::sort(allVids.begin(), allVids.end());
+                const auto readOpts = rocksdb::ReadOptions();
+                for (auto const &index : allVids) {
+                    const std::string aKey = utils::to_fixed_string(9, index);
+                    std::string value;
+                    s = db->Get(readOpts, aKey, &value);
+                    assert(s.ok());
 
-                allFiles =
-                    utils::load_baseline<Container, IArchive>(reader, keys);
+                    std::istringstream is(value);
+                    Vertex<index_type> aVertex;
+                    {
+                        IArchive input(is);
+                        input(aVertex);
+                    }
+                    std::move(aVertex.Files.begin(), aVertex.Files.end(),
+                              std::back_inserter(allFiles));
+                }
             }
         }
 
@@ -209,7 +240,7 @@ namespace utils {
         boost::unordered_map<std::string, value_type> map;
         map.reserve(dict.size());
         for (auto item : dict) {
-          map.emplace(std::make_pair(item.Path, item));
+            map.emplace(std::make_pair(item.Path, item));
         }
 
         // Note: Modified files are files that are also in the dictionary,
@@ -264,8 +295,8 @@ namespace utils {
         auto searchObj = [&searchFolders, &visitor]() {
             utils::filesystem::dfs_file_search(searchFolders, visitor);
         };
-        auto readObj = [&reader, &folders, verbose]() {
-            return utils::read_baseline<Container>(reader, folders, verbose);
+        auto readObj = [dataFile, &folders, verbose]() {
+            return utils::read_baseline<Container>(dataFile, folders, verbose);
         };
 
         boost::future<Container> readThread = boost::async(readObj);
