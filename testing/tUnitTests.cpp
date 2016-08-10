@@ -106,7 +106,7 @@ TEST(ExporeFolderRootLevel, Positive) {
 TEST(DataStructure, Positive) {
     using IArchive = cereal::JSONInputArchive;
     using OArchive = cereal::JSONOutputArchive;
-    using value_type = utils::NewFileInfo<std::string>;
+    using value_type = utils::FileInfo;
 
     utils::TemporaryDirectory tmpDir;
     TestData data(tmpDir.getPath());
@@ -195,7 +195,7 @@ TEST(DFS, Positive) {
     // visitor.print<OArchive>();
 
     // Get the folder hierarchy
-    auto results = visitor.getFolderHierarchy();                                   
+    auto results = visitor.getFolderHierarchy<int>();                                   
     {
         OArchive oar(output);
         oar(cereal::make_nvp("Folder hierarchy", results));

@@ -14,7 +14,6 @@
 #include "DataStructures.hpp"
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
-#include "LevelDBIO.hpp"
 #include "RocksDB.hpp"
 #include "Timer.hpp"
 #include "graph/SparseGraph.hpp"
@@ -25,56 +24,6 @@
 #include <utility>
 
 namespace utils {
-    /**
-     * This function assumes that given keys are sorted.
-     *
-     * @param reader
-     * @param keys
-     *
-     * @return
-     */
-    template <typename Container, typename IArchive>
-    Container load_baseline(Reader &reader,
-                            const std::vector<std::string> &keys) {
-        auto Database = reader.getDB();
-        Container results;
-        leveldb::Iterator *it = Database->NewIterator(leveldb::ReadOptions());
-
-        auto currentKey = keys.begin();
-        for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            if (currentKey == keys.end()) {
-                break;
-            }
-
-            if (it->key().ToString() == *currentKey) {
-                // Deserialize the data
-                Container data;
-                std::istringstream is(it->value().ToString());
-                IArchive input(is);
-
-                // TODO: Fix me
-                // input(data);
-
-                std::move(data.begin(), data.end(),
-                          std::back_inserter(results));
-
-                // Advance to the next key
-                ++currentKey;
-            }
-
-            if (!it->status().ok()) {
-                std::cerr << "An error was found during the scan" << std::endl;
-                std::cerr << it->status().ToString() << std::endl;
-            }
-        }
-
-        // Cleanup it;
-        delete it;
-
-        // Return
-        return results;
-    }
-
     // TODO: Use TBB to speed up this function.
     template <typename Container, typename ExtContainer, typename StemContainer>
     auto filter(Container &data, ExtContainer &exts, StemContainer &stems) {
@@ -86,8 +35,7 @@ namespace utils {
 
     template <typename Container>
     Container read_baseline(const std::string &database,
-                            const std::vector<std::string> &folders,
-                            bool verbose = false) {
+                            const std::vector<std::string> &folders, bool verbose = false) {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
 
@@ -99,8 +47,8 @@ namespace utils {
 
         if (folders.empty()) {
             std::string value;
-            rocksdb::Status s = db->Get(rocksdb::ReadOptions(),
-                                        utils::Resources::AllFileKey, &value);
+            rocksdb::Status s =
+                db->Get(rocksdb::ReadOptions(), utils::Resources::AllFileKey, &value);
             assert(s.ok());
             std::istringstream is(value);
             IArchive input(is);
@@ -124,8 +72,8 @@ namespace utils {
 
             // Read vertex ids
             {
-                rocksdb::Status s = db->Get(rocksdb::ReadOptions(),
-                                            utils::Resources::VIDKey, &value);
+                rocksdb::Status s =
+                    db->Get(rocksdb::ReadOptions(), utils::Resources::VIDKey, &value);
                 assert(s.ok());
                 std::istringstream is(value);
                 IArchive input(is);
@@ -149,8 +97,8 @@ namespace utils {
             Graph g;
             {
                 value.clear();
-                rocksdb::Status s = db->Get(rocksdb::ReadOptions(),
-                                            utils::Resources::GraphKey, &value);
+                rocksdb::Status s =
+                    db->Get(rocksdb::ReadOptions(), utils::Resources::GraphKey, &value);
                 assert(s.ok());
                 std::istringstream is(value);
                 IArchive input(is);
@@ -201,9 +149,8 @@ namespace utils {
      * file name.
      */
     template <typename Container>
-    std::tuple<Container, Container, Container> diff(const Container &first,
-                                                     const Container &second,
-                                                     bool verbose = false) {
+    std::tuple<Container, Container, Container>
+    diff(const Container &first, const Container &second, bool verbose = false) {
 
         Container modifiedFiles;
         Container results;
@@ -213,10 +160,8 @@ namespace utils {
         // Create a lookup table
         using value_type = typename Container::value_type;
 
-        // TODO: Need to speedup this line using a better hash table.
-        auto it = second.begin();
-        // boost::unordered_set<value_type> dict(second.begin(), second.end());
-        boost::unordered_set<value_type> dict;
+        // TODO: Speedup this line using a better hash table.
+        std::unordered_set<FileInfo> dict(second.begin(), second.end());
 
         if (verbose) {
             std::cout << "---- Dictionary sizes: " << dict.size() << " \n";
@@ -224,17 +169,17 @@ namespace utils {
 
         // Remove items that belong to both. We assume that the number of
         // modified files is significantly less than the total number of files.
-        // auto getDiff = [&dict, &results](const auto &item) {
-        //     auto const pos = dict.find(item);
-        //     if (pos != dict.end()) {
-        //         dict.erase(pos);
-        //     } else {
-        //         results.emplace_back(item);
-        //     }
-        // };
+        auto getDiff = [&dict, &results](const auto &item) {
+            auto const pos = dict.find(item);
+            if (pos != dict.end()) {
+                dict.erase(pos);
+            } else {
+                results.emplace_back(item);
+            }
+        };
 
         // TODO: Speed up this loop
-        // std::for_each(first.begin(), first.end(), getDiff);
+        std::for_each(first.begin(), first.end(), getDiff);
 
         // Get modified and deleted items.
         boost::unordered_map<std::string, value_type> map;
@@ -265,31 +210,27 @@ namespace utils {
         }
 
         // Get deleted items
-        std::for_each(map.begin(), map.end(),
-                      [&deletedFiles](auto const &item) {
-                          deletedFiles.emplace_back(item.second);
-                      });
+        std::for_each(map.begin(), map.end(), [&deletedFiles](auto const &item) {
+            deletedFiles.emplace_back(item.second);
+        });
 
         // Return
         return std::make_tuple(modifiedFiles, newFiles, deletedFiles);
     }
 
-    auto diffFolders(const std::string &dataFile,
-                     const std::vector<std::string> &folders, bool verbose) {
+    auto diffFolders(const std::string &dataFile, const std::vector<std::string> &folders,
+                     bool verbose) {
         // Search for files in the given folders.
         using path = boost::filesystem::path;
         using PathContainer = std::vector<path>;
         using Container = std::vector<utils::FileInfo>;
 
-        utils::filesystem::SimpleVisitor<PathContainer,
-                                         utils::filesystem::NormalPolicy>
+        utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>
             visitor;
         PathContainer searchFolders;
         for (auto item : folders) {
             searchFolders.emplace_back(path(item));
         }
-
-        utils::Reader reader(dataFile);
 
         // We do real work here
         auto searchObj = [&searchFolders, &visitor]() {
@@ -301,7 +242,6 @@ namespace utils {
 
         boost::future<Container> readThread = boost::async(readObj);
         boost::future<void> findThread = boost::async(searchObj);
-        ;
 
         readThread.wait();
         findThread.wait();
@@ -312,7 +252,7 @@ namespace utils {
         auto const &results = visitor.getResults();
         if (verbose) {
             fmt::print("Number of files: {}\n", results.size());
-            fmt::print("Number of files in the baseline: {}\n", results.size());
+            fmt::print("Number of files in the baseline: {}\n", baseline.size());
         }
 
         return utils::diff(baseline, results);

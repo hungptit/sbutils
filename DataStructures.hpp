@@ -30,33 +30,35 @@ namespace utils {
      *
      */
 
-    template <typename String = std::string> struct NewFileInfo {
-        NewFileInfo()
+    struct FileInfo {
+        using String = std::string;
+        
+        FileInfo()
             : Permissions(), Size(), Path(), Stem(), Extension(), TimeStamp() {}
 
         template <typename T1, typename T2, typename T3, typename T4,
                   typename T5, typename T6>
-        NewFileInfo(T1 &&perms, T2 &&sizes, T3 &&path, T4 &&stem, T5 &&ext,
+        FileInfo(T1 &&perms, T2 &&sizes, T3 &&path, T4 &&stem, T5 &&ext,
                     T6 &&timeStamp) noexcept
             : Permissions(std::forward<T1>(perms)),
               Size(std::forward<T2>(sizes)), Path(std::forward<T3>(path)),
               Stem(std::forward<T4>(stem)), Extension(std::forward<T5>(ext)),
               TimeStamp(std::forward<T6>(timeStamp)) {}
 
-        NewFileInfo(const NewFileInfo &info) noexcept
+        FileInfo(const FileInfo &info) noexcept
             : Permissions(info.Permissions), Size(info.Size), Path(info.Path),
               Stem(info.Stem), Extension(info.Extension),
               TimeStamp(info.TimeStamp) {}
 
-        NewFileInfo(NewFileInfo &&info) noexcept
+        FileInfo(FileInfo &&info) noexcept
             : Permissions(info.Permissions), Size(info.Size),
               Path(std::move(info.Path)), Stem(info.Stem),
               Extension(info.Extension), TimeStamp(info.TimeStamp) {}
 
-        NewFileInfo &operator=(const NewFileInfo &rhs) {
-            if (*this == rhs) {
-                return *this;
-            }
+        FileInfo &operator=(const FileInfo &rhs) {
+            // if (*this == rhs) {
+            //     return *this;
+            // }
             this->Permissions = rhs.Permissions;
             this->Size = rhs.Size;
             this->Path = rhs.Path;
@@ -82,20 +84,17 @@ namespace utils {
         String Extension;
         std::time_t TimeStamp;
     };
-
+   
     // A file path must be unique.
-    template <typename String>
-    bool Less(const NewFileInfo<String> &lhs, const NewFileInfo<String> &rhs) {
+    bool operator<(const FileInfo &lhs, const FileInfo &rhs) {
         return (lhs.Path < rhs.Path);
     }
 
-    template <typename String>
-    bool operator==(const NewFileInfo<String> &lhs,
-                    const NewFileInfo<String> &rhs) {
+    bool operator==(const FileInfo &lhs,
+                    const FileInfo &rhs) {
         return (lhs.Size == rhs.Size) && (lhs.Path == rhs.Path);
     }
 
-    using FileInfo = NewFileInfo<std::string>;
 
     /**
      * Definition for the folder hirarchy.
@@ -244,14 +243,14 @@ namespace utils {
 }
 
 namespace std {
-    // We only care about the size and path of files.
-    template <typename String> struct hash<utils::NewFileInfo<String>> {
-        using value_type = utils::NewFileInfo<String>;
+    template <> struct hash<utils::FileInfo> {
+        using value_type = utils::FileInfo;
         typedef std::size_t result_type;
 
         result_type operator()(const value_type &aKey) const {
+            // We only care about the size and path of files.
             result_type const h1(std::hash<uintmax_t>()(aKey.Size));
-            result_type const h2(std::hash<String>()(aKey.Path));
+            result_type const h2(std::hash<std::string>()(aKey.Path));
             return h1 ^ (h2 << 1);
         }
     };

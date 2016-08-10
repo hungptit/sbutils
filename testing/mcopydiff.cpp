@@ -23,7 +23,6 @@
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
 #include "utils/LevelDBIO.hpp"
-#include "utils/SparseGraphAlgorithms.hpp"
 #include "utils/Timer.hpp"
 
 #include <sstream>

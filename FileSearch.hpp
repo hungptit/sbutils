@@ -201,8 +201,6 @@ namespace utils {
                 fmt::print("Number of files: {0}\n", counter);
             }
 
-            // TODO: Use data structures and algorithms provided by graph
-            // module.
             template <typename index_type>
             auto getFolderHierarchy() {
                 std::sort(vertexes.begin(), vertexes.end(),

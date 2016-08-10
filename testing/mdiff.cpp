@@ -17,15 +17,12 @@
 #include "boost/thread.hpp"
 #include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
-#include "boost/unordered_set.hpp"
 
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
-#include "utils/LevelDBIO.hpp"
+#include "utils/DataStructures.hpp"
 #include "utils/Timer.hpp"
-
 #include "fmt/format.h"
-
 #include <sstream>
 #include <string>
 #include <vector>
@@ -56,6 +53,8 @@ namespace {
 
 int main(int argc, char *argv[]) {
     using namespace boost;
+    utils::ElapsedTime<utils::SECOND> e("Diff time: ");
+    
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
 
@@ -129,9 +128,9 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        utils::ElapsedTime<utils::SECOND> e;
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
+ 
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             utils::diffFolders(dataFile, folders, verbose);
 

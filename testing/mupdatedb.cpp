@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("folders")) {
         auto list = vm["folders"].as<std::vector<std::string>>();
         std::for_each(list.begin(), list.end(), [&folders](auto const &item) {
-            folders.emplace_back(path{item});
+            folders.emplace_back(utils::normalize_path(item));
         });
     } else {
         folders.emplace_back(boost::filesystem::current_path());
