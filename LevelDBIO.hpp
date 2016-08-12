@@ -8,6 +8,11 @@
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 
+#include "DataStructures.hpp"
+#include "Resources.hpp"
+#include "Utils.hpp"
+#include "Timer.hpp"
+
 namespace utils {
     class Writer {
       public:
@@ -43,7 +48,7 @@ namespace utils {
       public:
       Reader(const Reader&) = delete;
       Reader& operator=(const Reader&) = delete;
-      
+
         explicit Reader(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             options.create_if_missing = false;
@@ -54,7 +59,7 @@ namespace utils {
             }
         }
 
-        leveldb::DB * getDB() const {return Database;} 
+        leveldb::DB * getDB() const {return Database;}
 
         std::vector<std::string> keys() {
             std::vector<std::string> allKeys;

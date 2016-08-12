@@ -27,8 +27,10 @@ namespace utils {
             boost::filesystem::create_directories(CurrentDir);
         }
 
-        TemporaryDirectory(const TemporaryDirectory &) = delete;
-        TemporaryDirectory &operator=(const TemporaryDirectory &) = delete;
+        TemporaryDirectory(const TemporaryDirectory &tmpDir) = delete;
+
+        TemporaryDirectory(TemporaryDirectory &&tmpDir) noexcept
+            : CurrentDir(std::move(tmpDir.CurrentDir)) {}
 
         ~TemporaryDirectory() {
             if (boost::filesystem::exists(CurrentDir)) {

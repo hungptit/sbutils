@@ -37,7 +37,7 @@ namespace utils {
         double TicksPerSeconds;
     };
 
-    template <DispOpt val> class ElapsedTime {
+    template <DispOpt val = SECOND> class ElapsedTime {
       public:
         explicit ElapsedTime() : Message("Elapsed time: ") {}
         explicit ElapsedTime(const std::string &msg) : Message(msg) {}

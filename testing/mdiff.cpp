@@ -17,15 +17,12 @@
 #include "boost/thread.hpp"
 #include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
-#include "boost/unordered_set.hpp"
 
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
-#include "utils/LevelDBIO.hpp"
+#include "utils/DataStructures.hpp"
 #include "utils/Timer.hpp"
-
 #include "fmt/format.h"
-
 #include <sstream>
 #include <string>
 #include <vector>
@@ -36,11 +33,11 @@ namespace {
         bool isValid(utils::FileInfo &item) {
             return (std::find(ExcludedExtensions.begin(),
                               ExcludedExtensions.end(),
-                              std::get<utils::filesystem::EXTENSION>(item)) ==
-                    ExcludedExtensions.end());
+                              item.Extension) == ExcludedExtensions.end());
         }
 
       private:
+
         std::vector<std::string> ExcludedExtensions = {
             ".p",   ".d",   ".o",      ".ts", ".xml~", ".m~",
             ".log", ".dbg", ".mexa64", ".so", ".dot",  ".tmp"};
@@ -50,7 +47,7 @@ namespace {
     void print(Container &data, Filter &f) {
         for (auto item : data) {
             if (f.isValid(item)) {
-                fmt::print("{}\n", std::get<utils::filesystem::PATH>(item));
+                fmt::print("{}\n", item.Path);
             }
         }
     }
@@ -58,6 +55,8 @@ namespace {
 
 int main(int argc, char *argv[]) {
     using namespace boost;
+    utils::ElapsedTime<utils::SECOND> e("Diff time: ");
+    
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
 
@@ -135,9 +134,9 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        utils::ElapsedTime<utils::SECOND> e;
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
+ 
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             utils::diffFolders(dataFile, folders, verbose);
 

@@ -4,4 +4,4 @@ IndentWidth: 4
 TabWidth: 4   
 UseTab: Never 
 NamespaceIndentation: All
-ColumnLimit: 80
+ColumnLimit: 96
