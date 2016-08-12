@@ -24,23 +24,21 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Allowed options");
 
     // clang-format off
-  desc.add_options()
-    ("help,h", "Print this help")
-    ("verbose,v", "Display searched data.")
-    ("keys,k", "List all keys.")
-    ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
-    ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
-    ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
-    ("strings,t", po::value<std::string>(), "Search string")
-    ("database,d", po::value<std::string>(), "File database.");
+    desc.add_options()
+        ("help,h", "Print this help")
+        ("verbose,v", "Display searched data.")
+        ("keys,k", "List all keys.")
+        ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
+        ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
+        ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
+        ("pattern,p", po::value<std::string>(), "Search string pattern.")
+        ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
 
     po::positional_options_description p;
     p.add("strings", -1);
     po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
-        vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -78,7 +76,7 @@ int main(int argc, char *argv[]) {
     // Get file extensions
     std::string pattern;
     if (vm.count("strings")) {
-        pattern= vm["strings"].as<std::string>();
+        pattern = vm["strings"].as<std::string>();
     }
 
     // Get file database
@@ -95,24 +93,20 @@ int main(int argc, char *argv[]) {
 
     {
         using Container = std::vector<utils::FileInfo>;
-        Container allFiles =
-            utils::read_baseline<Container>(database, folders, verbose);
+        Container allFiles = utils::read_baseline<Container>(database, folders, verbose);
 
         Container results;
         if (pattern.empty()) {
-            results = utils::filterSearchResults(allFiles, extensions, stems);        
-        } else            
-        {
-            results = utils::filterSearchResults(allFiles, extensions, stems, pattern);        
+            results = utils::filterSearchResults(allFiles, extensions, stems);
+        } else {
+            results = utils::filterSearchResults(allFiles, extensions, stems, pattern);
         }
-        
-        
+
         {
             fmt::MemoryWriter writer;
             writer << "Search results: \n";
-            std::for_each(
-                results.begin(), results.end(),
-                [&writer](auto const &item) { writer << item.Path << "\n"; });
+            std::for_each(results.begin(), results.end(),
+                          [&writer](auto const &item) { writer << item.Path << "\n"; });
             ;
             fmt::print("{}", writer.str());
         }

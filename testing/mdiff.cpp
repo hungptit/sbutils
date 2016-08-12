@@ -59,16 +59,13 @@ int main(int argc, char *argv[]) {
     
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-
+    
     // clang-format off
   desc.add_options()
     ("help,h", "Print this help")
     ("verbose,v", "Display searched data.")
     ("keys,k", "List all keys.")
     ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
-    ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
-    ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
-    ("strings,t", po::value<std::vector<std::string>>(), "Search string")
     ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
 
@@ -81,7 +78,6 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        // std::cout << "Usage:  [options]\n";
         std::cout << desc;
         fmt::print("Example:\n\tmdiff matlab/toolbox\n");
         return 0;
@@ -100,24 +96,6 @@ int main(int argc, char *argv[]) {
         // TODO: Read the config file provided by users.
         folders = {"matlab/src", "matlab/toolbox", "matlab/test",
                    "matlab/resources"};
-    }
-
-    // Get file stems
-    std::vector<std::string> stems;
-    if (vm.count("stems")) {
-        stems = vm["stems"].as<std::vector<std::string>>();
-    }
-
-    // Get file extensions
-    std::vector<std::string> extensions;
-    if (vm.count("extensions")) {
-        extensions = vm["extensions"].as<std::vector<std::string>>();
-    }
-
-    // Get file extensions
-    std::vector<std::string> searchStrings;
-    if (vm.count("strings")) {
-        searchStrings = vm["strings"].as<std::vector<std::string>>();
     }
 
     // Get file database
