@@ -31,12 +31,12 @@ int main(int argc, char *argv[]) {
     ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
     ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
     ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
-    ("strings,t", po::value<std::vector<std::string>>(), "Search string")
+    ("strings,t", po::value<std::string>(), "Search string")
     ("database,d", po::value<std::string>(), "File database.");
     // clang-format on
 
     po::positional_options_description p;
-    p.add("folders", -1);
+    p.add("strings", -1);
     po::variables_map vm;
     po::store(
         po::command_line_parser(argc, argv).options(desc).positional(p).run(),
@@ -76,9 +76,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Get file extensions
-    std::vector<std::string> searchStrings;
+    std::string pattern;
     if (vm.count("strings")) {
-        searchStrings = vm["strings"].as<std::vector<std::string>>();
+        pattern= vm["strings"].as<std::string>();
     }
 
     // Get file database
@@ -97,8 +97,16 @@ int main(int argc, char *argv[]) {
         using Container = std::vector<utils::FileInfo>;
         Container allFiles =
             utils::read_baseline<Container>(database, folders, verbose);
-        Container results = utils::filter(allFiles, extensions, stems);
 
+        Container results;
+        if (pattern.empty()) {
+            results = utils::filterSearchResults(allFiles, extensions, stems);        
+        } else            
+        {
+            results = utils::filterSearchResults(allFiles, extensions, stems, pattern);        
+        }
+        
+        
         {
             fmt::MemoryWriter writer;
             writer << "Search results: \n";

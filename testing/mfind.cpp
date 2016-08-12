@@ -12,6 +12,7 @@
 #include "utils/FileSearch.hpp"
 #include "utils/Print.hpp"
 #include "utils/Timer.hpp"
+#include "utils/Utils.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -91,10 +92,10 @@ int main(int argc, char *argv[]) {
     }
     utils::filesystem::dfs_file_search(searchFolders, visitor);
     auto results = visitor.getResults();
-    utils::filesystem::ExtFilter<std::vector<std::string>> f1(extensions);
-    utils::filesystem::StemFilter<std::vector<std::string>> f2(stems);
+    utils::ExtFilter<std::vector<std::string>> f1(extensions);
+    utils::StemFilter<std::vector<std::string>> f2(stems);
     auto data =
-        utils::filesystem::filter(results.begin(), results.end(), f1, f2);
+        utils::filter(results.begin(), results.end(), f1, f2);
 
     if (verbose) {
         fmt::print("Search folders:\n");

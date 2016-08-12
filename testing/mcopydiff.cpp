@@ -191,7 +191,6 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        utils::ElapsedTime<utils::SECOND> e;
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
@@ -200,6 +199,7 @@ int main(int argc, char *argv[]) {
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
         // folder.
+        utils::ElapsedTime<utils::SECOND> e("Copy files: ");
         for (auto const &aDstDir : dstDir) {
             auto copyEditedFileObj = [&allEditedFiles, &aDstDir, verbose]() {
                 return copyFiles(allEditedFiles, aDstDir, verbose);

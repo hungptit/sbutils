@@ -16,75 +16,11 @@
 
 #include "DataStructures.hpp"
 #include "Utils.hpp"
+#include "Timer.hpp"
 
 namespace utils {
     namespace filesystem {
-        template <typename Container> class ExtFilter {
-          public:
-            explicit ExtFilter(Container &exts) : Extensions(exts) {}
 
-            bool isValid(FileInfo &info) {
-                if (Extensions.empty()) {
-                    return true;
-                } else {
-                    return (std::find(Extensions.begin(), Extensions.end(),
-                                      info.Extension) != Extensions.end());
-                }
-            }
-
-          private:
-            Container Extensions;
-        };
-
-        template <typename Container> class StemFilter {
-          public:
-            explicit StemFilter(Container &stems) : Stems(stems) {}
-
-            bool isValid(FileInfo &info) {
-                if (Stems.empty()) {
-                    return true;
-                } else {
-                    return (std::find(Stems.begin(), Stems.end(), info.Stem) !=
-                            Stems.end());
-                }
-            }
-
-          private:
-            std::vector<std::string> Stems;
-        };
-
-        template <typename Iterator, typename Filter1>
-        std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
-                                            Filter1 &f1) {
-            std::vector<utils::FileInfo> results;
-            auto filterObj = [&f1, &results](auto &item) {
-                if (f1.isValid(item)) {
-                    results.emplace_back(item);
-                }
-            };
-
-            // TODO: Speed up this for loop using thread.
-            std::for_each(begin, end, filterObj);
-            
-            return results;
-        }
-
-        template <typename Iterator, typename Filter1, typename Filter2>
-        std::vector<utils::FileInfo> filter(Iterator begin, Iterator end,
-                                            Filter1 &f1, Filter2 &f2) {
-            std::vector<utils::FileInfo> results;
-            
-            auto filterObj = [&f1, &f2, &results](auto &item) {
-                if (f1.isValid(item) && f2.isValid(item)) {
-                    results.emplace_back(item);
-                }
-            };
-
-            // TODO: Speed up this for loop using thread.
-            std::for_each(begin, end, filterObj);
-            
-            return results;
-        }
 
         struct DoNothingPolicy {
             bool isValidStem(const std::string &) { return true; }
@@ -299,6 +235,7 @@ namespace utils {
          */
         template <typename Container, typename Visitor>
         void dfs_file_search(const Container &searchPaths, Visitor &visitor) {
+            ElapsedTime<MILLISECOND> timer("Search files: ");
             Container folders(searchPaths);
             while (!folders.empty()) {
                 auto aPath = folders.back();

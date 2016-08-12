@@ -17,6 +17,7 @@
 #include "RocksDB.hpp"
 #include "Timer.hpp"
 #include "graph/SparseGraph.hpp"
+#include "Utils.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -25,13 +26,6 @@
 
 namespace utils {
     // TODO: Use TBB to speed up this function.
-    template <typename Container, typename ExtContainer, typename StemContainer>
-    auto filter(Container &data, ExtContainer &exts, StemContainer &stems) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-        utils::filesystem::ExtFilter<ExtContainer> f1(exts);
-        utils::filesystem::StemFilter<StemContainer> f2(stems);
-        return utils::filesystem::filter(data.begin(), data.end(), f1, f2);
-    }
 
     template <typename Container>
     Container read_baseline(const std::string &database,
@@ -39,7 +33,7 @@ namespace utils {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
 
-        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline time: ");
+        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(utils::open(database));

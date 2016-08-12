@@ -8,7 +8,7 @@ set(EXTRA_COMPILE_OPTIONS "-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS -DFMT_HEADER
 # set(CMAKE_BUILD_TYPE Debug)
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef ${EXTRA_COMPILE_OPTIONS}")
 
-# set (CMAKE_BUILD_TYPE Release)
+set (CMAKE_BUILD_TYPE Release)
 
 # Uncomment below lines if using gcc
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef ${EXTRA_COMPILE_OPTIONS}")
@@ -106,8 +106,8 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LEVELDB} ${LIB_LZ4} ${LIB_SNAPPY} ${LIB_JEMALLOC}
-      ${LIB_BZ2} -lpthread -lrt -lz)
+      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LEVELDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
+      ${LIB_BZ2} -lpthread -lrt)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
