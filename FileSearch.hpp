@@ -15,12 +15,11 @@
 #include "fmt/format.h"
 
 #include "DataStructures.hpp"
-#include "Utils.hpp"
 #include "Timer.hpp"
+#include "Utils.hpp"
 
 namespace utils {
     namespace filesystem {
-
 
         struct DoNothingPolicy {
             bool isValidStem(const std::string &) { return true; }
@@ -30,40 +29,35 @@ namespace utils {
         class NormalPolicy {
           public:
             bool isValidExt(const std::string &anExtension) {
-                return std::find(ExcludedExtensions.begin(),
-                                 ExcludedExtensions.end(),
+                return std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
                                  anExtension) == ExcludedExtensions.end();
             }
 
             bool isValidStem(const std::string &aStem) {
-                return std::find(ExcludedStems.begin(), ExcludedStems.end(),
-                                 aStem) == ExcludedStems.end();
+                return std::find(ExcludedStems.begin(), ExcludedStems.end(), aStem) ==
+                       ExcludedStems.end();
             }
 
           private:
-            const std::array<std::string, 1> ExcludedExtensions = {{".git"}};
-            const std::array<std::string, 2> ExcludedStems = {
-                {"CMakeFiles", "CMakeTmp"}};
+            const std::array<std::string, 2> ExcludedExtensions = {{".git", ".cache"}};
+            const std::array<std::string, 2> ExcludedStems = {{"CMakeFiles", "CMakeTmp"}};
         };
 
         class MWPolicy {
           public:
             bool isValidExt(const std::string &anExtension) {
-                return std::find(ExcludedExtensions.begin(),
-                                 ExcludedExtensions.end(),
+                return std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
                                  anExtension) == ExcludedExtensions.end();
             }
 
             bool isValidStem(const std::string &aStem) {
-                return std::find(ExcludedStems.begin(), ExcludedStems.end(),
-                                 aStem) == ExcludedStems.end();
+                return std::find(ExcludedStems.begin(), ExcludedStems.end(), aStem) ==
+                       ExcludedStems.end();
             }
 
           private:
-            const std::array<std::string, 1> ExcludedExtensions = {
-                {".sbtools"}};
-            const std::array<std::string, 2> ExcludedStems = {
-                {"doc", "doxygen"}};
+            const std::array<std::string, 1> ExcludedExtensions = {{".sbtools"}};
+            const std::array<std::string, 2> ExcludedStems = {{"doc", "doxygen"}};
         };
 
         template <typename PathContainer, typename Filter> class Visitor {
@@ -89,16 +83,15 @@ namespace utils {
                     auto aStem = currentPath.stem().string();
                     auto anExtension = currentPath.extension().string();
                     if (ftype == boost::filesystem::regular_file) {
-                        vertex_data.emplace_back(FileInfo(
-                            status.permissions(),
-                            fs::file_size(currentPath, errcode), currentPathStr,
-                            aStem, currentPath.extension().string(),
-                            fs::last_write_time(aPath, errcode)));
+                        vertex_data.emplace_back(
+                            FileInfo(status.permissions(), fs::file_size(currentPath, errcode),
+                                     currentPathStr, aStem, currentPath.extension().string(),
+                                     fs::last_write_time(aPath, errcode)));
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (CustomFilter.isValidStem(aStem) &&
                             CustomFilter.isValidExt(anExtension)) {
-                            edges.emplace_back(std::make_tuple(
-                                aPath.string(), currentPath.string()));
+                            edges.emplace_back(
+                                std::make_tuple(aPath.string(), currentPath.string()));
                             stack.emplace_back(currentPath);
                         }
                     } else {
@@ -108,22 +101,17 @@ namespace utils {
                 // Each vertex will store its path and a list of files at the
                 // root
                 // level of the current folder.
-                vertexes.emplace_back(
-                    vertex_type{aPath.string(), std::move(vertex_data)});
+                vertexes.emplace_back(vertex_type{aPath.string(), std::move(vertex_data)});
                 vertex_data.clear();
             }
 
             template <typename OArchive> void print() {
                 size_t counter = 0;
                 std::for_each(vertexes.begin(), vertexes.end(),
-                              [&counter](auto const &item) {
-                                  counter += item.Files.size();
-                              });
+                              [&counter](auto const &item) { counter += item.Files.size(); });
 
                 std::stringstream output;
 
-                
-                
                 {
                     OArchive oar(output);
                     oar(cereal::make_nvp("All vertexes", vertexes));
@@ -137,12 +125,9 @@ namespace utils {
                 fmt::print("Number of files: {0}\n", counter);
             }
 
-            template <typename index_type>
-            auto getFolderHierarchy() {
+            template <typename index_type> auto getFolderHierarchy() {
                 std::sort(vertexes.begin(), vertexes.end(),
-                          [](auto const &x, auto const &y) {
-                              return x.Path < y.Path;
-                          });
+                          [](auto const &x, auto const &y) { return x.Path < y.Path; });
 
                 // Create a lookup table
                 std::unordered_map<std::string, index_type> lookupTable;
@@ -161,7 +146,7 @@ namespace utils {
                 allEdges.reserve(edges.size());
                 for (auto anEdge : edges) {
                     allEdges.push_back(graph_edge_type(lookupTable[std::get<0>(anEdge)],
-                                                 lookupTable[std::get<1>(anEdge)]));
+                                                       lookupTable[std::get<1>(anEdge)]));
                 }
                 std::sort(allEdges.begin(), allEdges.end());
                 return FolderHierarchy<index_type>(std::move(vertexes), std::move(allEdges));
@@ -204,8 +189,7 @@ namespace utils {
                     if (ftype == boost::filesystem::regular_file) {
                         Results.emplace_back(FileInfo(
                             status.permissions(), fs::file_size(currentPath),
-                            currentPath.string(), aStem,
-                            currentPath.extension().string(),
+                            currentPath.string(), aStem, currentPath.extension().string(),
                             fs::last_write_time(aPath)));
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (CustomFilter.isValidStem(aStem) &&

@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     // clang-format on
 
     po::positional_options_description p;
-    p.add("strings", -1);
+    p.add("pattern", -1);
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
@@ -75,8 +75,8 @@ int main(int argc, char *argv[]) {
 
     // Get file extensions
     std::string pattern;
-    if (vm.count("strings")) {
-        pattern = vm["strings"].as<std::string>();
+    if (vm.count("pattern")) {
+        pattern = vm["pattern"].as<std::string>();
     }
 
     // Get file database

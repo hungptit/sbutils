@@ -3,12 +3,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
-set(EXTRA_COMPILE_OPTIONS "-Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef -DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS -DFMT_HEADER_ONLY")
+set(EXTRA_COMPILE_OPTIONS "")
 
 # set(CMAKE_BUILD_TYPE Debug)
 set (CMAKE_BUILD_TYPE Release)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 ${EXTRA_COMPILE_OPTIONS}")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef -DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS -DFMT_HEADER_ONLY ")
+
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 
 
@@ -67,7 +68,7 @@ set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
 set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
+# set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
 
