@@ -115,7 +115,6 @@ namespace utils {
     std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, Filter1 &f1, Filter2 &f2,
                                         Filter3 &f3) {
         std::vector<utils::FileInfo> results;
-
         auto filterObj = [&f1, &f2, &f3, &results](auto &item) {
             if (f1.isValid(item) && f2.isValid(item) && f3.isValid(item)) {
                 results.emplace_back(item);
