@@ -13,6 +13,16 @@
 #include "utils/Resources.hpp"
 #include "utils/Timer.hpp"
 
+template <typename Container>
+void print(const Container &results) {
+    fmt::MemoryWriter writer;
+    writer << "Search results: \n";
+    std::for_each(results.begin(), results.end(),
+                  [&writer](auto const &item) { writer << item.Path << "\n"; });
+    ;
+    fmt::print("{}", writer.str());
+}
+
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     using path = boost::filesystem::path;
@@ -101,14 +111,6 @@ int main(int argc, char *argv[]) {
         } else {
             results = utils::filterSearchResults(allFiles, extensions, stems, pattern);
         }
-
-        {
-            fmt::MemoryWriter writer;
-            writer << "Search results: \n";
-            std::for_each(results.begin(), results.end(),
-                          [&writer](auto const &item) { writer << item.Path << "\n"; });
-            ;
-            fmt::print("{}", writer.str());
-        }
+        print(results);
     }
 }
