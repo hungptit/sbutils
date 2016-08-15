@@ -13,6 +13,16 @@
 #include "utils/Resources.hpp"
 #include "utils/Timer.hpp"
 
+template <typename Container>
+void print(const Container &results) {
+    fmt::MemoryWriter writer;
+    writer << "Search results: \n";
+    std::for_each(results.begin(), results.end(),
+                  [&writer](auto const &item) { writer << item.Path << "\n"; });
+    ;
+    fmt::print("{}", writer.str());
+}
+
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     using path = boost::filesystem::path;
@@ -94,21 +104,14 @@ int main(int argc, char *argv[]) {
     {
         using Container = std::vector<utils::FileInfo>;
         Container allFiles = utils::read_baseline<Container>(database, folders, verbose);
-
-        Container results;
+        utils::StemFilter<decltype(stems)> stemFilter(stems);
+        utils::ExtFilter<decltype(extensions)> extFilter(extensions);
         if (pattern.empty()) {
-            results = utils::filterSearchResults(allFiles, extensions, stems);
+            print(utils::filter(allFiles.cbegin(), allFiles.cend(), stemFilter, extFilter));
         } else {
-            results = utils::filterSearchResults(allFiles, extensions, stems, pattern);
-        }
-
-        {
-            fmt::MemoryWriter writer;
-            writer << "Search results: \n";
-            std::for_each(results.begin(), results.end(),
-                          [&writer](auto const &item) { writer << item.Path << "\n"; });
-            ;
-            fmt::print("{}", writer.str());
+            utils::SimpleFilter patternFilter(pattern);
+            print(utils::filter(allFiles.begin(), allFiles.end(), patternFilter, stemFilter, extFilter));
+            print(utils::filter_nopack(allFiles.begin(), allFiles.end(), patternFilter, stemFilter, extFilter));
         }
     }
 }

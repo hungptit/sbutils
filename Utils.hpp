@@ -20,53 +20,6 @@ namespace utils {
         return ss.str();
     }
 
-    template <typename Container> class ExtFilter {
-      public:
-        explicit ExtFilter(Container &exts) : Extensions(exts) {}
-
-        bool isValid(FileInfo &info) {
-            if (Extensions.empty()) {
-                return true;
-            } else {
-                return (std::find(Extensions.begin(), Extensions.end(), info.Extension) !=
-                        Extensions.end());
-            }
-        }
-
-      private:
-        Container Extensions;
-    };
-
-    template <typename Container> class StemFilter {
-      public:
-        explicit StemFilter(Container &stems) : Stems(stems) {}
-
-        bool isValid(FileInfo &info) {
-            if (Stems.empty()) {
-                return true;
-            } else {
-                return (std::find(Stems.begin(), Stems.end(), info.Stem) != Stems.end());
-            }
-        }
-
-      private:
-        std::vector<std::string> Stems;
-    };
-
-    class SimpleFilter {
-      public:
-        using iter_type = std::string::const_iterator;
-        explicit SimpleFilter(const std::string &pattern)
-            : Pattern(pattern) {}
-
-        bool isValid(const FileInfo &info) {
-          return info.Path.find(Pattern) != std::string::npos;
-        }
-
-      private:
-        std::string Pattern;
-    };
-
     class KnuthMorrisPrattFilter {
       public:
         using iter_type = std::string::const_iterator;
@@ -79,11 +32,72 @@ namespace utils {
         boost::algorithm::knuth_morris_pratt<iter_type> SearchAlg;
     };
 
-    template <typename Iterator, typename Filter1>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, Filter1 &f1) {
+    template <typename T, typename... Args> bool isValid(const FileInfo &info, const T &first) {
+        return first.isValid(info);
+    }
+    
+    template <typename Container> class ExtFilter {
+      public:
+        explicit ExtFilter(Container &exts) : Extensions(exts) {}
+
+        bool isValid(const FileInfo &info) const {
+            if (Extensions.empty()) {
+                return true;
+            }
+            return (std::find(Extensions.begin(), Extensions.end(), info.Extension) !=
+                    Extensions.end());
+        }
+
+      private:
+        Container Extensions;
+    };
+
+    template <typename Container> class StemFilter {
+      public:
+        explicit StemFilter(Container &stems) : Stems(stems) {}
+
+        bool isValid(const FileInfo &info) const {
+            if (Stems.empty()) {
+                return true;
+            }
+            return (std::find(Stems.begin(), Stems.end(), info.Stem) != Stems.end());
+        }
+
+      private:
+        std::vector<std::string> Stems;
+    };
+
+    class SimpleFilter {
+      public:
+        using iter_type = std::string::const_iterator;
+        explicit SimpleFilter(const std::string &pattern) : Pattern(pattern) {}
+
+        bool isValid(const FileInfo &info) const {
+            return info.Path.find(Pattern) != std::string::npos;
+        }
+
+      private:
+        std::string Pattern;
+    };
+
+    template <typename T, typename... Args>
+    bool isValid(const FileInfo &info, const T &first, const Args... args) {
+        return first.isValid(info) && isValid(info, args...);
+    }
+
+    // Do a simple copy if there is not any constraint.
+    template <typename Iterator>
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end) {
+        return std::vector<utils::FileInfo>(begin, end);
+    }
+
+    template <typename Iterator, typename FirstConstraint, typename... Constraints>
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, FirstConstraint &f1,
+                                        Constraints... fs) {
+        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         std::vector<utils::FileInfo> results;
-        auto filterObj = [&f1, &results](auto &item) {
-            if (f1.isValid(item)) {
+        auto filterObj = [&](const auto &item) {
+            if (isValid(item, f1, fs...)) {
                 results.emplace_back(item);
             }
         };
@@ -94,29 +108,14 @@ namespace utils {
         return results;
     }
 
-    template <typename Iterator, typename Filter1, typename Filter2>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, Filter1 &f1,
-                                        Filter2 &f2) {
+    template <typename Iterator, typename FirstConstraint, typename SecondConstraint,
+              typename ThirdConstraint>
+    std::vector<utils::FileInfo>
+    filter_nopack(Iterator begin, Iterator end, const FirstConstraint &f1,
+                  const SecondConstraint &f2, const ThirdConstraint &f3) {
+        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         std::vector<utils::FileInfo> results;
-
-        auto filterObj = [&f1, &f2, &results](auto &item) {
-            if (f1.isValid(item) && f2.isValid(item)) {
-                results.emplace_back(item);
-            }
-        };
-
-        // TODO: Speed up this for loop using thread.
-        std::for_each(begin, end, filterObj);
-
-        return results;
-    }
-
-    template <typename Iterator, typename Filter1, typename Filter2, typename Filter3>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, Filter1 &f1, Filter2 &f2,
-                                        Filter3 &f3) {
-        std::vector<utils::FileInfo> results;
-
-        auto filterObj = [&f1, &f2, &f3, &results](auto &item) {
+        auto filterObj = [&](const auto &item) {
             if (f1.isValid(item) && f2.isValid(item) && f3.isValid(item)) {
                 results.emplace_back(item);
             }
@@ -126,24 +125,6 @@ namespace utils {
         std::for_each(begin, end, filterObj);
 
         return results;
-    }
-
-    template <typename Container, typename ExtContainer, typename StemContainer>
-    auto filterSearchResults(Container &data, ExtContainer &exts, StemContainer &stems) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-        utils::ExtFilter<ExtContainer> f1(exts);
-        utils::StemFilter<StemContainer> f2(stems);
-        return utils::filter(data.begin(), data.end(), f1, f2);
-    }
-
-    template <typename Container, typename ExtContainer, typename StemContainer>
-    auto filterSearchResults(Container &data, ExtContainer &exts, StemContainer &stems,
-                             const std::string &pattern) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-        utils::ExtFilter<ExtContainer> f1(exts);
-        utils::StemFilter<StemContainer> f2(stems);
-        utils::SimpleFilter f3(pattern);
-        return utils::filter(data.begin(), data.end(), f1, f2, f3);
     }
 }
 
