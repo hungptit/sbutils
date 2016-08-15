@@ -53,10 +53,24 @@ namespace utils {
         std::vector<std::string> Stems;
     };
 
-    template <typename Container> class PatternFilter {
+    class SimpleFilter {
       public:
         using iter_type = std::string::const_iterator;
-        explicit PatternFilter(const std::string &pattern)
+        explicit SimpleFilter(const std::string &pattern)
+            : Pattern(pattern) {}
+
+        bool isValid(const FileInfo &info) {
+          return info.Path.find(Pattern) != std::string::npos;
+        }
+
+      private:
+        std::string Pattern;
+    };
+
+    class KnuthMorrisPrattFilter {
+      public:
+        using iter_type = std::string::const_iterator;
+        explicit KnuthMorrisPrattFilter(const std::string &pattern)
             : SearchAlg(pattern.begin(), pattern.end()) {}
 
         bool isValid(const FileInfo &info) { return SearchAlg(info.Path) != info.Path.end(); }
@@ -98,8 +112,8 @@ namespace utils {
     }
 
     template <typename Iterator, typename Filter1, typename Filter2, typename Filter3>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, Filter1 &f1,
-                                        Filter2 &f2, Filter3 &f3) {
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, Filter1 &f1, Filter2 &f2,
+                                        Filter3 &f3) {
         std::vector<utils::FileInfo> results;
 
         auto filterObj = [&f1, &f2, &f3, &results](auto &item) {
@@ -123,11 +137,12 @@ namespace utils {
     }
 
     template <typename Container, typename ExtContainer, typename StemContainer>
-    auto filterSearchResults(Container &data, ExtContainer &exts, StemContainer &stems, const std::string &pattern) {
+    auto filterSearchResults(Container &data, ExtContainer &exts, StemContainer &stems,
+                             const std::string &pattern) {
         utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         utils::ExtFilter<ExtContainer> f1(exts);
         utils::StemFilter<StemContainer> f2(stems);
-        utils::PatternFilter<StemContainer> f3(pattern);
+        utils::SimpleFilter f3(pattern);
         return utils::filter(data.begin(), data.end(), f1, f2, f3);
     }
 }
