@@ -96,7 +96,7 @@ namespace utils {
                                         Constraints... fs) {
         utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         std::vector<utils::FileInfo> results;
-        auto filterObj = [&](const auto &item) {
+        auto filterObj = [f1, &fs..., &results](const auto &item) {
             if (isValid(item, f1, fs...)) {
                 results.emplace_back(item);
             }
@@ -104,7 +104,6 @@ namespace utils {
 
         // TODO: Speed up this for loop using thread.
         std::for_each(begin, end, filterObj);
-
         return results;
     }
 
