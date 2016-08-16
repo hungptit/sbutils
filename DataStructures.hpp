@@ -156,10 +156,7 @@ namespace utils {
                         [&](auto const &item) { AllFiles.emplace_back(item); });
                 });
 
-            std::sort(AllFiles.begin(), AllFiles.end(),
-                      [](const auto &first, const auto &second) {
-                          return first.Path < second.Path;
-                      });
+            std::sort(AllFiles.begin(), AllFiles.end());
         }
 
         template <typename Archive> void serialize(Archive &ar) {

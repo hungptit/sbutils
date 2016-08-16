@@ -5,15 +5,25 @@
 #include <iostream>
 #include <string>
 #include <tuple>
+#include <utility>
 
 #include "DataStructures.hpp"
 #include "Timer.hpp"
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 
-namespace utils {
-    // Define the file information which is (path, stem, extension, permission,
-    // time_stamp, file_size)
+namespace {
+    template <typename T, typename... Args>
+    bool isValid(const utils::FileInfo &info, T &&first) {
+        return first.isValid(info);
+    }
+    
+    template <typename T, typename... Args>
+    bool isValid(const utils::FileInfo &info, T &&first, Args&&... args) {
+        return first.isValid(info) && isValid(info, std::forward<Args>(args)...);
+    }    
+}
 
+namespace utils {
     template <typename T> std::string to_fixed_string(const int len, T val) {
         std::ostringstream ss;
         ss << std::setw(len) << std::setfill('0') << val;
@@ -31,11 +41,7 @@ namespace utils {
       private:
         boost::algorithm::knuth_morris_pratt<iter_type> SearchAlg;
     };
-
-    template <typename T, typename... Args> bool isValid(const FileInfo &info, const T &first) {
-        return first.isValid(info);
-    }
-    
+   
     template <typename Container> class ExtFilter {
       public:
         explicit ExtFilter(Container &exts) : Extensions(exts) {}
@@ -80,11 +86,6 @@ namespace utils {
         std::string Pattern;
     };
 
-    template <typename T, typename... Args>
-    bool isValid(const FileInfo &info, const T &first, const Args... args) {
-        return first.isValid(info) && isValid(info, args...);
-    }
-
     // Do a simple copy if there is not any constraint.
     template <typename Iterator>
     std::vector<utils::FileInfo> filter(Iterator begin, Iterator end) {
@@ -92,12 +93,12 @@ namespace utils {
     }
 
     template <typename Iterator, typename FirstConstraint, typename... Constraints>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, FirstConstraint &f1,
-                                        Constraints... fs) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, FirstConstraint &&f1,
+                                        Constraints&&... fs) {
+        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
         std::vector<utils::FileInfo> results;
         auto filterObj = [f1, &fs..., &results](const auto &item) {
-            if (isValid(item, f1, fs...)) {
+            if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
                 results.emplace_back(item);
             }
         };
@@ -107,24 +108,24 @@ namespace utils {
         return results;
     }
 
-    template <typename Iterator, typename FirstConstraint, typename SecondConstraint,
-              typename ThirdConstraint>
-    std::vector<utils::FileInfo>
-    filter_nopack(Iterator begin, Iterator end, const FirstConstraint &f1,
-                  const SecondConstraint &f2, const ThirdConstraint &f3) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-        std::vector<utils::FileInfo> results;
-        auto filterObj = [&](const auto &item) {
-            if (f1.isValid(item) && f2.isValid(item) && f3.isValid(item)) {
-                results.emplace_back(item);
-            }
-        };
+    // template <typename Iterator, typename FirstConstraint, typename SecondConstraint,
+    //           typename ThirdConstraint>
+    // std::vector<utils::FileInfo>
+    // filter_nopack(Iterator begin, Iterator end, FirstConstraint &&f1,
+    //               SecondConstraint &&f2, ThirdConstraint &&f3) {
+    //     utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files no pack: ");
+    //     std::vector<utils::FileInfo> results;
+    //     auto filterObj = [&f1, &f2, &f3, &results](const auto &item) {
+    //         if (f1.isValid(item) && f2.isValid(item) && f3.isValid(item)) {
+    //             results.emplace_back(item);
+    //         }
+    //     };
 
-        // TODO: Speed up this for loop using thread.
-        std::for_each(begin, end, filterObj);
+    //     // TODO: Speed up this for loop using thread.
+    //     std::for_each(begin, end, filterObj);
 
-        return results;
-    }
+    //     return results;
+    // }
 }
 
 #endif
