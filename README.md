@@ -3,9 +3,17 @@
 
 * [Boost](http://www.boost.org/): filesystem, thread, system.
 
-* [leveldb](http://leveldb.org/)
+* [rocksdb](http://rocksdb.org/)
 
 * [snappy](http://google.github.io/snappy/)
+
+* [zlib](http://zlib.net/)
+
+* [bzip2](http://www.bzip.org/)
+
+* [lz4](https://github.com/Cyan4973/lz4)
+
+* [jemalloc](https://github.com/jemalloc)
 
 * [cereal](http://uscilab.github.io/cereal/)
 
@@ -16,8 +24,8 @@
 * [Poco](http://pocoproject.org/)
 
 # Installation #
-* Get all required packages for **utils** including Boost. Poco, leveldb, snappy, cereal, cppformat, and gtest. If you do not want to handle this manually then you can try [3p](https://github.com/hungptit/3p). This git repository has automated shell scripts that can be used to build all required packages for **util**s.
-* Compile all commands using below command:
+* Get all required packages for **sbutils** including Boost. Poco, rocksdb, zlib, bzip2, lz4, snappy, jemalloc, cereal, fmt, and gtest. If you do not want to handle this manually then you can either use system libraries or [3p](https://github.com/hungptit/3p). [3p](https://github.com/hungptit/3p) has automated Bash scripts that can be used to build all required packages for **sbutils**.
+* Compile all commands using below command. You might have to modify the CMakeLists.txt to make it suitable for your configuration.
 
         cd utils/testing
         cmake ./
@@ -27,13 +35,13 @@
 
 ## mupdatedb ##
 
-**mupdatedb** will generate a file information database for given folders. This database will be the baseline for other commands including **mdiff**, **mlocate**, and **copydiff**. Below is a simple example
+**mupdatedb** will build the file information database for given folders. This database will be used as a baseline for other commands including **mdiff**, **mlocate**, and **copydiff**. Below is a simple example
 
         mupdatedb matlab/ -d .database
 
 ## mdiff ##
 
-**mdiff** lists all files that have been modified, added, and removed in given folders using the baseline. Below is a sample command which will find the differences between the current state of **matlab/toolbox/** and **matlab/test/** folders and their baseline.
+**mdiff** lists all files that have been modified, added, and removed in given folders or a sandbox using the baseline. This command can handle a very large sandbox in a reasonable amount of time. Below is a sample command which will find the differences between the current state of **matlab/toolbox/** and **matlab/test/** folders and the baseline.
 
         % mdiff matlab/toolbox/ matlab/test/
         ---- Modified files: 5 ----
@@ -53,13 +61,24 @@
 
 ## mlocate ##
 
-We can use **mlocate** to locate files in given folders. The command will be significantly faster than **locate** command if users can provide more specific constraints. This sample command below will find all files in matlab/test folder that have tAutoFix stem.
+We can use **mlocate** to locate files in given folders. The command will be significantly faster than **global** command if users can provide more specific constraints such as file extensions, search folders, and file stems. Below are sample commands that find a setup_flycheck pattern for all files in the current folder with different constraints.
 
-        % mlocate matlab/test/ -s tAutoFix
-        Search results: 
-        matlab/test/toolbox/simulink/modelref/ss2mdlref/tAutoFix.m
-        matlab/test/toolbox/slci/Compatibility/tAutoFix.m
-        Elapsed time: 365.184  milliseconds
+    % mlocate setup_flycheck
+    Read baseline: 404.257  milliseconds
+    Filtering files param pack: 55.1193  milliseconds
+    Search results: 
+    ./emacs/setup_flycheck.el
+    Search results: 
+    Total time: 530.944  milliseconds
+
+    % mlocate setup_flycheck -f ./emacs
+    Read baseline: 171.286  milliseconds
+    Filtering files param pack: 0.782505  milliseconds
+    Search results: 
+    ./emacs/setup_flycheck.el
+    Search results: 
+    Total time: 173.89  milliseconds
+
 
 ## mcopydiff ##
 
@@ -74,7 +93,7 @@ This command will copy changes that you have made in your local sandbox to the n
 
 # Others #
 
-There are utility classes in **utils** that can be used independently in many C++ projects. These classes are:
+There are utility classes in **sbutils** that can be used independently in many C++ projects. These classes are:
 
 * Timer: Calculate the elapsed time of a code segment. This class is very similar to **tic** and **toc** command in **Matlab**.
 
