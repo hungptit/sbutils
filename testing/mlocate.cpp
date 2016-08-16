@@ -106,15 +106,14 @@ int main(int argc, char *argv[]) {
         Container allFiles = utils::read_baseline<Container>(database, folders, verbose);
         Container results;
         if (pattern.empty()) {
-            const utils::StemFilter<decltype(stems)> stemFilter(stems);
-            const utils::ExtFilter<decltype(extensions)> extFilter(extensions);
+            utils::StemFilter<decltype(stems)> stemFilter(stems);
+            utils::ExtFilter<decltype(extensions)> extFilter(extensions);
             results = utils::filter(allFiles.cbegin(), allFiles.cend(), stemFilter, extFilter);
         } else {
-            const utils::StemFilter<decltype(stems)> stemFilter(stems);
-            const utils::ExtFilter<decltype(extensions)> extFilter(extensions);
-            const utils::SimpleFilter patternFilter(pattern);
+            utils::StemFilter<decltype(stems)> stemFilter(stems);
+            utils::ExtFilter<decltype(extensions)> extFilter(extensions);
+            utils::SimpleFilter patternFilter(pattern);
             print(utils::filter(allFiles.begin(), allFiles.end(), extFilter, patternFilter, stemFilter, extFilter));
-            // print(utils::filter_nopack(allFiles.begin(), allFiles.end(), patternFilter, stemFilter, extFilter));
         }
         print(results);
     }

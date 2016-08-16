@@ -107,25 +107,6 @@ namespace utils {
         std::for_each(begin, end, filterObj);
         return results;
     }
-
-    // template <typename Iterator, typename FirstConstraint, typename SecondConstraint,
-    //           typename ThirdConstraint>
-    // std::vector<utils::FileInfo>
-    // filter_nopack(Iterator begin, Iterator end, FirstConstraint &&f1,
-    //               SecondConstraint &&f2, ThirdConstraint &&f3) {
-    //     utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files no pack: ");
-    //     std::vector<utils::FileInfo> results;
-    //     auto filterObj = [&f1, &f2, &f3, &results](const auto &item) {
-    //         if (f1.isValid(item) && f2.isValid(item) && f3.isValid(item)) {
-    //             results.emplace_back(item);
-    //         }
-    //     };
-
-    //     // TODO: Speed up this for loop using thread.
-    //     std::for_each(begin, end, filterObj);
-
-    //     return results;
-    // }
 }
 
 #endif

@@ -68,24 +68,22 @@ namespace utils {
             using path_container = std::vector<path>;
             using index_type = int;
             using vertex_type = Vertex<index_type>;
-            // using graph_type = graph::SparseGraph<index_type, index_type>;
-
-            void visit(path &aPath, PathContainer &stack) {
+            
+            void visit(const path &aPath, PathContainer &stack) {
                 namespace fs = boost::filesystem;
                 directory_iterator endIter;
                 directory_iterator dirIter(aPath);
                 for (; dirIter != endIter; ++dirIter) {
-                    auto currentPath = dirIter->path();
-                    auto status = dirIter->status();
-                    auto ftype = status.type();
+                    auto const currentPath = dirIter->path();
+                    auto const status = dirIter->status();
+                    auto const ftype = status.type();
                     boost::system::error_code errcode;
-                    std::string currentPathStr = currentPath.string();
-                    auto aStem = currentPath.stem().string();
-                    auto anExtension = currentPath.extension().string();
+                    const auto aStem = currentPath.stem().string();
+                    const auto anExtension = currentPath.extension().string();
                     if (ftype == boost::filesystem::regular_file) {
                         vertex_data.emplace_back(
                             FileInfo(status.permissions(), fs::file_size(currentPath, errcode),
-                                     currentPathStr, aStem, currentPath.extension().string(),
+                                     currentPath.string(), std::move(aStem), std::move(anExtension),
                                      fs::last_write_time(aPath, errcode)));
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (CustomFilter.isValidStem(aStem) &&
@@ -133,7 +131,7 @@ namespace utils {
                 std::unordered_map<std::string, index_type> lookupTable;
                 int counter = 0;
                 lookupTable.reserve(vertexes.size());
-                auto updateDictObj = [&](auto const &item) {
+                auto updateDictObj = [&lookupTable, &counter](auto const &item) {
                     lookupTable.emplace(std::make_pair(item.Path, counter));
                     ++counter;
                 };
@@ -176,20 +174,20 @@ namespace utils {
 
             const container_type &getResults() const { return Results; }
 
-            void visit(path &aPath, PathContainer &folders) {
+            void visit(const path &aPath, PathContainer &folders) {
                 namespace fs = boost::filesystem;
                 directory_iterator endIter;
                 directory_iterator dirIter(aPath);
                 for (; dirIter != endIter; ++dirIter) {
-                    auto currentPath = dirIter->path();
-                    auto status = dirIter->status();
-                    auto ftype = status.type();
-                    auto aStem = currentPath.stem().string();
-                    auto anExtension = currentPath.extension().string();
+                    const auto currentPath = dirIter->path();
+                    const auto status = dirIter->status();
+                    const auto ftype = status.type();
+                    const auto aStem = currentPath.stem().string();
+                    const auto anExtension = currentPath.extension().string();
                     if (ftype == boost::filesystem::regular_file) {
                         Results.emplace_back(FileInfo(
                             status.permissions(), fs::file_size(currentPath),
-                            currentPath.string(), aStem, currentPath.extension().string(),
+                            currentPath.string(), std::move(aStem), std::move(anExtension),
                             fs::last_write_time(aPath)));
                     } else if (ftype == boost::filesystem::directory_file) {
                         if (CustomFilter.isValidStem(aStem) &&
