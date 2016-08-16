@@ -144,13 +144,13 @@ namespace utils {
      */
     template <typename Container>
     std::tuple<Container, Container, Container>
-    diff(const Container &first, const Container &second, bool verbose = false) {
+    diff(const Container &&first, const Container &&second, bool verbose = false) {
 
         Container modifiedFiles;
         Container results;
         Container newFiles;
         Container deletedFiles;
-
+        
         // Create a lookup table
         using value_type = typename Container::value_type;
 
@@ -239,17 +239,17 @@ namespace utils {
 
         readThread.wait();
         findThread.wait();
-        const Container &baseline = readThread.get();
+        Container baseline = readThread.get();
         findThread.get();
 
         // Return the differences between baseline and current state.
-        auto const &results = visitor.getResults();
+        Container results = visitor.getResults();
         if (verbose) {
             fmt::print("Number of files: {}\n", results.size());
             fmt::print("Number of files in the baseline: {}\n", baseline.size());
         }
 
-        return utils::diff(baseline, results);
+        return utils::diff(std::move(baseline), std::move(results));
     }
 }
 #endif
