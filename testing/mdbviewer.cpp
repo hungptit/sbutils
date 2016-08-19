@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
         ("verbose,v", "Display verbose information.")
         ("all-keys,a", "Display all keys in a given database")
         ("keys,k", po::value<std::vector<std::string>>(&keys), "List the content of given keys.")
-        ("database,d", po::value<std::string>(&database)->default_value(".database"), "File database.");
+        ("database,d", po::value<std::string>(&database)->default_value(utils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;

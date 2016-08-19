@@ -25,6 +25,10 @@ namespace utils {
                 clock::duration::period::den / clock::duration::period::num;
         }
 
+        Timer(Timer &) = delete;
+        Timer(Timer &&) = delete;
+        Timer & operator=(Timer &) = delete;
+        
         void tic() { StartTime = clock::now(); }
 
         auto toc() const { return (clock::now() - StartTime).count(); }

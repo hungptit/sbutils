@@ -184,9 +184,10 @@ namespace utils {
                     const auto ftype = status.type();
                     const auto aStem = currentPath.stem().string();
                     const auto anExtension = currentPath.extension().string();
+                    boost::system::error_code errcode;
                     if (ftype == boost::filesystem::regular_file) {
                         Results.emplace_back(FileInfo(
-                            status.permissions(), fs::file_size(currentPath),
+                                                 status.permissions(), fs::file_size(currentPath, errcode),
                             currentPath.string(), std::move(aStem), std::move(anExtension),
                             fs::last_write_time(aPath)));
                     } else if (ftype == boost::filesystem::directory_file) {

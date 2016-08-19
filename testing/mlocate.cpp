@@ -13,8 +13,7 @@
 #include "utils/Resources.hpp"
 #include "utils/Timer.hpp"
 
-template <typename Container>
-void print(const Container &results) {
+template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;
     writer << "Search results: \n";
     std::for_each(results.begin(), results.end(),
@@ -30,9 +29,9 @@ int main(int argc, char *argv[]) {
     using Index = int;
 
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
-
     po::options_description desc("Allowed options");
-
+    std::string database;
+    
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
@@ -42,7 +41,7 @@ int main(int argc, char *argv[]) {
         ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
         ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
         ("pattern,p", po::value<std::string>(), "Search string pattern.")
-        ("database,d", po::value<std::string>(), "File database.");
+        ("database,d", po::value<std::string>(&database)->default_value(utils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -89,14 +88,6 @@ int main(int argc, char *argv[]) {
         pattern = vm["pattern"].as<std::string>();
     }
 
-    // Get file database
-    std::string database;
-    if (vm.count("database")) {
-        database = vm["database"].as<std::string>();
-    } else {
-        database = (path(utils::Resources::Database)).string();
-    }
-
     if (verbose) {
         std::cout << "Database: " << database << std::endl;
     }
@@ -113,7 +104,8 @@ int main(int argc, char *argv[]) {
             utils::StemFilter<decltype(stems)> stemFilter(stems);
             utils::ExtFilter<decltype(extensions)> extFilter(extensions);
             utils::SimpleFilter patternFilter(pattern);
-            print(utils::filter(allFiles.begin(), allFiles.end(), extFilter, patternFilter, stemFilter, extFilter));
+            results = utils::filter(allFiles.begin(), allFiles.end(), extFilter, patternFilter,
+                                    stemFilter, extFilter);
         }
         print(results);
     }
