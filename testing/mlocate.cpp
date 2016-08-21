@@ -95,18 +95,18 @@ int main(int argc, char *argv[]) {
     {
         using Container = std::vector<utils::FileInfo>;
         Container allFiles = utils::read_baseline<Container>(database, folders, verbose);
-        Container results;
         if (pattern.empty()) {
             utils::StemFilter<decltype(stems)> stemFilter(stems);
             utils::ExtFilter<decltype(extensions)> extFilter(extensions);
-            results = utils::filter(allFiles.cbegin(), allFiles.cend(), stemFilter, extFilter);
+            auto const results = utils::filter(allFiles, stemFilter, extFilter);
+            print(results);
         } else {
             utils::StemFilter<decltype(stems)> stemFilter(stems);
             utils::ExtFilter<decltype(extensions)> extFilter(extensions);
             utils::SimpleFilter patternFilter(pattern);
-            results = utils::filter(allFiles.begin(), allFiles.end(), extFilter, patternFilter,
+            auto const results = utils::filter(allFiles, extFilter, patternFilter,
                                     stemFilter, extFilter);
+            print(results);
         }
-        print(results);
     }
 }

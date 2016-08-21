@@ -11,6 +11,8 @@
 #include "Timer.hpp"
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 
+#include "tbb/tbb.h"
+
 namespace {
     template <typename T, typename... Args>
     bool isValid(const utils::FileInfo &info, T &&first) {
@@ -87,24 +89,42 @@ namespace utils {
     };
 
     // Do a simple copy if there is not any constraint.
-    template <typename Iterator>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end) {
-        return std::vector<utils::FileInfo>(begin, end);
-    }
+    // template <typename Iterator>
+    // std::vector<utils::FileInfo> filter(Iterator begin, Iterator end) {
+    //     return std::vector<utils::FileInfo>(begin, end);
+    // }
 
-    template <typename Iterator, typename FirstConstraint, typename... Constraints>
-    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, FirstConstraint &&f1,
-                                        Constraints&&... fs) {
+    // template <typename Iterator, typename FirstConstraint, typename... Constraints>
+    // auto filter(Iterator begin, Iterator end, FirstConstraint &&f1,
+    //                                     Constraints&&... fs) {
+    //     utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
+    //     std::vector<utils::FileInfo> results;
+    //     auto filterObj = [f1, &fs..., &results](const auto &item) {
+    //         if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
+    //             results.emplace_back(item);
+    //         }
+    //     };
+
+    //     // TODO: Speed up this for loop using thread.
+    //     std::for_each(begin, end, filterObj);
+    //     return results;
+    // }
+
+  template <typename Container, typename FirstConstraint, typename... Constraints>
+  auto filter(Container &&data, FirstConstraint &&f1,
+              Constraints&&... fs) {
         utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
-        std::vector<utils::FileInfo> results;
-        auto filterObj = [f1, &fs..., &results](const auto &item) {
+        tbb::concurrent_vector<utils::FileInfo> results;
+        
+        auto filterObj = [f1, &fs..., &results, &data](const int idx) {
+          auto const item = data[idx];
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
-                results.emplace_back(item);
+              results.push_back(item);
             }
         };
 
-        // TODO: Speed up this for loop using thread.
-        std::for_each(begin, end, filterObj);
+        int size = data.size();
+        tbb::parallel_for(0, size, 1, filterObj);
         return results;
     }
 }

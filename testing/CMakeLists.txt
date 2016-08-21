@@ -58,6 +58,7 @@ include_directories ("${PROJECTS_FOLDER}/3p/jemalloc/include")
 
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
+include_directories ("${PROJECTS_FOLDER}/3p/tbb/include/")
 
 # Use POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
@@ -109,7 +110,7 @@ if (Boost_FOUND)
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
       ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
-      ${LIB_BZ2} ${LIB_FMT} -lpthread -lrt)
+      ${LIB_BZ2} ${LIB_FMT} -lpthread -lrt -ltbb)
   endforeach (src_file)
   INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
