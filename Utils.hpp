@@ -95,7 +95,7 @@ namespace utils {
     template <typename Iterator, typename FirstConstraint, typename... Constraints>
     std::vector<utils::FileInfo> filter(Iterator begin, Iterator end, FirstConstraint &&f1,
                                         Constraints&&... fs) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
+        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         std::vector<utils::FileInfo> results;
         auto filterObj = [f1, &fs..., &results](const auto &item) {
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
