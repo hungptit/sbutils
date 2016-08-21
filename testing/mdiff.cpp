@@ -93,7 +93,6 @@ int main(int argc, char *argv[]) {
     if (vm.count("folders")) {
         folders = vm["folders"].as<std::vector<std::string>>();
     } else {
-        // TODO: Read the config file provided by users.
         folders = {"matlab/src", "matlab/toolbox", "matlab/test",
                    "matlab/resources"};
     }

@@ -1,4 +1,5 @@
 # Introduction #
+
 **utils** are C++ utilities that I use to speed up my local sandbox workflow. To compile **utils** we need the following packages:
 
 * [Boost](http://www.boost.org/): filesystem, thread, system.
@@ -24,6 +25,7 @@
 * [Poco](http://pocoproject.org/)
 
 # Installation #
+
 * Get all required packages for **sbutils** including Boost. Poco, rocksdb, zlib, bzip2, lz4, snappy, jemalloc, cereal, fmt, and gtest. If you do not want to handle this manually then you can either use system libraries or [3p](https://github.com/hungptit/3p). [3p](https://github.com/hungptit/3p) has automated Bash scripts that can be used to build all required packages for **sbutils**.
 * Compile all commands using below command. You might have to modify the CMakeLists.txt to make it suitable for your configuration.
 
@@ -57,7 +59,6 @@
         ---- Deleted files: 78 ----
         matlab/toolbox/simulink/simulink/+Simulink/+ModelReference/+Conversion/SubsystemConversion.m~
         Elapsed time: 3.97246  seconds
-        
 
 ## mlocate ##
 
@@ -66,19 +67,18 @@ We can use **mlocate** to locate files in given folders. The command will be sig
     % mlocate setup_flycheck
     Read baseline: 404.257  milliseconds
     Filtering files param pack: 55.1193  milliseconds
-    Search results: 
+    Search results:
     ./emacs/setup_flycheck.el
-    Search results: 
+    Search results:
     Total time: 530.944  milliseconds
 
     % mlocate setup_flycheck -f ./emacs
     Read baseline: 171.286  milliseconds
     Filtering files param pack: 0.782505  milliseconds
-    Search results: 
+    Search results:
     ./emacs/setup_flycheck.el
-    Search results: 
+    Search results:
     Total time: 173.89  milliseconds
-
 
 ## mcopydiff ##
 

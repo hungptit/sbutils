@@ -103,7 +103,6 @@ namespace utils {
             }
         };
 
-        // TODO: Speed up this for loop using thread.
         std::for_each(begin, end, filterObj);
         return results;
     }

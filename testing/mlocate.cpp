@@ -18,7 +18,6 @@ template <typename Container> void print(Container &&results) {
     writer << "Search results: \n";
     std::for_each(results.begin(), results.end(),
                   [&writer](auto const &item) { writer << item.Path << "\n"; });
-    ;
     fmt::print("{}", writer.str());
 }
 
@@ -31,7 +30,7 @@ int main(int argc, char *argv[]) {
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     po::options_description desc("Allowed options");
     std::string database;
-    
+
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")

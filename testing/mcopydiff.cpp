@@ -59,7 +59,6 @@ namespace {
         }
     }
 
-    // TODO: Need to parallelize this function
     auto copyFiles(const std::vector<utils::FileInfo> &files,
                    const boost::filesystem::path &dstDir,
                    bool verbose = false) {
