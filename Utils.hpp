@@ -89,35 +89,35 @@ namespace utils {
     };
 
     // Do a simple copy if there is not any constraint.
-    // template <typename Iterator>
-    // std::vector<utils::FileInfo> filter(Iterator begin, Iterator end) {
-    //     return std::vector<utils::FileInfo>(begin, end);
-    // }
+    template <typename Iterator>
+    std::vector<utils::FileInfo> filter(Iterator begin, Iterator end) {
+        return std::vector<utils::FileInfo>(begin, end);
+    }
 
-    // template <typename Iterator, typename FirstConstraint, typename... Constraints>
-    // auto filter(Iterator begin, Iterator end, FirstConstraint &&f1,
-    //                                     Constraints&&... fs) {
-    //     utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
-    //     std::vector<utils::FileInfo> results;
-    //     auto filterObj = [f1, &fs..., &results](const auto &item) {
-    //         if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
-    //             results.emplace_back(item);
-    //         }
-    //     };
+    template <typename Container, typename FirstConstraint, typename... Constraints>
+    auto filter(Container &&data, FirstConstraint &&f1,
+                                        Constraints&&... fs) {
+        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
+        std::vector<utils::FileInfo> results;
+        auto filterObj = [f1, &fs..., &results](const auto &item) {
+            if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
+                results.emplace_back(item);
+            }
+        };
 
-    //     // TODO: Speed up this for loop using thread.
-    //     std::for_each(begin, end, filterObj);
-    //     return results;
-    // }
+        // TODO: Speed up this for loop using thread.
+        std::for_each(data.begin(), data.end(), filterObj);
+        return results;
+    }
 
   template <typename Container, typename FirstConstraint, typename... Constraints>
-  auto filter(Container &&data, FirstConstraint &&f1,
+  auto filter_tbb(Container &&data, FirstConstraint &&f1,
               Constraints&&... fs) {
         utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
         tbb::concurrent_vector<utils::FileInfo> results;
         
         auto filterObj = [f1, &fs..., &results, &data](const int idx) {
-          auto const item = data[idx];
+          auto const &item = data[idx];
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
               results.push_back(item);
             }
