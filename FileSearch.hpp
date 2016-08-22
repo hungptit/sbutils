@@ -7,16 +7,15 @@
 #include <unordered_map>
 #include <vector>
 
-// Boost libraries
-#define BOOST_THREAD_VERSION 4
-#include "boost/config.hpp"
-#include "boost/filesystem.hpp"
-
-#include "fmt/format.h"
-
 #include "DataStructures.hpp"
 #include "Timer.hpp"
 #include "Utils.hpp"
+
+#include "boost/filesystem.hpp"
+#include "fmt/format.h"
+
+#include "tbb/tbb.h"
+#include "tbb/parallel_sort.h"
 
 namespace utils {
     namespace filesystem {
@@ -124,8 +123,8 @@ namespace utils {
             }
 
             template <typename index_type> auto getFolderHierarchy() {
-                std::sort(vertexes.begin(), vertexes.end(),
-                          [](auto const &x, auto const &y) { return x.Path < y.Path; });
+                tbb::parallel_sort(vertexes.begin(), vertexes.end(),
+                                   [](auto const &x, auto const &y) { return x.Path < y.Path; });
 
                 // Create a lookup table
                 std::unordered_map<std::string, index_type> lookupTable;
@@ -146,7 +145,7 @@ namespace utils {
                     allEdges.push_back(graph_edge_type(lookupTable[std::get<0>(anEdge)],
                                                        lookupTable[std::get<1>(anEdge)]));
                 }
-                std::sort(allEdges.begin(), allEdges.end());
+                tbb::parallel_sort(allEdges.begin(), allEdges.end());
                 return FolderHierarchy<index_type>(std::move(vertexes), std::move(allEdges));
             }
 

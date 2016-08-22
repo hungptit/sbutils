@@ -10,14 +10,9 @@
 #include <unordered_set>
 #include <vector>
 
-#define BOOST_THREAD_VERSION 4
 #include "boost/config.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread/future.hpp"
-#include "boost/unordered_set.hpp"
 
 #include "fmt/format.h"
 #include "utils/FileSearch.hpp"
@@ -25,6 +20,7 @@
 #include "utils/LevelDBIO.hpp"
 #include "utils/Timer.hpp"
 
+#include <future>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -41,17 +37,15 @@ namespace {
     struct NormalFilter {
       public:
         bool isValid(utils::FileInfo &item) const {
-            return (std::find(ExcludedExtensions.begin(),
-                              ExcludedExtensions.end(), item.Extension) ==
-                    ExcludedExtensions.end());
+            return (std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
+                              item.Extension) == ExcludedExtensions.end());
         }
 
       private:
         std::vector<std::string> ExcludedExtensions = {".p"};
     };
 
-    template <typename Container, typename Filter>
-    void print(Container &data, Filter &f) {
+    template <typename Container, typename Filter> void print(Container &data, Filter &f) {
         for (auto item : data) {
             if (f.isValid(item)) {
                 fmt::print("{}\n", item.Path);
@@ -60,8 +54,7 @@ namespace {
     }
 
     auto copyFiles(const std::vector<utils::FileInfo> &files,
-                   const boost::filesystem::path &dstDir,
-                   bool verbose = false) {
+                   const boost::filesystem::path &dstDir, bool verbose = false) {
         using namespace boost::filesystem;
         size_t nfiles = 0, nbytes = 0;
         boost::system::error_code errcode;
@@ -91,8 +84,7 @@ namespace {
                 nfiles++;
                 nbytes += item.Size;
                 if (verbose) {
-                    fmt::print("Copy {0} to {1}\n", srcFile.string(),
-                               dstFile.string());
+                    fmt::print("Copy {0} to {1}\n", srcFile.string(), dstFile.string());
                 }
             }
         }
@@ -100,8 +92,7 @@ namespace {
     }
 
     auto deleteFiles(const std::vector<utils::FileInfo> &files,
-                     const boost::filesystem::path &parent,
-                     bool verbose = false) {
+                     const boost::filesystem::path &parent, bool verbose = false) {
         using namespace boost::filesystem;
         size_t nfiles = 0;
         boost::system::error_code errcode;
@@ -139,9 +130,7 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("src_dir", -1);
     po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
-        vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -159,9 +148,9 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> srcDir;
     if (vm.count("src_dir")) {
         auto srcPaths = vm["src_dir"].as<std::vector<std::string>>();
-        for (auto const & item : srcPaths) {
+        for (auto const &item : srcPaths) {
             srcDir.emplace_back(utils::normalize_path(item));
-        }        
+        }
     } else {
         throw(std::runtime_error("Need to provide the source folder path!"));
     }
@@ -169,12 +158,11 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> dstDir;
     if (vm.count("dst_dir")) {
         auto inputArgs = vm["dst_dir"].as<std::vector<std::string>>();
-        for (auto const & anArg : inputArgs) {
+        for (auto const &anArg : inputArgs) {
             dstDir.emplace_back(utils::normalize_path(anArg));
-        }        
+        }
     } else {
-        throw(std::runtime_error(
-                  "Need to provide the destination sandbox path!"));
+        throw(std::runtime_error("Need to provide the destination sandbox path!"));
     }
 
     // Get file database
@@ -190,8 +178,7 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
-            allDeletedFiles;
+        std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             utils::diffFolders(dataFile, srcDir, verbose);
 
@@ -212,11 +199,10 @@ int main(int argc, char *argv[]) {
                 return deleteFiles(allDeletedFiles, aDstDir, verbose);
             };
 
-            boost::future<std::tuple<size_t, size_t>> t1 =
-                boost::async(copyEditedFileObj);
-            boost::future<std::tuple<size_t, size_t>> t2 =
-                boost::async(copyNewFileObj);
-            boost::future<size_t> t3 = boost::async(deleteFileObj);
+            using namespace std;
+            future<std::tuple<size_t, size_t>> t1 = async(copyEditedFileObj);
+            future<std::tuple<size_t, size_t>> t2 = async(copyNewFileObj);
+            future<size_t> t3 = async(deleteFileObj);
 
             t1.wait();
             t2.wait();
@@ -227,10 +213,10 @@ int main(int argc, char *argv[]) {
             auto results3 = t3.get();
 
             fmt::print("==== Summary for {} ====\n", aDstDir);
-            fmt::print("\tCopied {0} modified files ({1} bytes)\n",
-                       std::get<0>(results1), std::get<1>(results1));
-            fmt::print("\tCopied {0} new files ({1} bytes)\n",
-                       std::get<0>(results2), std::get<1>(results2));
+            fmt::print("\tCopied {0} modified files ({1} bytes)\n", std::get<0>(results1),
+                       std::get<1>(results1));
+            fmt::print("\tCopied {0} new files ({1} bytes)\n", std::get<0>(results2),
+                       std::get<1>(results2));
             fmt::print("\tDelete {0} files\n", results3);
         }
     }

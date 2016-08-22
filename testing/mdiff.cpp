@@ -10,19 +10,14 @@
 #include <unordered_set>
 #include <vector>
 
-#define BOOST_THREAD_VERSION 4
-#include "boost/config.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread/future.hpp"
 
+#include "fmt/format.h"
+#include "utils/DataStructures.hpp"
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
-#include "utils/DataStructures.hpp"
 #include "utils/Timer.hpp"
-#include "fmt/format.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -31,20 +26,17 @@ namespace {
     struct NormalFilter {
       public:
         bool isValid(utils::FileInfo &item) {
-            return (std::find(ExcludedExtensions.begin(),
-                              ExcludedExtensions.end(),
+            return (std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
                               item.Extension) == ExcludedExtensions.end());
         }
 
       private:
-
-        std::vector<std::string> ExcludedExtensions = {
-            ".p",   ".d",   ".o",      ".ts", ".xml~", ".m~",
-            ".log", ".dbg", ".mexa64", ".so", ".dot",  ".tmp"};
+        std::vector<std::string> ExcludedExtensions = {".p",      ".d",  ".o",   ".ts",
+                                                       ".xml~",   ".m~", ".log", ".dbg",
+                                                       ".mexa64", ".so", ".dot", ".tmp"};
     };
 
-    template <typename Container, typename Filter>
-    void print(Container &data, Filter &f) {
+    template <typename Container, typename Filter> void print(Container &data, Filter &f) {
         for (auto item : data) {
             if (f.isValid(item)) {
                 fmt::print("{}\n", item.Path);
@@ -56,10 +48,10 @@ namespace {
 int main(int argc, char *argv[]) {
     using namespace boost;
     utils::ElapsedTime<utils::SECOND> e("Diff time: ");
-    
+
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-    
+
     // clang-format off
   desc.add_options()
     ("help,h", "Print this help")
@@ -72,9 +64,7 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("folders", -1);
     po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
-        vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -93,8 +83,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("folders")) {
         folders = vm["folders"].as<std::vector<std::string>>();
     } else {
-        folders = {"matlab/src", "matlab/toolbox", "matlab/test",
-                   "matlab/resources"};
+        folders = {"matlab/src", "matlab/toolbox", "matlab/test", "matlab/resources"};
     }
 
     // Get file database
@@ -102,8 +91,7 @@ int main(int argc, char *argv[]) {
     if (vm.count("database")) {
         dataFile = vm["database"].as<std::string>();
     } else {
-        dataFile =
-            (boost::filesystem::path(utils::Resources::Database)).string();
+        dataFile = (boost::filesystem::path(utils::Resources::Database)).string();
     }
 
     if (verbose) {
@@ -111,23 +99,20 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        std::vector<utils::FileInfo> allEditedFiles, allNewFiles,
-            allDeletedFiles;
- 
+        std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
+
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             utils::diffFolders(dataFile, folders, verbose);
 
         // Now we will display the results
-        std::cout << "---- Modified files: " << allEditedFiles.size()
-                  << " ----\n";
+        std::cout << "---- Modified files: " << allEditedFiles.size() << " ----\n";
         NormalFilter f;
         print(allEditedFiles, f);
 
         std::cout << "---- New files: " << allNewFiles.size() << " ----\n";
         print(allNewFiles, f);
 
-        std::cout << "---- Deleted files: " << allDeletedFiles.size()
-                  << " ----\n";
+        std::cout << "---- Deleted files: " << allDeletedFiles.size() << " ----\n";
         print(allDeletedFiles, f);
     }
 }

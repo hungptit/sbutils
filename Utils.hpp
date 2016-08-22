@@ -111,8 +111,8 @@ namespace utils {
 
   template <typename Container, typename FirstConstraint, typename... Constraints>
   auto filter_tbb(Container &&data, FirstConstraint &&f1,
-              Constraints&&... fs) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files param pack: ");
+                  Constraints&&... fs) {
+      // utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         tbb::concurrent_vector<utils::FileInfo> results;
         
         auto filterObj = [f1, &fs..., &results, &data](const int idx) {

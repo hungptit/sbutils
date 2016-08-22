@@ -1,4 +1,3 @@
-
 #ifndef Utils_DataStructures_hpp_
 #define Utils_DataStructures_hpp_
 
@@ -17,7 +16,6 @@
 #include "cereal/types/vector.hpp"
 
 #include "boost/filesystem.hpp"
-
 #include "graph/SparseGraph.hpp"
 
 namespace utils {
@@ -32,33 +30,28 @@ namespace utils {
 
     struct FileInfo {
         using String = std::string;
-        
-        FileInfo()
-            : Permissions(), Size(), Path(), Stem(), Extension(), TimeStamp() {}
 
-        template <typename T1, typename T2, typename T3, typename T4,
-                  typename T5, typename T6>
+        FileInfo() : Permissions(), Size(), Path(), Stem(), Extension(), TimeStamp() {}
+
+        template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
         FileInfo(T1 &&perms, T2 &&sizes, T3 &&path, T4 &&stem, T5 &&ext,
-                    T6 &&timeStamp) noexcept
-            : Permissions(std::forward<T1>(perms)),
-              Size(std::forward<T2>(sizes)), Path(std::forward<T3>(path)),
-              Stem(std::forward<T4>(stem)), Extension(std::forward<T5>(ext)),
-              TimeStamp(std::forward<T6>(timeStamp)) {}
+                 T6 &&timeStamp) noexcept
+            : Permissions(std::forward<T1>(perms)), Size(std::forward<T2>(sizes)),
+              Path(std::forward<T3>(path)), Stem(std::forward<T4>(stem)),
+              Extension(std::forward<T5>(ext)), TimeStamp(std::forward<T6>(timeStamp)) {}
 
         FileInfo(const FileInfo &info) noexcept
-            : Permissions(info.Permissions), Size(info.Size), Path(info.Path),
-              Stem(info.Stem), Extension(info.Extension),
-              TimeStamp(info.TimeStamp) {}
-
-        FileInfo(FileInfo &&info) noexcept
-            : Permissions(info.Permissions), Size(info.Size),
-              Path(std::move(info.Path)), Stem(info.Stem),
+            : Permissions(info.Permissions), Size(info.Size), Path(info.Path), Stem(info.Stem),
               Extension(info.Extension), TimeStamp(info.TimeStamp) {}
 
+        FileInfo(FileInfo &&info) noexcept
+            : Permissions(info.Permissions), Size(info.Size), Path(std::move(info.Path)),
+              Stem(info.Stem), Extension(info.Extension), TimeStamp(info.TimeStamp) {}
+
         FileInfo &operator=(const FileInfo &rhs) {
-            // if (*this == rhs) {
-            //     return *this;
-            // }
+            if (this == &rhs) {
+                return *this;
+            }
             this->Permissions = rhs.Permissions;
             this->Size = rhs.Size;
             this->Path = rhs.Path;
@@ -68,12 +61,16 @@ namespace utils {
             return *this;
         }
 
+        // template <typename Archive> void serialize(Archive &ar) {
+        //     ar(cereal::make_nvp("perms", Permissions),
+        //        cereal::make_nvp("size", Size), cereal::make_nvp("path", Path),
+        //        cereal::make_nvp("stem", Stem),
+        //        cereal::make_nvp("ext", Extension),
+        //        cereal::make_nvp("time_stamp", TimeStamp));
+        // }
+
         template <typename Archive> void serialize(Archive &ar) {
-            ar(cereal::make_nvp("perms", Permissions),
-               cereal::make_nvp("size", Size), cereal::make_nvp("path", Path),
-               cereal::make_nvp("stem", Stem),
-               cereal::make_nvp("ext", Extension),
-               cereal::make_nvp("time_stamp", TimeStamp));
+            ar(Permissions, Size, Path, Stem, Extension, TimeStamp);
         }
 
         // Data members
@@ -84,17 +81,13 @@ namespace utils {
         String Extension;
         std::time_t TimeStamp;
     };
-   
-    // A file path must be unique.
-    bool operator<(const FileInfo &lhs, const FileInfo &rhs) {
-        return (lhs.Path < rhs.Path);
-    }
 
-    bool operator==(const FileInfo &lhs,
-                    const FileInfo &rhs) {
+    // A file path must be unique.
+    bool operator<(const FileInfo &lhs, const FileInfo &rhs) { return (lhs.Path < rhs.Path); }
+
+    bool operator==(const FileInfo &lhs, const FileInfo &rhs) {
         return (lhs.Size == rhs.Size) && (lhs.Path == rhs.Path);
     }
-
 
     /**
      * Definition for the folder hirarchy.
@@ -109,16 +102,13 @@ namespace utils {
         Vertex(const Vertex &data) : Path(data.Path), Files(data.Files) {}
 
         template <typename T>
-        Vertex(T &&data)
-            : Path(std::move(data.Path)), Files(std::move(data.Files)) {}
+        Vertex(T &&data) : Path(std::move(data.Path)), Files(std::move(data.Files)) {}
 
         template <typename T1, typename T2>
-        Vertex(T1 &&aPath, T2 &&files)
-            : Path(std::move(aPath)), Files(std::move(files)) {}
+        Vertex(T1 &&aPath, T2 &&files) : Path(std::move(aPath)), Files(std::move(files)) {}
 
         template <typename Archive> void serialize(Archive &ar) {
-            ar(cereal::make_nvp("path", Path),
-               cereal::make_nvp("files", Files));
+            ar(cereal::make_nvp("path", Path), cereal::make_nvp("files", Files));
         }
     };
 
@@ -134,31 +124,26 @@ namespace utils {
 
         template <typename T1, typename T2>
         FolderHierarchy(T1 &&vertexes, T2 &&edges)
-            : Vertexes(std::move(vertexes)),
-              Graph(std::move(edges), Vertexes.size(), true), AllFiles() {
+            : Vertexes(std::move(vertexes)), Graph(std::move(edges), Vertexes.size(), true),
+              AllFiles() {
             update();
         }
 
         void update() {
             std::size_t counter = 0;
             std::for_each(Vertexes.cbegin(), Vertexes.cend(),
-                          [&counter](auto const &aFolder) {
-                              counter += aFolder.Files.size();
-                          });
+                          [&counter](auto const &aFolder) { counter += aFolder.Files.size(); });
             AllFiles.reserve(counter);
-            std::for_each(
-                Vertexes.cbegin(), Vertexes.cend(), [&](auto const &aFolder) {
-                    std::for_each(
-                        aFolder.Files.cbegin(), aFolder.Files.cend(),
-                        [&](auto const &item) { AllFiles.emplace_back(item); });
-                });
+            std::for_each(Vertexes.cbegin(), Vertexes.cend(), [&](auto const &aFolder) {
+                std::for_each(aFolder.Files.cbegin(), aFolder.Files.cend(),
+                              [&](auto const &item) { AllFiles.emplace_back(item); });
+            });
 
             std::sort(AllFiles.begin(), AllFiles.end());
         }
 
         template <typename Archive> void serialize(Archive &ar) {
-            ar(cereal::make_nvp("vertexes", Vertexes),
-               cereal::make_nvp("graph", Graph),
+            ar(cereal::make_nvp("vertexes", Vertexes), cereal::make_nvp("graph", Graph),
                cereal::make_nvp("all_files", AllFiles));
         }
 
