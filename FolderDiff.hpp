@@ -2,6 +2,8 @@
 #define FolderDiff_hpp
 
 #include <functional>
+#include <future>
+#include <thread>
 #include <vector>
 
 #include "DataStructures.hpp"
@@ -12,10 +14,15 @@
 #include "Utils.hpp"
 #include "graph/SparseGraph.hpp"
 
+#define BOOST_THREAD_VERSION 4
+#include "boost/config.hpp"
+#include "boost/thread.hpp"
+#include "boost/thread/future.hpp"
+
 #include <algorithm>
+#include <future>
 #include <memory>
 #include <string>
-#include <future>
 #include <utility>
 
 // #include "city.h"
@@ -56,19 +63,17 @@ namespace utils {
             using vertex_container = typename Graph::vertex_container;
             using edge_container = typename Graph::edge_container;
             std::string value;
-            
 
             /**
              * Read vertex and graph information using two threads.
-             * 
+             *
              */
-            
+
             // Read vertex ids
             auto readVidObj = [&db]() -> std::vector<std::string> {
                 std::vector<std::string> vids;
                 std::string value;
-                rocksdb::Status s =
-                    db->Get(rocksdb::ReadOptions(), Resources::VIDKey, &value);
+                rocksdb::Status s = db->Get(rocksdb::ReadOptions(), Resources::VIDKey, &value);
                 assert(s.ok());
                 std::istringstream is(value);
                 IArchive input(is);
@@ -89,16 +94,16 @@ namespace utils {
                 return g;
             };
 
-            using namespace std;
+            using namespace boost;
             future<std::vector<std::string>> t1 = async(readVidObj);
             future<Graph> t2 = async(readGraphObj);
 
             t1.wait();
             t2.wait();
-            
+
             std::vector<std::string> vids = t1.get();
             Graph g = t2.get();
-            
+
             if (verbose) {
                 fmt::print("Number of vertexes: {0}\n", g.numberOfVertexes());
             }
@@ -107,7 +112,7 @@ namespace utils {
 
             /**
              * Find all vertexes that belong to given folders.
-             * 
+             *
              */
 
             // Now find indexes for given folders using O(n) algorithm. Below
@@ -122,17 +127,17 @@ namespace utils {
                     fmt::print("Could not find key {} in database\n", aKey);
                 }
             }
-            
+
             std::vector<index_type> allVids =
                 graph::dfs_preordering<std::vector<index_type>>(g, indexes);
 
             // Need to sort vids to maximize the read performance.
             tbb::parallel_sort(allVids.begin(), allVids.end());
-            
+
             // Now read all keys and create a list of edited file data
-            // bases. The comlexity of this algorithm is O(n) because allVids and keys are sorted.
-            if (!allVids.empty())
-            {
+            // bases. The comlexity of this algorithm is O(n) because allVids and keys are
+            // sorted.
+            if (!allVids.empty()) {
                 size_t idx = 0;
                 std::string expectedKey = utils::to_fixed_string(9, idx);
                 std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
@@ -149,7 +154,9 @@ namespace utils {
                         std::move(aVertex.Files.begin(), aVertex.Files.end(),
                                   std::back_inserter(allFiles));
                         ++idx;
-                        if (idx == allVids.size()) {break;}
+                        if (idx == allVids.size()) {
+                            break;
+                        }
                         expectedKey = utils::to_fixed_string(9, idx);
                     }
                 }
@@ -168,17 +175,16 @@ namespace utils {
      * file name.
      */
     template <typename Container>
-    std::tuple<Container, Container, Container>
-    diff(Container &&first, Container &&second, bool verbose = false) {
+    std::tuple<Container, Container, Container> diff(Container &&first, Container &&second,
+                                                     bool verbose = false) {
         utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ");
-        
         Container modifiedFiles;
         Container results;
         Container newFiles;
         Container deletedFiles;
-        
+
         // Create a lookup table
-        using value_type = typename Container::value_type;        
+        using value_type = typename Container::value_type;
         std::unordered_set<FileInfo> dict(second.begin(), second.end());
 
         if (verbose) {
@@ -241,33 +247,34 @@ namespace utils {
         using path = boost::filesystem::path;
         using PathContainer = std::vector<path>;
         using Container = std::vector<utils::FileInfo>;
-        
-        utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>
-            visitor;
+
         PathContainer searchFolders;
         for (auto item : folders) {
             searchFolders.emplace_back(path(item));
         }
 
         // We do real work here
-        auto searchObj = [&searchFolders, &visitor]() {
+        using Visitor =
+            utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>;
+        auto searchObj = [&searchFolders]() -> Container {
+            Visitor visitor;
             utils::filesystem::dfs_file_search(searchFolders, visitor);
+            return visitor.getResults();
         };
         auto readObj = [dataFile, &folders, verbose]() {
             return utils::read_baseline<Container>(dataFile, folders, verbose);
         };
 
-        using namespace std;
+        using namespace boost;
         future<Container> readThread = async(readObj);
-        future<void> findThread = async(searchObj);
+        future<Container> findThread = async(searchObj);
 
         readThread.wait();
         findThread.wait();
         Container baseline = readThread.get();
-        findThread.get();
+        Container results = findThread.get();
 
         // Return the differences between baseline and current state.
-        Container results = visitor.getResults();
         if (verbose) {
             fmt::print("Number of files: {}\n", results.size());
             fmt::print("Number of files in the baseline: {}\n", baseline.size());

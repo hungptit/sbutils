@@ -10,7 +10,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "boost/config.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 
@@ -24,6 +23,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#define BOOST_THREAD_VERSION 4
+#include "boost/config.hpp"
+#include "boost/thread.hpp"
+#include "boost/thread/future.hpp"
 
 namespace {
     struct DonothingFilter {
@@ -199,9 +203,11 @@ int main(int argc, char *argv[]) {
                 return deleteFiles(allDeletedFiles, aDstDir, verbose);
             };
 
-            using namespace std;
-            future<std::tuple<size_t, size_t>> t1 = async(copyEditedFileObj);
-            future<std::tuple<size_t, size_t>> t2 = async(copyNewFileObj);
+            using namespace boost;
+            future<std::tuple<size_t, size_t>> t1 =
+                async(copyEditedFileObj);
+            future<std::tuple<size_t, size_t>> t2 =
+                async(copyNewFileObj);
             future<size_t> t3 = async(deleteFileObj);
 
             t1.wait();

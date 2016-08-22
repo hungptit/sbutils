@@ -42,7 +42,7 @@ endif (Boost_NO_SYSTEM_PATHS)
 
 message(${BOOST_ROOT})
 
-find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
+find_package(Boost 1.60 REQUIRED date_time system thread filesystem graph program_options iostreams)
 
 # Include folder
 message(${PROJECTS_FOLDER})

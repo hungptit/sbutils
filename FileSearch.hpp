@@ -171,7 +171,7 @@ namespace utils {
             using directory_iterator = boost::filesystem::directory_iterator;
             using path_container = std::vector<path>;
 
-            const container_type &getResults() const { return Results; }
+            container_type getResults() { return std::move(Results); }
 
             void visit(const path &aPath, PathContainer &folders) {
                 namespace fs = boost::filesystem;
