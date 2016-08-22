@@ -36,7 +36,7 @@ namespace utils {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
 
-        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
+        // utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(utils::open(database));
@@ -134,8 +134,7 @@ namespace utils {
             // Need to sort vids to maximize the read performance.
             tbb::parallel_sort(allVids.begin(), allVids.end());
 
-
-          {
+            {
                 std::sort(allVids.begin(), allVids.end());
                 const auto readOpts = rocksdb::ReadOptions();
                 for (auto const &index : allVids) {
@@ -154,40 +153,41 @@ namespace utils {
                               std::back_inserter(allFiles));
                 }
             }
-            
+
             // Now read all keys and create a list of edited file data
             // bases. The comlexity of this algorithm is O(n) because allVids
             // and keys are sorted. However, this algorithm might be slower than
             // the above algoritm in practice. Need to find a better approach.
-          // if (!allVids.empty()) {
-          //       size_t idx = 0;
-          //       std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
-          //       for (it->SeekToFirst(); it->Valid(); it->Next()) {
-          //           const std::string aKey = it->key().ToString();
-          //           std::string expectedKey = utils::to_fixed_string(9, allVids[idx]);
-          //           if (expectedKey == aKey) {
-          //               const std::string value = it->value().ToString();
-          //               std::istringstream is(value);
+            // if (!allVids.empty()) {
+            //       size_t idx = 0;
+            //       std::unique_ptr<rocksdb::Iterator>
+            //       it(db->NewIterator(rocksdb::ReadOptions()));
+            //       for (it->SeekToFirst(); it->Valid(); it->Next()) {
+            //           const std::string aKey = it->key().ToString();
+            //           std::string expectedKey = utils::to_fixed_string(9, allVids[idx]);
+            //           if (expectedKey == aKey) {
+            //               const std::string value = it->value().ToString();
+            //               std::istringstream is(value);
 
-          //               Vertex<index_type> aVertex;
-          //               {
-          //                   IArchive input(is);
-          //                   input(aVertex);
-          //               }
-          //               std::move(aVertex.Files.begin(), aVertex.Files.end(),
-          //                         std::back_inserter(allFiles));
-          //               ++idx;
+            //               Vertex<index_type> aVertex;
+            //               {
+            //                   IArchive input(is);
+            //                   input(aVertex);
+            //               }
+            //               std::move(aVertex.Files.begin(), aVertex.Files.end(),
+            //                         std::back_inserter(allFiles));
+            //               ++idx;
 
-          //               if (idx == allVids.size()) {
-          //                   break;
-          //               }
-          //           }
-          //       }
-          //   }
+            //               if (idx == allVids.size()) {
+            //                   break;
+            //               }
+            //           }
+            //       }
+            //   }
         }
 
-        fmt::print("Number of files: {}\n", allFiles.size());
-        
+        // fmt::print("Number of files: {}\n", allFiles.size());
+
         return allFiles;
     }
 
@@ -204,13 +204,15 @@ namespace utils {
                                                      bool verbose = false) {
         utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ");
         Container modifiedFiles;
-        Container results;
         Container newFiles;
         Container deletedFiles;
 
         // Create a lookup table
         using value_type = typename Container::value_type;
-        std::unordered_set<FileInfo> dict(second.begin(), second.end());
+
+        using Dict = std::unordered_set<FileInfo>;
+        Dict dict(second.begin(), second.end());
+        Container results;
 
         if (verbose) {
             std::cout << "---- Dictionary sizes: " << dict.size() << " \n";
@@ -265,7 +267,7 @@ namespace utils {
         // Return
         return std::make_tuple(modifiedFiles, newFiles, deletedFiles);
     }
-
+    
     auto diffFolders(const std::string &dataFile, const std::vector<std::string> &folders,
                      bool verbose) {
         // Search for files in the given folders.
