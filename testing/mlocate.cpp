@@ -18,7 +18,6 @@ template <typename Container> void print(Container &&results) {
     writer << "Search results: \n";
     std::for_each(results.begin(), results.end(),
                   [&writer](auto const &item) { writer << item.Path << "\n"; });
-    ;
     fmt::print("{}", writer.str());
 }
 
@@ -31,16 +30,20 @@ int main(int argc, char *argv[]) {
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     po::options_description desc("Allowed options");
     std::string database;
+    std::vector<std::string> stems;
+    std::vector<std::string> extensions;
+    std::vector<std::string> folders;
+    std::string pattern;
     
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
         ("keys,k", "List all keys.")
-        ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
-        ("stems,s", po::value<std::vector<std::string>>(), "File stems.")
-        ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
-        ("pattern,p", po::value<std::string>(), "Search string pattern.")
+        ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
+        ("stems,s", po::value<std::vector<std::string>>(&stems), "File stems.")
+        ("extensions,e", po::value<std::vector<std::string>>(&extensions), "File extensions.")
+        ("pattern,p", po::value<std::string>(&pattern), "Search string pattern.")
         ("database,d", po::value<std::string>(&database)->default_value(utils::Resources::Database), "File database.");
     // clang-format on
 
@@ -63,29 +66,11 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
 
-    // Search folders
-    std::vector<std::string> folders;
-    if (vm.count("folders")) {
-        folders = vm["folders"].as<std::vector<std::string>>();
-        std::sort(folders.begin(), folders.end());
-    }
+    std::sort(folders.begin(), folders.end());
 
     // Get file stems
-    std::vector<std::string> stems;
     if (vm.count("stems")) {
         stems = vm["stems"].as<std::vector<std::string>>();
-    }
-
-    // Get file extensions
-    std::vector<std::string> extensions;
-    if (vm.count("extensions")) {
-        extensions = vm["extensions"].as<std::vector<std::string>>();
-    }
-
-    // Get file extensions
-    std::string pattern;
-    if (vm.count("pattern")) {
-        pattern = vm["pattern"].as<std::string>();
     }
 
     if (verbose) {
@@ -93,19 +78,19 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        using Container = std::vector<utils::FileInfo>;
+        using Container = std::vector<utils::FileInfo>; // 
         Container allFiles = utils::read_baseline<Container>(database, folders, verbose);
         if (pattern.empty()) {
             utils::StemFilter<decltype(stems)> stemFilter(stems);
             utils::ExtFilter<decltype(extensions)> extFilter(extensions);
-            auto const results = utils::filter(allFiles, stemFilter, extFilter);
+            auto const results = utils::filter_tbb(allFiles, stemFilter, extFilter);
             print(results);
         } else {
             utils::StemFilter<decltype(stems)> stemFilter(stems);
             utils::ExtFilter<decltype(extensions)> extFilter(extensions);
             utils::SimpleFilter patternFilter(pattern);
-            auto const results = utils::filter(allFiles, extFilter, patternFilter,
-                                    stemFilter, extFilter);
+            auto const results = utils::filter_tbb(allFiles, extFilter, patternFilter,
+                                                   stemFilter, extFilter);
             print(results);
         }
     }

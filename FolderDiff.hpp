@@ -25,8 +25,6 @@
 #include <utility>
 
 namespace utils {
-    // TODO: Use TBB to speed up this function.
-
     template <typename Container>
     Container read_baseline(const std::string &database,
                             const std::vector<std::string> &folders, bool verbose = false) {
@@ -61,9 +59,7 @@ namespace utils {
             using edge_container = typename Graph::edge_container;
             std::string value;
             std::vector<std::string> vids;
-
-            // TODO: Parallelize read vertex ids and read graph info.
-
+            
             // Read vertex ids
             {
                 rocksdb::Status s =
@@ -153,8 +149,6 @@ namespace utils {
         
         // Create a lookup table
         using value_type = typename Container::value_type;
-
-        // TODO: Speedup this line using a better hash table.
         std::unordered_set<FileInfo> dict(second.begin(), second.end());
 
         if (verbose) {
@@ -172,7 +166,6 @@ namespace utils {
             }
         };
 
-        // TODO: Speed up this loop
         std::for_each(first.begin(), first.end(), getDiff);
 
         // Get modified and deleted items.

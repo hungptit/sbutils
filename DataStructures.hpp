@@ -146,9 +146,6 @@ namespace utils {
                               counter += aFolder.Files.size();
                           });
             AllFiles.reserve(counter);
-
-            // TODO: Benchmark std::copy, emplace_back, , back_inserter, and
-            // insert approaches.
             std::for_each(
                 Vertexes.cbegin(), Vertexes.cend(), [&](auto const &aFolder) {
                     std::for_each(
