@@ -10,11 +10,11 @@
 #include <unordered_set>
 #include <vector>
 
-#define BOOST_THREAD_VERSION 4
-#include "boost/config.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
-#include "boost/thread.hpp"
+
+#define BOOST_THREAD_VERSION 4
+#include "boost/config.hpp"
 #include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
 

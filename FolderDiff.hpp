@@ -1,14 +1,9 @@
 #ifndef FolderDiff_hpp
 #define FolderDiff_hpp
 
-#define BOOST_THREAD_VERSION 4
-#include "boost/config.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread/future.hpp"
-#include "boost/unordered_map.hpp"
-#include "boost/unordered_set.hpp"
-
 #include <functional>
+#include <thread>
+#include <future>
 #include <vector>
 
 #include "DataStructures.hpp"
@@ -16,8 +11,13 @@
 #include "FileUtils.hpp"
 #include "RocksDB.hpp"
 #include "Timer.hpp"
-#include "graph/SparseGraph.hpp"
 #include "Utils.hpp"
+#include "graph/SparseGraph.hpp"
+
+#define BOOST_THREAD_VERSION 4
+#include "boost/config.hpp"
+#include "boost/thread.hpp"
+#include "boost/thread/future.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -25,8 +25,6 @@
 #include <utility>
 
 namespace utils {
-    // TODO: Use TBB to speed up this function.
-
     template <typename Container>
     Container read_baseline(const std::string &database,
                             const std::vector<std::string> &folders, bool verbose = false) {
@@ -143,14 +141,15 @@ namespace utils {
      * file name.
      */
     template <typename Container>
-    std::tuple<Container, Container, Container>
-    diff(const Container &&first, const Container &&second, bool verbose = false) {
+    std::tuple<Container, Container, Container> diff(Container &&first, Container &&second,
+                                                     bool verbose = false) {
+        utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ");
 
         Container modifiedFiles;
         Container results;
         Container newFiles;
         Container deletedFiles;
-        
+
         // Create a lookup table
         using value_type = typename Container::value_type;
 
@@ -176,7 +175,7 @@ namespace utils {
         std::for_each(first.begin(), first.end(), getDiff);
 
         // Get modified and deleted items.
-        boost::unordered_map<std::string, value_type> map;
+        std::unordered_map<std::string, value_type> map;
         map.reserve(dict.size());
         for (auto item : dict) {
             map.emplace(std::make_pair(item.Path, item));
@@ -219,31 +218,32 @@ namespace utils {
         using PathContainer = std::vector<path>;
         using Container = std::vector<utils::FileInfo>;
 
-        utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>
-            visitor;
         PathContainer searchFolders;
         for (auto item : folders) {
             searchFolders.emplace_back(path(item));
         }
 
         // We do real work here
-        auto searchObj = [&searchFolders, &visitor]() {
+        using Visitor = utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>;
+        auto searchObj = [&searchFolders]() -> Container {
+            Visitor visitor;
             utils::filesystem::dfs_file_search(searchFolders, visitor);
+            return visitor.getResults();
         };
         auto readObj = [dataFile, &folders, verbose]() {
             return utils::read_baseline<Container>(dataFile, folders, verbose);
         };
 
-        boost::future<Container> readThread = boost::async(readObj);
-        boost::future<void> findThread = boost::async(searchObj);
+        using namespace boost;
+        future<Container> readThread = async(readObj);
+        future<Container> findThread = async(searchObj);
 
         readThread.wait();
         findThread.wait();
         Container baseline = readThread.get();
-        findThread.get();
-
+        Container results = findThread.get();
+        
         // Return the differences between baseline and current state.
-        Container results = visitor.getResults();
         if (verbose) {
             fmt::print("Number of files: {}\n", results.size());
             fmt::print("Number of files in the baseline: {}\n", baseline.size());
