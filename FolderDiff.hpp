@@ -18,6 +18,10 @@
 #include <future>
 #include <utility>
 
+// #include "city.h"
+// #include "libcuckoo/cuckoohash_map.hh"
+// #include "libcuckoo/city_hasher.hh"
+
 namespace utils {
     template <typename Container>
     Container read_baseline(const std::string &database,
@@ -25,7 +29,7 @@ namespace utils {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
 
-        // utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
+        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(utils::open(database));
@@ -165,15 +169,16 @@ namespace utils {
      */
     template <typename Container>
     std::tuple<Container, Container, Container>
-    diff(const Container &&first, const Container &&second, bool verbose = false) {
-
+    diff(Container &&first, Container &&second, bool verbose = false) {
+        utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ");
+        
         Container modifiedFiles;
         Container results;
         Container newFiles;
         Container deletedFiles;
         
         // Create a lookup table
-        using value_type = typename Container::value_type;
+        using value_type = typename Container::value_type;        
         std::unordered_set<FileInfo> dict(second.begin(), second.end());
 
         if (verbose) {

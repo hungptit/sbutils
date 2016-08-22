@@ -5,8 +5,8 @@ set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 set(EXTRA_COMPILE_OPTIONS "")
 
-set(CMAKE_BUILD_TYPE Debug)
-# set (CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
+set (CMAKE_BUILD_TYPE Release)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O3 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef -DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS -DFMT_HEADER_ONLY ")
 
@@ -26,6 +26,7 @@ set(LIB_LZ4 "${PROJECTS_FOLDER}/3p/lz4/lib/liblz4.a")
 set(LIB_BZ2 "${PROJECTS_FOLDER}/3p/bzip2/lib/libbz2.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
+set(LIB_CITYHASH "${PROJECTS_FOLDER}/3p/libcuckoo/lib/libcityhash.a")
 
 # This option make sure that we use the local boost version. Note that if the 
 # system boost is installed then CMake might use that boost version.
@@ -59,6 +60,8 @@ include_directories ("${PROJECTS_FOLDER}/3p/jemalloc/include")
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
 include_directories ("${PROJECTS_FOLDER}/3p/tbb/include/")
+# include_directories ("${PROJECTS_FOLDER}/3p/libcuckoo/include")
+
 
 # Use POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
