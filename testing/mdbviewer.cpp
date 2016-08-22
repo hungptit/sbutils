@@ -64,8 +64,9 @@ int main(int argc, char *argv[]) {
     if (displayAllKeys) {
         std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
         std::vector<std::string> keys;
+        
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            keys.emplace_back(it->key().ToString());
+          keys.emplace_back(it->key().ToString());
         }
 
         fmt::print("Number of keys: {}\n", keys.size());
@@ -90,8 +91,8 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             ++counter;
-            const std::string value = it->value().ToString();
-            valueSizes += value.size();
+            const rocksdb::Slice aSlice = it->value();
+            valueSizes += aSlice.size();
         }
         fmt::print("Number of keys: {}\n", counter);
         fmt::print("Sizeof all values (bytes): {}\n", valueSizes);
