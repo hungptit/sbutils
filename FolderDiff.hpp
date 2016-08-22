@@ -134,35 +134,60 @@ namespace utils {
             // Need to sort vids to maximize the read performance.
             tbb::parallel_sort(allVids.begin(), allVids.end());
 
-            // Now read all keys and create a list of edited file data
-            // bases. The comlexity of this algorithm is O(n) because allVids and keys are
-            // sorted.
-            if (!allVids.empty()) {
-                size_t idx = 0;
-                std::string expectedKey = utils::to_fixed_string(9, idx);
-                std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
-                for (it->SeekToFirst(); it->Valid(); it->Next()) {
-                    const std::string aKey = it->key().ToString();
-                    if (expectedKey == aKey) {
-                        const std::string value = it->value().ToString();
-                        std::istringstream is(value);
-                        Vertex<index_type> aVertex;
-                        {
-                            IArchive input(is);
-                            input(aVertex);
-                        }
-                        std::move(aVertex.Files.begin(), aVertex.Files.end(),
-                                  std::back_inserter(allFiles));
-                        ++idx;
-                        if (idx == allVids.size()) {
-                            break;
-                        }
-                        expectedKey = utils::to_fixed_string(9, idx);
+
+          {
+                std::sort(allVids.begin(), allVids.end());
+                const auto readOpts = rocksdb::ReadOptions();
+                for (auto const &index : allVids) {
+                    const std::string aKey = utils::to_fixed_string(9, index);
+                    std::string value;
+                    s = db->Get(readOpts, aKey, &value);
+                    assert(s.ok());
+
+                    std::istringstream is(value);
+                    Vertex<index_type> aVertex;
+                    {
+                        IArchive input(is);
+                        input(aVertex);
                     }
+                    std::move(aVertex.Files.begin(), aVertex.Files.end(),
+                              std::back_inserter(allFiles));
                 }
             }
+            
+            // Now read all keys and create a list of edited file data
+            // bases. The comlexity of this algorithm is O(n) because allVids
+            // and keys are sorted. However, this algorithm might be slower than
+            // the above algoritm in practice. Need to find a better approach.
+          // if (!allVids.empty()) {
+          //       size_t idx = 0;
+          //       std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
+          //       for (it->SeekToFirst(); it->Valid(); it->Next()) {
+          //           const std::string aKey = it->key().ToString();
+          //           std::string expectedKey = utils::to_fixed_string(9, allVids[idx]);
+          //           if (expectedKey == aKey) {
+          //               const std::string value = it->value().ToString();
+          //               std::istringstream is(value);
+
+          //               Vertex<index_type> aVertex;
+          //               {
+          //                   IArchive input(is);
+          //                   input(aVertex);
+          //               }
+          //               std::move(aVertex.Files.begin(), aVertex.Files.end(),
+          //                         std::back_inserter(allFiles));
+          //               ++idx;
+
+          //               if (idx == allVids.size()) {
+          //                   break;
+          //               }
+          //           }
+          //       }
+          //   }
         }
 
+        fmt::print("Number of files: {}\n", allFiles.size());
+        
         return allFiles;
     }
 
