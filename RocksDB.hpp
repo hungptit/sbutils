@@ -26,11 +26,10 @@ namespace utils {
 
     rocksdb::DB *open(const std::string &database) {
         rocksdb::Options options;
-        options.write_buffer_size = 1024 * 1024 * 128;
         options.create_if_missing = true;
         // options.compression = rocksdb::kBZip2Compression;
         // options.compression = rocksdb::kLZ4HCCompression;
-        options.compression = rocksdb::kSnappyCompression;
+        // options.compression = rocksdb::kSnappyCompression;
         // options.compression = rocksdb::kZlibCompression;
         return open(database, options);
     }

@@ -54,44 +54,26 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        std::cout << "Usage: viewer [options]\n";
+        std::cout << "Usage: mlocate [options]\n";
         std::cout << desc;
-        std::cout << "Examples:" << std::endl;
-        std::cout << "\t viewer -d .database -s AutoFix" << std::endl;
+        std::cout << "Examples:\n";
+        std::cout << "\t mlocate -d .database -s AutoFix\n";
+        std::cout << "\t mlocate -s AutoFix\n";
         return 0;
     }
 
-    bool verbose = false;
-    if (vm.count("verbose")) {
-        verbose = true;
-    }
-
-    std::sort(folders.begin(), folders.end());
-
-    // Get file stems
-    if (vm.count("stems")) {
-        stems = vm["stems"].as<std::vector<std::string>>();
-    }
-
+    bool verbose = vm.count("verbose");
     if (verbose) {
         std::cout << "Database: " << database << std::endl;
     }
 
-    {
-        using Container = std::vector<utils::FileInfo>; // 
-        Container allFiles = utils::read_baseline<Container>(database, folders, verbose);
-        if (pattern.empty()) {
-            utils::StemFilter<decltype(stems)> stemFilter(stems);
-            utils::ExtFilter<decltype(extensions)> extFilter(extensions);
-            auto const results = utils::filter_tbb(allFiles, stemFilter, extFilter);
-            print(results);
-        } else {
-            utils::StemFilter<decltype(stems)> stemFilter(stems);
-            utils::ExtFilter<decltype(extensions)> extFilter(extensions);
-            utils::SimpleFilter patternFilter(pattern);
-            auto const results = utils::filter_tbb(allFiles, extFilter, patternFilter,
-                                                   stemFilter, extFilter);
-            print(results);
-        }
-    }
+    using Container = std::vector<utils::FileInfo>;
+    std::sort(folders.begin(), folders.end());
+    auto data = utils::read_baseline<Container>(database, folders, verbose);
+    const utils::ExtFilter<std::vector<std::string>> f1(extensions);
+    const utils::StemFilter<std::vector<std::string>> f2(stems);
+    const utils::SimpleFilter f3(pattern);
+    auto results =
+        (pattern.empty()) ? utils::filter_tbb(data, f1, f2) : utils::filter_tbb(data, f1, f2, f3);
+    print(results);
 }

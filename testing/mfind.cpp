@@ -88,12 +88,12 @@ int main(int argc, char *argv[]) {
         searchFolders.emplace_back(path(item));
     }
     utils::filesystem::dfs_file_search(searchFolders, visitor);
-    auto results = visitor.getResults();
+    auto const & results = visitor.getResults();
     const utils::ExtFilter<std::vector<std::string>> f1(extensions);
     const utils::StemFilter<std::vector<std::string>> f2(stems);
     const utils::SimpleFilter f3(pattern);
-    auto data = (pattern.empty()) ? utils::filter(results.begin(), results.end(), f1, f2)
-                                  : utils::filter(results.begin(), results.end(), f1, f2, f3);
+    auto data =
+        (pattern.empty()) ? utils::filter(results, f1, f2) : utils::filter(results, f1, f2, f3);
 
     if (verbose) {
         fmt::print("Search folders:\n");
