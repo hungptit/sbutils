@@ -35,9 +35,7 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("database", -1);
     po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
-        vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -47,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     bool verbose = vm.count("verbose");
     bool displayAllKeys = vm.count("all-keys");
-    
+
     // Display input parameters if verbose is true
     if (verbose) {
         fmt::print("verbose: {}\n", verbose);
@@ -56,19 +54,26 @@ int main(int argc, char *argv[]) {
     }
 
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
-    
+
     // Open a given database
     rocksdb::Options options;
     options.create_if_missing = false;
     std::unique_ptr<rocksdb::DB> db(utils::open(database, options));
     assert(db != nullptr);
-    
+
     if (displayAllKeys) {
         std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
+        std::vector<std::string> keys;
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            std::string aKey = it->key().ToString();
-            fmt::print("{0}\n", aKey);
+            keys.emplace_back(it->key().ToString());
         }
+
+        fmt::print("Number of keys: {}\n", keys.size());
+        if (verbose) {
+            std::for_each(keys.begin(), keys.end(),
+                          [](const auto & aKey) { fmt::print("{0}\n", aKey); });
+        }
+
         assert(it->status().ok()); // Check for any errors found during the scan
     } else if (!keys.empty()) {
         // Display the key-value of a given list of keys
@@ -91,6 +96,6 @@ int main(int argc, char *argv[]) {
         fmt::print("Number of keys: {}\n", counter);
         fmt::print("Sizeof all values (bytes): {}\n", valueSizes);
     }
-    
+
     return 0;
 }
