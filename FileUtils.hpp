@@ -165,9 +165,9 @@ namespace utils {
         if (currentItem == allKeys.end()) {
             auto aFolder = boost::filesystem::canonical(aPath).parent_path();
             while (!aFolder.empty()) {
-                auto currentItem =
+                auto subItem =
                     std::find(allKeys.begin(), allKeys.end(), aFolder.string());
-                if (currentItem != allKeys.end()) {
+                if (subItem != allKeys.end()) {
                     break;
                 } else {
                     aFolder =

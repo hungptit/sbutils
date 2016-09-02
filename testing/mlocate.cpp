@@ -23,10 +23,6 @@ template <typename Container> void print(Container &&results) {
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
-    using path = boost::filesystem::path;
-    using IArchive = utils::DefaultIArchive;
-    using Index = int;
-
     utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     po::options_description desc("Allowed options");
     std::string database;

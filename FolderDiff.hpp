@@ -40,7 +40,6 @@ namespace utils {
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(utils::open(database));
-        rocksdb::Status s;
 
         if (folders.empty()) {
             std::string value;
@@ -60,9 +59,6 @@ namespace utils {
             using index_type = int;
             using edge_type = graph::BasicEdgeData<index_type>;
             using Graph = graph::SparseGraph<index_type, edge_type>;
-            using vertex_container = typename Graph::vertex_container;
-            using edge_container = typename Graph::edge_container;
-            std::string value;
 
             /**
              * Read vertex and graph information using two threads.
@@ -140,7 +136,7 @@ namespace utils {
                 for (auto const &index : allVids) {
                     const std::string aKey = utils::to_fixed_string(9, index);
                     std::string value;
-                    s = db->Get(readOpts, aKey, &value);
+                    auto const s = db->Get(readOpts, aKey, &value);
                     assert(s.ok());
 
                     std::istringstream is(value);
@@ -220,49 +216,53 @@ namespace utils {
 
         // Remove items that belong to both. We assume that the number of
         // modified files is significantly less than the total number of files.
-        auto getDiff = [&dict, &results](const auto &item) {
-            auto const pos = dict.find(item);
-            if (pos != dict.end()) {
-                dict.erase(pos);
+        auto getDiff = [&dict, &results, &first](const int idx) {
+            auto const & aKey = first[idx];
+            if (dict.find(aKey) == dict.end()) {
+                dict.erase(aKey);
             } else {
-                results.emplace_back(item);
+                results.push_back(aKey);
             }
         };
 
-        std::for_each(first.begin(), first.end(), getDiff);
+        int N = first.size();
+        tbb::parallel_for(0, N, 1, getDiff);
 
         // Get modified and deleted items.
         std::unordered_map<std::string, value_type> map;
         map.reserve(dict.size());
-        for (auto item : dict) {
-            map.emplace(std::make_pair(item.Path, item));
+        for (auto it = dict.begin(); it != dict.end(); ++it) {
         }
+        // for (size_t idx = 0; idx < dict.size(); ++ idx) {
+        //     auto const item = dict.keys(idx);
+        //     map.emplace(std::make_pair(item.Path, item));
+        // }
 
-        // Note: Modified files are files that are also in the dictionary,
-        // however, they have a different size and permission.
-        if (!map.empty()) {
-            for (auto item : results) {
-                const auto pos = map.find(item.Path);
-                if (pos != map.end()) {
-                    auto dictItem = pos->second;
-                    bool isOK = (item.Size == dictItem.Size) &&
-                                (item.Permissions == dictItem.Permissions);
-                    if (!isOK) {
-                        modifiedFiles.emplace_back(item);
-                    }
-                    map.erase(item.Path);
-                } else {
-                    newFiles.emplace_back(item);
-                }
-            }
-        } else {
-            newFiles = std::move(results);
-        }
+        // // Note: Modified files are files that are also in the dictionary,
+        // // however, they have a different size and permission.
+        // if (!map.empty()) {
+        //     for (auto item : results) {
+        //         const auto pos = map.find(item.Path);
+        //         if (pos != map.end()) {
+        //             auto dictItem = pos->second;
+        //             bool isOK = (item.Size == dictItem.Size) &&
+        //                         (item.Permissions == dictItem.Permissions);
+        //             if (!isOK) {
+        //                 modifiedFiles.emplace_back(item);
+        //             }
+        //             map.erase(item.Path);
+        //         } else {
+        //             newFiles.emplace_back(item);
+        //         }
+        //     }
+        // } else {
+        //     newFiles = std::move(results);
+        // }
 
-        // Get deleted items
-        std::for_each(map.begin(), map.end(), [&deletedFiles](auto const &item) {
-            deletedFiles.emplace_back(item.second);
-        });
+        // // Get deleted items
+        // std::for_each(map.begin(), map.end(), [&deletedFiles](auto const &item) {
+        //     deletedFiles.emplace_back(item.second);
+        // });
 
         // Return
         return std::make_tuple(modifiedFiles, newFiles, deletedFiles);

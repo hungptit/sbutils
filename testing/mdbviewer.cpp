@@ -63,15 +63,15 @@ int main(int argc, char *argv[]) {
 
     if (displayAllKeys) {
         std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
-        std::vector<std::string> keys;
+        std::vector<std::string> allKeys;
         
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-          keys.emplace_back(it->key().ToString());
+          allKeys.emplace_back(it->key().ToString());
         }
 
         fmt::print("Number of keys: {}\n", keys.size());
         if (verbose) {
-            std::for_each(keys.begin(), keys.end(),
+            std::for_each(allKeys.begin(), allKeys.end(),
                           [](const auto & aKey) { fmt::print("{0}\n", aKey); });
         }
 

@@ -104,7 +104,7 @@ TEST(ExporeFolderRootLevel, Positive) {
 }
 
 TEST(DataStructure, Positive) {
-    using IArchive = cereal::JSONInputArchive;
+    // using IArchive = cereal::JSONInputArchive;
     using OArchive = cereal::JSONOutputArchive;
     using value_type = utils::FileInfo;
 
@@ -165,7 +165,7 @@ TEST(DataStructure, Positive) {
         
         fmt::print("Current path: {}\n", aFolder.Path.string());
         
-        auto printObj = [&](auto &aPath){fmt::print("{}\n", aPath.string());};
+        auto printObj = [](auto &item){fmt::print("{}\n", item.string());};
 
         fmt::print("Files:\n");
         std::for_each(aFolder.Files.cbegin(), aFolder.Files.cend(), printObj);

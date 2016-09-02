@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     using index_type = int;
     namespace po = boost::program_options;
 
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+    utils::ElapsedTime<utils::MILLISECOND> totalTimer("Total time: ");
 
     po::options_description desc("Allowed options");
     std::string database;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
                                    utils::filesystem::NormalPolicy>;
     FileVisitor visitor;
     {
-        utils::ElapsedTime<utils::MILLISECOND> timer("Search time: ");
+        utils::ElapsedTime<utils::MILLISECOND> searchTimer("Search time: ");
         utils::filesystem::dfs_file_search(folders, visitor);
     }
     
