@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> extensions;
     std::vector<std::string> folders;
     std::string pattern;
-    
+
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
@@ -65,11 +65,11 @@ int main(int argc, char *argv[]) {
 
     using Container = std::vector<utils::FileInfo>;
     std::sort(folders.begin(), folders.end());
-    auto data = utils::read_baseline<Container>(database, folders, verbose);
+    auto data = utils::read_baseline_tbb<Container>(database, folders, verbose);
     const utils::ExtFilter<std::vector<std::string>> f1(extensions);
     const utils::StemFilter<std::vector<std::string>> f2(stems);
     const utils::SimpleFilter f3(pattern);
-    auto results =
-        (pattern.empty()) ? utils::filter_tbb(data, f1, f2) : utils::filter_tbb(data, f1, f2, f3);
+    auto results = (pattern.empty()) ? utils::filter_tbb(data, f1, f2)
+                                     : utils::filter_tbb(data, f1, f2, f3);
     print(results);
 }

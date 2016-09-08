@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
 
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
-            utils::diffFolders(dataFile, folders, verbose);
+            utils::diffFolders_tbb(dataFile, folders, verbose);
 
         // Now we will display the results
         std::cout << "---- Modified files: " << allEditedFiles.size() << " ----\n";

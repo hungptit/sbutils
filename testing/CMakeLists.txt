@@ -21,12 +21,11 @@ include(CheckCXXCompilerFlag)
 include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
 
-set(EXTRA_COMPILE_OPTIONS "")
-
 # set(CMAKE_BUILD_TYPE Debug)
-set (CMAKE_BUILD_TYPE Release)
 
+set (CMAKE_BUILD_TYPE Release)
 add_cxx_compiler_flag(-O4)
+
 add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 add_cxx_compiler_flag(-Wextra)
@@ -118,7 +117,7 @@ set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
 # set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
-set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/lib/intel64/gcc4.4/libtbb.so")
+set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/build/linux_intel64_gcc_cc4.9.2_libc2.19_kernel4.4.0_release/libtbb.so")
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})
