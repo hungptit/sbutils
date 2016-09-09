@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
     {
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
-            utils::diffFolders(dataFile, srcDir, verbose);
+            utils::diffFolders_tbb(dataFile, srcDir, verbose);
 
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
@@ -198,11 +198,9 @@ int main(int argc, char *argv[]) {
                 return deleteFiles(allDeletedFiles, aDstDir, verbose);
             };
 
-            using namespace boost;
-            future<std::tuple<size_t, size_t>> t1 =
-                async(copyEditedFileObj);
-            future<std::tuple<size_t, size_t>> t2 =
-                async(copyNewFileObj);
+            using namespace std;
+            future<std::tuple<size_t, size_t>> t1 = async(copyEditedFileObj);
+            future<std::tuple<size_t, size_t>> t2 = async(copyNewFileObj);
             future<size_t> t3 = async(deleteFileObj);
 
             t1.wait();

@@ -48,9 +48,6 @@ namespace utils {
                 fmt::print("Number of files: {0}\n", allFiles.size());
             }
         } else {
-            // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
-            // time:
-            // ");
             using index_type = int;
             using edge_type = graph::BasicEdgeData<index_type>;
             using Graph = graph::SparseGraph<index_type, edge_type>;
