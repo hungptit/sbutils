@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-    utils::Timer timer;
 
     // clang-format off
     desc.add_options()
@@ -39,16 +38,12 @@ int main(int argc, char *argv[]) {
 
     if (vm.count("help")) {
         std::cout << desc;
-        std::cout << "Examples:" << std::endl;
-        std::cout << "\t mfind ./ -d .database" << std::endl;
         return EXIT_SUCCESS;
     }
 
-    auto verbose = false;
-    if (vm.count("verbose")) {
-        verbose = true;
-    }
-
+    auto verbose = vm.count("verbose");
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
+    
     std::string jsonFile;
     if (vm.count("toJSON")) {
         jsonFile = vm["toJSON"].as<std::string>();
@@ -123,7 +118,5 @@ int main(int argc, char *argv[]) {
         myfile << os.str() << std::endl;
     }
 
-    std::cout << "Total time: " << timer.toc() / timer.ticksPerSecond() << " seconds"
-              << std::endl;
     return 0;
 }
