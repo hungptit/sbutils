@@ -52,6 +52,21 @@ namespace {
         }
     }
 
+    void createParentFolders(const boost::filesystem::path &dstDir,
+                             const std::vector<utils::FileInfo> &files, bool verbose = false) {
+        auto createParentObj = [&dstDir, verbose](const utils::FileInfo &info) {
+            using namespace boost::filesystem;
+            path aFile(dstDir / path(info.Path));
+            path parentFolder(aFile.parent_path());
+            if (!exists(parentFolder)) {
+                create_directories(parentFolder);
+                if (verbose) {
+                    fmt::print("Create folder: {}\n", parentFolder.string());
+                }
+            }
+        };
+    }
+
     auto copyFiles(const std::vector<utils::FileInfo> &files,
                    const boost::filesystem::path &dstDir, bool verbose = false) {
         using namespace boost::filesystem;
@@ -199,10 +214,8 @@ int main(int argc, char *argv[]) {
             };
 
             using namespace boost;
-            future<std::tuple<size_t, size_t>> t1 =
-                async(copyEditedFileObj);
-            future<std::tuple<size_t, size_t>> t2 =
-                async(copyNewFileObj);
+            future<std::tuple<size_t, size_t>> t1 = async(copyEditedFileObj);
+            future<std::tuple<size_t, size_t>> t2 = async(copyNewFileObj);
             future<size_t> t3 = async(deleteFileObj);
 
             t1.wait();
