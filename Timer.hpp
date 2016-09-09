@@ -41,16 +41,19 @@ namespace utils {
 
     template <DispOpt val = SECOND> class ElapsedTime {
       public:
-        explicit ElapsedTime() : Message("Elapsed time: ") {}
-        explicit ElapsedTime(const std::string &msg) : Message(msg) {}
-
+        explicit ElapsedTime() : LocalTimer(), Message("Elapsed time: "), Verbose(true) {}
+        explicit ElapsedTime(const std::string &msg) : LocalTimer(), Message(msg), Verbose(true) {}
+        explicit ElapsedTime(const std::string &msg, bool verbose) : LocalTimer(), Message(msg), Verbose(verbose) {}
+        
         ~ElapsedTime() {
-            std::cout << Message << Timer_.toc() * val / Timer_.ticksPerSecond()
-                      << " " << getUnitString<val>() << std::endl;
+            if (Verbose)
+                {std::cout << Message << LocalTimer.toc() * val / LocalTimer.ticksPerSecond()
+                           << " " << getUnitString<val>() << std::endl;}
         }
 
       private:
-        Timer Timer_;
+        Timer LocalTimer;
         std::string Message;
+        bool Verbose;
     };
 }

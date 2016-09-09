@@ -47,18 +47,20 @@ namespace {
 
 int main(int argc, char *argv[]) {
     using namespace boost;
-    utils::ElapsedTime<utils::SECOND> e("Diff time: ");
 
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-
+   
+    std::string dataFile;
+    std::vector<std::string> folders;
+    
     // clang-format off
-  desc.add_options()
+    desc.add_options()
     ("help,h", "Print this help")
     ("verbose,v", "Display searched data.")
     ("keys,k", "List all keys.")
-    ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
-    ("database,d", po::value<std::string>(), "File database.");
+      ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
+        ("database,d", po::value<std::string>(&dataFile)->default_value(utils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -73,32 +75,18 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    bool verbose = false;
-    if (vm.count("verbose")) {
-        verbose = true;
-    }
-
-    // Search folders
-    std::vector<std::string> folders;
-    if (vm.count("folders")) {
-        folders = vm["folders"].as<std::vector<std::string>>();
-    } else {
+    bool verbose = vm.count("verbose");
+    if (folders.empty()) {
         folders = {"matlab/src", "matlab/toolbox", "matlab/test", "matlab/resources"};
     }
-
-    // Get file database
-    std::string dataFile;
-    if (vm.count("database")) {
-        dataFile = vm["database"].as<std::string>();
-    } else {
-        dataFile = (boost::filesystem::path(utils::Resources::Database)).string();
-    }
+    
 
     if (verbose) {
         std::cout << "Database: " << dataFile << std::endl;
     }
-
+    
     {
+        utils::ElapsedTime<utils::SECOND> e("Diff time: ", verbose);
         std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
 
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =

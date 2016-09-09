@@ -94,7 +94,7 @@ namespace utils {
     template <typename Container, typename FirstConstraint, typename... Constraints>
     auto filter(Container &&data, FirstConstraint &&f1,
                                         Constraints&&... fs) {
-        utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
+        // utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
         std::vector<utils::FileInfo> results;
         auto filterObj = [f1, &fs..., &results](const auto &item) {
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {

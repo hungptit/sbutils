@@ -215,8 +215,8 @@ namespace utils {
          * @return
          */
         template <typename Container, typename Visitor>
-        void dfs_file_search(const Container &searchPaths, Visitor &visitor) {
-            ElapsedTime<MILLISECOND> timer("Search files: ");
+        void dfs_file_search(const Container &searchPaths, Visitor &visitor, bool verbose = false) {
+            ElapsedTime<MILLISECOND> timer("Search files: ", verbose);
             Container folders(searchPaths);
             while (!folders.empty()) {
                 auto aPath = folders.back();

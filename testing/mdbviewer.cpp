@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
         fmt::print("database: {}\n", database);
     }
 
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
 
     // Open a given database
     rocksdb::Options options;

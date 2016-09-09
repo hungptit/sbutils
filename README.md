@@ -1,8 +1,20 @@
-# Introduction #
+**utils** is a very fast sandbox tool that can be used to speed up large scale software development process.
 
-**utils** are C++ utilities that I use to speed up my local sandbox workflow. To compile **utils** we need the following packages:
+# Features #
 
-* [Boost](http://www.boost.org/): filesystem, thread, system.
+* Written using C++11/C++14 and all commands are multi-threaded using TBB.
+
+* **mlocate**: Locate a file in a given sandbox. This command is faster than **global** for a full sandbox search. And it can be significantly faster than **global** if users specify parent folders, file extensions, and/or file stems.
+
+* **mdiff**: Find files that have modified in a given sandbox.
+
+* **mcopydiff**: Copy all changes that we have made in a given sandbox to a new sandbox.
+
+# Installation #
+
+**sbutils** require the following packages:
+
+* [Boost](http://www.boost.org/): filesystem, system, and program_options.
 
 * [rocksdb](http://rocksdb.org/)
 
@@ -18,28 +30,30 @@
 
 * [cereal](http://uscilab.github.io/cereal/)
 
-* [cppformat](https://github.com/cppformat/cppformat)
+* [fmt](https://github.com/fmtlib/fmt.git)
 
 * [gtest](https://github.com/google/googletest)
 
 * [Poco](http://pocoproject.org/)
 
-# Installation #
+* [TBB](https://www.threadingbuildingblocks.org/)
 
-* Get all required packages for **sbutils** including Boost. Poco, rocksdb, zlib, bzip2, lz4, snappy, jemalloc, cereal, fmt, and gtest. If you do not want to handle this manually then you can either use system libraries or [3p](https://github.com/hungptit/3p). [3p](https://github.com/hungptit/3p) has automated Bash scripts that can be used to build all required packages for **sbutils**.
-* Compile all commands using below command. You might have to modify the CMakeLists.txt to make it suitable for your configuration.
+* [graph](https://github.com/hungptit/graph.git)
 
+If you want to use a local version of above packages then try [3p](https://github.com/hungptit/3p). [3p](https://github.com/hungptit/3p) is a collection of Bash scripts that can be used to automatically build all required packages for **sbutils**. You compile all commands using below command. 
         cd utils/testing
         cmake ./
         make -j5
 
-# Usage #
+*You might have to modify the CMakeLists.txt to make it suitable for your configuration.*
+
+# Examples #
 
 ## mupdatedb ##
 
 **mupdatedb** will build the file information database for given folders. This database will be used as a baseline for other commands including **mdiff**, **mlocate**, and **copydiff**. Below is a simple example
 
-        mupdatedb matlab/ -d .database
+    mupdatedb matlab/ -d .database
 
 ## mdiff ##
 
@@ -84,21 +98,22 @@ We can use **mlocate** to locate files in given folders. The command will be sig
 
 This command will copy changes that you have made in your local sandbox to the network sandbox if the source and destination file sizes are different. I do not use time stamp because it is unreliable. Below command will copy all changes that I have made in **matlab/** folder to **/sandbox/hungdang/tmp/test** folder.
 
-        % mcopydiff -s matlab/ -d /sandbox/hungdang/tmp/test
-        Summary:
-        	Copied 13 modified files (1839641797 bytes)
-        	Copied 2837 new files (7404812100 bytes)
-        	Delete 0 files
-        Elapsed time: 112.374  seconds
+    % mcopydiff -s matlab/ -d /sandbox/hungdang/tmp/test/
+    Read baseline: 2192.57  milliseconds
+    Search files: 15525.2  milliseconds
+    Diff time: 1116.79  milliseconds
+    ==== Summary for /sandbox/hungdang/tmp/test ====
+    	Copied 240 modified files (2109819070 bytes)
+    	Copied 2968 new files (9241188535 bytes)
+    	Delete 0 files
+    Copy files: 102.543  seconds
 
 # Others #
 
-There are utility classes in **sbutils** that can be used independently in many C++ projects. These classes are:
+There are utility classes in **sbutils** that can be used independently in other C++ projects including
 
 * Timer: Calculate the elapsed time of a code segment. This class is very similar to **tic** and **toc** command in **Matlab**.
 
 * TemporaryDirectory: Create a temporary folder and cleanup this folder when an object is destroyed. This class is very useful for writing unit tests.
-
-* Reader/Writer: For file I/O with leveldb.
 
 # FAQs #

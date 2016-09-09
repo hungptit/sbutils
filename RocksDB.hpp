@@ -5,7 +5,6 @@
 #include <utility>
 
 #include "rocksdb/db.h"
-
 #include "DataStructures.hpp"
 #include "Resources.hpp"
 #include "Utils.hpp"
@@ -26,10 +25,6 @@ namespace utils {
     rocksdb::DB *open(const std::string &database) {
         rocksdb::Options options;
         options.create_if_missing = true;
-        // options.compression = rocksdb::kBZip2Compression;
-        // options.compression = rocksdb::kLZ4HCCompression;
-        // options.compression = rocksdb::kSnappyCompression;
-        // options.compression = rocksdb::kZlibCompression;
         return open(database, options);
     }
 

@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
         // folder.
-        utils::ElapsedTime<utils::SECOND> e("Copy files: ");
+        utils::ElapsedTime<utils::SECOND> e("Copy files: ", verbose);
 
         auto runObj = [&allEditedFiles, &allNewFiles, &allDeletedFiles, verbose](const std::string &aDstDir) {
             createParentFolders(aDstDir, allEditedFiles, verbose);

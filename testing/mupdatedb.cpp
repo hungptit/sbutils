@@ -21,9 +21,6 @@ int main(int argc, char *argv[]) {
     using path = boost::filesystem::path;
     using index_type = int;
     namespace po = boost::program_options;
-
-    utils::ElapsedTime<utils::MILLISECOND> totalTimer("Total time: ");
-
     po::options_description desc("Allowed options");
     std::string database;
     std::string cfgFile;
@@ -51,7 +48,8 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
-
+    utils::ElapsedTime<utils::MILLISECOND> totalTimer("Total time: ", verbose);
+    
     std::vector<path> folders;
 
     if (vm.count("folders")) {
@@ -81,13 +79,13 @@ int main(int argc, char *argv[]) {
                                    utils::filesystem::NormalPolicy>;
     FileVisitor visitor;
     {
-        utils::ElapsedTime<utils::MILLISECOND> searchTimer("Search time: ");
+        utils::ElapsedTime<utils::MILLISECOND> searchTimer("Search time: ", verbose);
         utils::filesystem::dfs_file_search(folders, visitor);
     }
     
     // Save data to a rocksdb database.
     {
-        utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ");
+        utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ", verbose);
 
         auto const results = visitor.getFolderHierarchy<index_type>();
 

@@ -24,7 +24,6 @@ template <typename Container> void print(Container &&results) {
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
     po::options_description desc("Allowed options");
     std::string database;
     std::vector<std::string> stems;
@@ -60,6 +59,8 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
+
     if (verbose) {
         std::cout << "Database: " << database << std::endl;
     }

@@ -59,14 +59,6 @@ namespace utils {
             return *this;
         }
 
-        // template <typename Archive> void serialize(Archive &ar) {
-        //     ar(cereal::make_nvp("perms", Permissions),
-        //        cereal::make_nvp("size", Size), cereal::make_nvp("path", Path),
-        //        cereal::make_nvp("stem", Stem),
-        //        cereal::make_nvp("ext", Extension),
-        //        cereal::make_nvp("time_stamp", TimeStamp));
-        // }
-
         template <typename Archive> void serialize(Archive &ar) {
             ar(Permissions, Size, Path, Stem, Extension, TimeStamp);
         }

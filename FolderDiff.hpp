@@ -22,10 +22,11 @@
 namespace utils {
     template <typename Container>
     Container read_baseline(const std::string &database,
-                                const std::vector<std::string> &folders, bool verbose = false) {
+                            const std::vector<std::string> &folders, bool verbose = false) {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
-        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
+
+        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ", verbose);
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(utils::open(database));
@@ -137,7 +138,7 @@ namespace utils {
     template <typename Container>
     std::tuple<Container, Container, Container> diff(Container &&first, Container &&second,
                                                      bool verbose = false) {
-        utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ");
+        utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ", verbose);
         Container modifiedFiles;
         Container results;
         Container newFiles;
