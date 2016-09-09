@@ -1,5 +1,4 @@
-#ifndef Print_hpp
-#define Print_hpp
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -55,5 +54,3 @@ namespace utils {
         //               [](auto &val) { std::cout << val << "\n"; });
     }
 }
-
-#endif

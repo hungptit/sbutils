@@ -1,25 +1,24 @@
-#ifndef LevelDBIO_HPP_
-#define LevelDBIO_HPP_
+#pragma once
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "leveldb/db.h"
 #include "leveldb/cache.h"
+#include "leveldb/db.h"
 
 #include "DataStructures.hpp"
 #include "Resources.hpp"
-#include "Utils.hpp"
 #include "Timer.hpp"
+#include "Utils.hpp"
 
 namespace utils {
     class Writer {
       public:
-      Writer(const Writer&) = delete;
-      Writer& operator=(const Writer&) = delete;
+        Writer(const Writer &) = delete;
+        Writer &operator=(const Writer &) = delete;
 
-      explicit Writer(const std::string &dataFile) : DataFile(dataFile) {
+        explicit Writer(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
             // options.cache = leveldb::NewLRUCache(100 * 1048576);  // 100MB cache
             options.create_if_missing = true;
@@ -27,7 +26,8 @@ namespace utils {
 
             // Check that the database is opened successfully.
             if (false == status.ok()) {
-                std::cerr << "Unable to open/create database \"" << DataFile << "\"" << std::endl;
+                std::cerr << "Unable to open/create database \"" << DataFile << "\""
+                          << std::endl;
                 std::cerr << status.ToString() << std::endl;
             }
         }
@@ -46,8 +46,8 @@ namespace utils {
 
     class Reader {
       public:
-      Reader(const Reader&) = delete;
-      Reader& operator=(const Reader&) = delete;
+        Reader(const Reader &) = delete;
+        Reader &operator=(const Reader &) = delete;
 
         explicit Reader(const std::string &dataFile) : DataFile(dataFile) {
             leveldb::Options options;
@@ -59,7 +59,7 @@ namespace utils {
             }
         }
 
-        leveldb::DB * getDB() const {return Database;}
+        leveldb::DB *getDB() const { return Database; }
 
         std::vector<std::string> keys() {
             std::vector<std::string> allKeys;
@@ -104,4 +104,3 @@ namespace utils {
         leveldb::DB *Database;
     };
 }
-#endif

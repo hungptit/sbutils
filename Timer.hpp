@@ -1,6 +1,4 @@
-#ifndef Timer_hpp
-#define Timer_hpp
-
+#pragma once
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -56,4 +54,3 @@ namespace utils {
         std::string Message;
     };
 }
-#endif

@@ -85,7 +85,7 @@ endif (Boost_NO_SYSTEM_PATHS)
 
 message(${BOOST_ROOT})
 
-find_package(Boost 1.60 REQUIRED date_time system thread filesystem graph program_options iostreams)
+find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
 message(${PROJECTS_FOLDER})
@@ -117,7 +117,7 @@ set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
 # set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
-set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/build/linux_intel64_gcc_cc4.9.2_libc2.19_kernel4.4.0_release/libtbb.so")
+set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/lib/libtbb.so")
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})

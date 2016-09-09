@@ -1,9 +1,7 @@
-#ifndef LookupTable_hpp
-#define LookupTable_hpp
+#pragma once
 
 #include <algorithm>
 #include <unordered_map>
-
 #include "Print.hpp"
 
 namespace utils {
@@ -66,4 +64,3 @@ namespace utils {
         std::unordered_multimap<key_type, index_type> HashTable;
     };
 }
-#endif

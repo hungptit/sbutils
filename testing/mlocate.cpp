@@ -12,6 +12,7 @@
 #include "utils/LevelDBIO.hpp"
 #include "utils/Resources.hpp"
 #include "utils/Timer.hpp"
+#include "utils/UtilsTBB.hpp"
 
 template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]) {
 
     using Container = std::vector<utils::FileInfo>;
     std::sort(folders.begin(), folders.end());
-    auto data = utils::read_baseline_tbb<Container>(database, folders, verbose);
+    auto data = utils::read_baseline<Container>(database, folders, verbose);
     const utils::ExtFilter<std::vector<std::string>> f1(extensions);
     const utils::StemFilter<std::vector<std::string>> f2(stems);
     const utils::SimpleFilter f3(pattern);

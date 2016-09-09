@@ -1,5 +1,4 @@
-#ifndef FolderDiff_hpp
-#define FolderDiff_hpp
+#pragma once
 
 #include <algorithm>
 #include <functional>
@@ -20,143 +19,16 @@
 
 #include "tbb/parallel_invoke.h"
 
-// #include "city.h"
-// #include "libcuckoo/cuckoohash_map.hh"
-// #include "libcuckoo/city_hasher.hh"
-
 namespace utils {
     template <typename Container>
     Container read_baseline(const std::string &database,
-                            const std::vector<std::string> &folders, bool verbose = false) {
-        using IArchive = utils::DefaultIArchive;
-        Container allFiles;
-
-        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
-
-        // Open the database
-        std::unique_ptr<rocksdb::DB> db(utils::open(database));
-
-        if (folders.empty()) {
-            std::string value;
-            rocksdb::Status s =
-                db->Get(rocksdb::ReadOptions(), utils::Resources::AllFileKey, &value);
-            assert(s.ok());
-            std::istringstream is(value);
-            IArchive input(is);
-            input(allFiles);
-            if (verbose) {
-                fmt::print("Number of files: {0}\n", allFiles.size());
-            }
-        } else {
-            // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
-            // time:
-            // ");
-            using index_type = int;
-            using edge_type = graph::BasicEdgeData<index_type>;
-            using Graph = graph::SparseGraph<index_type, edge_type>;
-
-            // Read vertex ids
-            auto readVidObj = [&db]() -> std::vector<std::string> {
-                std::vector<std::string> vids;
-                std::string value;
-                rocksdb::Status s = db->Get(rocksdb::ReadOptions(), Resources::VIDKey, &value);
-                assert(s.ok());
-                std::istringstream is(value);
-                IArchive input(is);
-                input(vids);
-                return vids;
-            };
-
-            // Read graph info
-            auto readGraphObj = [&db]() -> Graph {
-                Graph g;
-                std::string value;
-                rocksdb::Status s =
-                    db->Get(rocksdb::ReadOptions(), utils::Resources::GraphKey, &value);
-                assert(s.ok());
-                std::istringstream is(value);
-                IArchive input(is);
-                input(g);
-                return g;
-            };
-
-            using namespace std;
-            future<std::vector<std::string>> t1 = async(readVidObj);
-            future<Graph> t2 = async(readGraphObj);
-
-            t1.wait();
-            t2.wait();
-
-            std::vector<std::string> vids = t1.get();
-            Graph g = t2.get();
-
-            if (verbose) {
-                fmt::print("Number of vertexes: {0}\n", g.numberOfVertexes());
-            }
-
-            assert(vids.size() == g.numberOfVertexes());
-
-            /**
-             * Find all vertexes that belong to given folders.
-             *
-             */
-
-            // Now find indexes for given folders using O(n) algorithm. Below
-            // code block assume that folders is sorted.
-            std::vector<index_type> indexes;
-            for (auto const &item : folders) {
-                const std::string aKey = utils::normalize_path(item);
-                auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
-                if (*it == aKey) {
-                    indexes.push_back(std::distance(vids.begin(), it));
-                } else {
-                    fmt::print("Could not find key {} in database\n", aKey);
-                }
-            }
-
-            std::vector<index_type> allVids =
-                graph::dfs_preordering<std::vector<index_type>>(g, indexes);
-
-            // Need to sort vids to maximize the read performance.
-            tbb::parallel_sort(allVids.begin(), allVids.end());
-
-            {
-                std::sort(allVids.begin(), allVids.end());
-                const auto readOpts = rocksdb::ReadOptions();
-                for (auto const &index : allVids) {
-                    const std::string aKey = utils::to_fixed_string(9, index);
-                    std::string value;
-                    auto const s = db->Get(readOpts, aKey, &value);
-                    assert(s.ok());
-
-                    std::istringstream is(value);
-                    Vertex<index_type> aVertex;
-                    {
-                        IArchive input(is);
-                        input(aVertex);
-                    }
-                    std::move(aVertex.Files.begin(), aVertex.Files.end(),
-                              std::back_inserter(allFiles));
-                }
-            }
-        }
-
-        // fmt::print("Number of files: {}\n", allFiles.size());
-
-        return allFiles;
-    }
-
-    template <typename Container>
-    Container read_baseline_tbb(const std::string &database,
                                 const std::vector<std::string> &folders, bool verbose = false) {
         using IArchive = utils::DefaultIArchive;
         Container allFiles;
-
         utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ");
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(utils::open(database));
-
         if (folders.empty()) {
             std::string value;
             rocksdb::Status s =
@@ -169,9 +41,6 @@ namespace utils {
                 fmt::print("Number of files: {0}\n", allFiles.size());
             }
         } else {
-            // utils::ElapsedTime<utils::MILLISECOND> t("Deserialization
-            // time:
-            // ");
             using index_type = int;
             using edge_type = graph::BasicEdgeData<index_type>;
             using Graph = graph::SparseGraph<index_type, edge_type>;
@@ -400,7 +269,7 @@ namespace utils {
         };
 
         auto readObj = [dataFile, &folders, &baseline, verbose]() {
-            baseline = utils::read_baseline_tbb<Container>(dataFile, folders, verbose);
+            baseline = utils::read_baseline<Container>(dataFile, folders, verbose);
         };
 
         tbb::parallel_invoke(searchObj, readObj);
@@ -414,4 +283,3 @@ namespace utils {
         return utils::diff(std::move(baseline), std::move(results));
     }
 }
-#endif

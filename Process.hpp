@@ -1,5 +1,4 @@
-#ifndef Process_hpp
-#define Process_hpp
+#pragma once
 
 #include "Poco/Process.h"
 #include "Poco/PipeStream.h"
@@ -44,4 +43,3 @@ namespace utils {
         return std::make_tuple(outStr, errStr, errCode);
     }
 }
-#endif

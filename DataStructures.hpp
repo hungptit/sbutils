@@ -1,6 +1,4 @@
-#ifndef Utils_DataStructures_hpp_
-#define Utils_DataStructures_hpp_
-
+#pragma once
 #include <string>
 #include <utility>
 #include <vector>
@@ -234,5 +232,3 @@ namespace std {
         }
     };
 }
-
-#endif

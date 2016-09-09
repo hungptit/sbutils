@@ -1,5 +1,4 @@
-#ifndef TestData_hpp_
-#define TestData_hpp_
+#pragma once
 
 #include "utils/TemporaryDirectory.hpp"
 
@@ -62,5 +61,3 @@ namespace {
         }
     };
 }
-
-#endif

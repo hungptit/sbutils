@@ -1,5 +1,4 @@
-#ifndef TemporaryDirectory_hpp_
-#define TemporaryDirectory_hpp_
+#pragma once
 
 #include "boost/filesystem.hpp"
 #include "boost/lexical_cast.hpp"
@@ -44,5 +43,3 @@ namespace utils {
         boost::filesystem::path CurrentDir;
     };
 }
-
-#endif

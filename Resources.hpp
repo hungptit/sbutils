@@ -1,5 +1,4 @@
-#ifndef Resources_hpp_
-#define Resources_hpp_
+#pragma once
 
 #include <string>
 
@@ -21,5 +20,3 @@ namespace utils {
     const std::string Resources::EdgeKey = "_edges_";
     const std::string Resources::AllFileKey = "_files_";
 }
-
-#endif

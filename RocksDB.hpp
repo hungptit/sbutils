@@ -1,5 +1,4 @@
-#ifndef RocksDB_hpp
-#define RocksDB_hpp
+#pragma once
 
 #include <memory>
 #include <string>
@@ -87,5 +86,3 @@ namespace utils {
         assert(s.ok()); // Write all changes to the database
     }
 }
-
-#endif

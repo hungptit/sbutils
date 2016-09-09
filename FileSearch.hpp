@@ -1,5 +1,4 @@
-#ifndef FileSearch_hpp_
-#define FileSearch_hpp_
+#pragma once
 
 // STL headers
 #include <array>
@@ -246,5 +245,3 @@ namespace utils {
         }
     }
 }
-
-#endif
