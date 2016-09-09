@@ -55,11 +55,6 @@ namespace utils {
             using edge_type = graph::BasicEdgeData<index_type>;
             using Graph = graph::SparseGraph<index_type, edge_type>;
 
-            /**
-             * Read vertex and graph information using two threads.
-             *
-             */
-
             // Read vertex ids
             auto readVidObj = [&db]() -> std::vector<std::string> {
                 std::vector<std::string> vids;
@@ -144,37 +139,6 @@ namespace utils {
                               std::back_inserter(allFiles));
                 }
             }
-
-            // Now read all keys and create a list of edited file data
-            // bases. The comlexity of this algorithm is O(n) because allVids
-            // and keys are sorted. However, this algorithm might be slower than
-            // the above algoritm in practice. Need to find a better approach.
-            // if (!allVids.empty()) {
-            //       size_t idx = 0;
-            //       std::unique_ptr<rocksdb::Iterator>
-            //       it(db->NewIterator(rocksdb::ReadOptions()));
-            //       for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            //           const std::string aKey = it->key().ToString();
-            //           std::string expectedKey = utils::to_fixed_string(9, allVids[idx]);
-            //           if (expectedKey == aKey) {
-            //               const std::string value = it->value().ToString();
-            //               std::istringstream is(value);
-
-            //               Vertex<index_type> aVertex;
-            //               {
-            //                   IArchive input(is);
-            //                   input(aVertex);
-            //               }
-            //               std::move(aVertex.Files.begin(), aVertex.Files.end(),
-            //                         std::back_inserter(allFiles));
-            //               ++idx;
-
-            //               if (idx == allVids.size()) {
-            //                   break;
-            //               }
-            //           }
-            //       }
-            //   }
         }
 
         // fmt::print("Number of files: {}\n", allFiles.size());
@@ -211,11 +175,6 @@ namespace utils {
             using index_type = int;
             using edge_type = graph::BasicEdgeData<index_type>;
             using Graph = graph::SparseGraph<index_type, edge_type>;
-
-            /**
-             * Read vertex and graph information using two threads.
-             *
-             */
 
             // Read vertex ids
             std::vector<std::string> vids;

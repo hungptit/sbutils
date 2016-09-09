@@ -13,11 +13,6 @@
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 
-#define BOOST_THREAD_VERSION 4
-#include "boost/config.hpp"
-#include "boost/thread.hpp"
-#include "boost/thread/future.hpp"
-
 #include "fmt/format.h"
 #include "utils/DataStructures.hpp"
 #include "utils/FileSearch.hpp"
