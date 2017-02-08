@@ -15,11 +15,10 @@
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 
-#include "utils/FileSearch.hpp"
-#include "utils/LevelDBIO.hpp"
-#include "utils/Timer.hpp"
-#include "utils/LookupTable.hpp"
-#include "utils/Print.hpp"
+#include "FileSearch.hpp"
+#include "Timer.hpp"
+#include "LookupTable.hpp"
+#include "Print.hpp"
 
 #include <sstream>
 #include <string>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/TemporaryDirectory.hpp"
+#include "TemporaryDirectory.hpp"
 
 namespace {
     class TestData {

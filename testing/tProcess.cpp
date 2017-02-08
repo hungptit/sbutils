@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
-#include "utils/TemporaryDirectory.hpp"
-#include "utils/Process.hpp"
+#include "TemporaryDirectory.hpp"
+#include "Process.hpp"
 #include "gtest/gtest.h"
 
 TEST(Basic, Positive) {

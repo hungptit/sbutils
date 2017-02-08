@@ -9,10 +9,10 @@
 #include "boost/program_options.hpp"
 
 #include "fmt/format.h"
-#include "utils/FileSearch.hpp"
-#include "utils/Print.hpp"
-#include "utils/Timer.hpp"
-#include "utils/Utils.hpp"
+#include "FileSearch.hpp"
+#include "Print.hpp"
+#include "Timer.hpp"
+#include "Utils.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;

@@ -6,15 +6,14 @@
 #include <tuple>
 #include <vector>
 
-#include "utils/RocksDB.hpp"
+#include "RocksDB.hpp"
 
 #include <memory>
 
-#include "utils/FileSearch.hpp"
-#include "utils/FileUtils.hpp"
-#include "utils/LevelDBIO.hpp"
-#include "utils/Resources.hpp"
-#include "utils/Timer.hpp"
+#include "FileSearch.hpp"
+#include "FileUtils.hpp"
+#include "Resources.hpp"
+#include "Timer.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;

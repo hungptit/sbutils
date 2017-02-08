@@ -29,17 +29,17 @@ namespace utils {
         return ss.str();
     }
 
-    class KnuthMorrisPrattFilter {
-      public:
-        using iter_type = std::string::const_iterator;
-        explicit KnuthMorrisPrattFilter(const std::string &pattern)
-            : SearchAlg(pattern.begin(), pattern.end()) {}
+    // class KnuthMorrisPrattFilter {
+    //   public:
+    //     using iter_type = std::string::const_iterator;
+    //     explicit KnuthMorrisPrattFilter(const std::string &pattern)
+    //         : SearchAlg(pattern.begin(), pattern.end()) {}
 
-        bool isValid(const FileInfo &info) { return SearchAlg(info.Path) != info.Path.end(); }
+    //     bool isValid(const FileInfo &info) { return SearchAlg(info.Path) != info.Path.end(); }
 
-      private:
-        boost::algorithm::knuth_morris_pratt<iter_type> SearchAlg;
-    };
+    //   private:
+    //     boost::algorithm::knuth_morris_pratt<iter_type> SearchAlg;
+    // };
    
     template <typename Container> class ExtFilter {
       public:

@@ -14,10 +14,10 @@
 #include "boost/program_options.hpp"
 
 #include "fmt/format.h"
-#include "utils/DataStructures.hpp"
-#include "utils/FileSearch.hpp"
-#include "utils/FolderDiff.hpp"
-#include "utils/Timer.hpp"
+#include "DataStructures.hpp"
+#include "FileSearch.hpp"
+#include "FolderDiff.hpp"
+#include "Timer.hpp"
 #include <sstream>
 #include <string>
 #include <vector>

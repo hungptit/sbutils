@@ -1,7 +1,12 @@
 PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
-set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
+
+set(LIBRARIES "/local/projects/libraries")
+set(CMAKE_INSTALL_PREFIX "/home/hungptit/sandbox/")
+
+message("LIBRARIES: ${LIBRARIES}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -24,21 +29,21 @@ include(CXXFeatureCheck)
 # set(CMAKE_BUILD_TYPE Debug)
 
 set (CMAKE_BUILD_TYPE Release)
-add_cxx_compiler_flag(-O4)
+add_cxx_compiler_flag(-O3)
 
 add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 add_cxx_compiler_flag(-Wextra)
-add_cxx_compiler_flag(-Wshadow)
-add_cxx_compiler_flag(-Werror RELEASE)
-add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
-add_cxx_compiler_flag(-Werror MINSIZEREL)
+# add_cxx_compiler_flag(-Wshadow)
+# add_cxx_compiler_flag(-Werror RELEASE)
+# add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
+# add_cxx_compiler_flag(-Werror MINSIZEREL)
 
 add_cxx_compiler_flag(-pedantic)
-add_cxx_compiler_flag(-pedantic-errors)
+# add_cxx_compiler_flag(-pedantic-errors)
 
 add_cxx_compiler_flag(-Wshorten-64-to-32)
-add_cxx_compiler_flag(-Wfloat-equal)
+# add_cxx_compiler_flag(-Wfloat-equal)
 add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
 add_cxx_compiler_flag(-fstrict-aliasing)
 if (HAVE_CXX_FLAG_FSTRICT_ALIASING)
@@ -52,72 +57,60 @@ endif()
 
 add_cxx_compiler_flag(-DFMT_HEADER_ONLY)
 add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
+# add_cxx_compiler_flag(-flto)
 
-set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
+# set(CMAKE_CXX_COMPILER "${ROOT_DIR}3p/llvm/bin/clang++")
 
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Used libraries
-set(LIB_GTEST "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest.a")
-set(LIB_GTEST_MAIN "${PROJECTS_FOLDER}/3p/gtest/lib/libgtest_main.a")
+# GoogleTest
+set(LIB_GTEST "${LIBRARIES}//lib/libgtest.a")
+set(LIB_GTEST_MAIN "${LIBRARIES}/lib/libgtest_main.a")
 
 # Libraries used by rocksdb
-set(LIB_ROCKSDB "${PROJECTS_FOLDER}/3p/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${PROJECTS_FOLDER}/3p/zlib/lib/libz.a")
-set(LIB_LZ4 "${PROJECTS_FOLDER}/3p/lz4/lib/liblz4.a")
-set(LIB_BZ2 "${PROJECTS_FOLDER}/3p/bzip2/lib/libbz2.a")
-set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
-set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
-set(LIB_CITYHASH "${PROJECTS_FOLDER}/3p/libcuckoo/lib/libcityhash.a")
+message("${LIB_GTEST_MAIN}")
+set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
+set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
+set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
+set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
+set(LIB_SNAPPY "${LIBRARIES}/lib/libsnappy.a")
+set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
+set(LIB_CITYHASH "${LIBRARIES}/lib/libcityhash.a")
 
 # This option make sure that we use the local boost version. Note that if the 
 # system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS TRUE) 
+set(Boost_NO_SYSTEM_PATHS FALSE) 
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
-  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
+  set(BOOST_ROOT "${LIBRARIES}/")
+  set(BOOST_INCLUDE_DIRS "${LIBRARIES}/include")
+  set(BOOST_LIBRARY_DIRS "${LIBRARIES}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
-message(${BOOST_ROOT})
-
-find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
-message(${PROJECTS_FOLDER})
-include_directories (${PROJECTS_FOLDER})
-include_directories ("${PROJECTS_FOLDER}/3p/gtest/include")
-include_directories ("${PROJECTS_FOLDER}/3p/fmt/include")
-include_directories ("${PROJECTS_FOLDER}/3p/leveldb/include")
+message("Root: ${ROOT_DIR}")
+include_directories ("${ROOT_DIR}")
+include_directories ("${LIBRARIES}/include")
+include_directories ("${ROOT_DIR}/fmt/")
 
-include_directories ("${PROJECTS_FOLDER}/3p/rocksdb/include")
-include_directories ("${PROJECTS_FOLDER}/3p/zlib/include")
-include_directories ("${PROJECTS_FOLDER}/3p/lz4/include")
-include_directories ("${PROJECTS_FOLDER}/3p/bzip2/include")
-include_directories ("${PROJECTS_FOLDER}/3p/jemalloc/include")
-
-include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
-include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
-include_directories ("${PROJECTS_FOLDER}/3p/tbb/include/")
-include_directories ("${PROJECTS_FOLDER}/3p/libcuckoo/include")
-
+include_directories ("/local/projects/libraries/src/rocksdb/include")
+include_directories ("${ROOT_DIR}/cereal/include")
+include_directories ("${ROOT_DIR}/3p/tbb/include/")
 
 # Use POCO static library
-include_directories("${PROJECTS_FOLDER}/3p/poco/include")
-set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
-set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
-# set(LIB_FMT "${PROJECTS_FOLDER}/3p/fmt/lib/libfmt.a")
-set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
-set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
-set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/lib/libtbb.so")
+include_directories("${LIBRARIES}/include")
+set(LIB_POCO_FOUNDATION "${LIBRARIES}/lib/libPocoFoundation.a")
+set(LIB_POCO_UTIL "${LIBRARIES}/lib/libPocoUtil.a")
+set(LIB_POCO_DATA "${LIBRARIES}/lib/libPocoData.a")
+set(LIB_POCO_SQLITE "${LIBRARIES}/lib/libPocoDataSQLite.a")
+set(LIB_POCO_XML "${LIBRARIES}/lib/libPocoXML.a")
+set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
+set(LIB_TBB "-ltbb")
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})
@@ -159,5 +152,5 @@ if (Boost_FOUND)
       ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
       ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -lrt)
   endforeach (src_file)
-  INSTALL_PROGRAMS(//$ENV{HOME}/Public/sbtools FILES ${COMMAND_SRC_FILES})
+  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

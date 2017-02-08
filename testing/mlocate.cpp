@@ -6,13 +6,12 @@
 #include <tuple>
 #include <vector>
 
-#include "utils/FileSearch.hpp"
-#include "utils/FileUtils.hpp"
-#include "utils/FolderDiff.hpp"
-#include "utils/LevelDBIO.hpp"
-#include "utils/Resources.hpp"
-#include "utils/Timer.hpp"
-#include "utils/UtilsTBB.hpp"
+#include "FileSearch.hpp"
+#include "FileUtils.hpp"
+#include "FolderDiff.hpp"
+#include "Resources.hpp"
+#include "Timer.hpp"
+#include "UtilsTBB.hpp"
 
 template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;

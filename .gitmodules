@@ -1,0 +1,12 @@
+[submodule "cereal"]
+	path = cereal
+	url = https://github.com/USCiLab/cereal.git
+[submodule "fmt"]
+	path = fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "graph"]
+	path = graph
+	url = https://github.com/hungptit/graph.git
+[submodule "spdlog"]
+	path = spdlog
+	url = https://github.com/gabime/spdlog.git

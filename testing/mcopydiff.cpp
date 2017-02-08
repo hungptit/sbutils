@@ -14,11 +14,10 @@
 #include "boost/program_options.hpp"
 
 #include "fmt/format.h"
-#include "utils/FileSearch.hpp"
-#include "utils/FolderDiff.hpp"
-#include "utils/LevelDBIO.hpp"
-#include "utils/Timer.hpp"
-#include "utils/UtilsTBB.hpp"
+#include "FileSearch.hpp"
+#include "FolderDiff.hpp"
+#include "Timer.hpp"
+#include "UtilsTBB.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
