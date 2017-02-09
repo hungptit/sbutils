@@ -27,7 +27,7 @@ namespace utils {
             }
         };
 
-        int size = data.size();
+        int size = static_cast<int>(data.size());
         tbb::parallel_for(0, size, 1, filterObj);
         return results;
     }
