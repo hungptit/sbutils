@@ -7,3 +7,9 @@
 [submodule "graph"]
 	path = graph
 	url = https://github.com/hungptit/graph.git
+<<<<<<< HEAD
+=======
+[submodule "spdlog"]
+	path = spdlog
+	url = https://github.com/gabime/spdlog.git
+>>>>>>> 38bd3e84850c86b3842f2ac8a3e044da15af8688

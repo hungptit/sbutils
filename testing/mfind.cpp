@@ -9,6 +9,7 @@
 #include "boost/program_options.hpp"
 
 #include "fmt/format.h"
+
 #include "sbutils/FileSearch.hpp"
 #include "sbutils/Print.hpp"
 #include "sbutils/Timer.hpp"

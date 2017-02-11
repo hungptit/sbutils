@@ -14,7 +14,7 @@
 #include "boost/program_options.hpp"
 
 #include "fmt/format.h"
-#include "sbutils/FileSearch.hpp"
+
 #include "sbutils/FolderDiff.hpp"
 #include "sbutils/Timer.hpp"
 #include "sbutils/UtilsTBB.hpp"

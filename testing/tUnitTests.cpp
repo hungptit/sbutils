@@ -6,13 +6,12 @@
 #include <tuple>
 #include <vector>
 
-#include "utils/DataStructures.hpp"
-#include "utils/FileSearch.hpp"
-#include "utils/FileUtils.hpp"
-#include "utils/LevelDBIO.hpp"
-#include "utils/Print.hpp"
-#include "utils/TemporaryDirectory.hpp"
-#include "utils/Timer.hpp"
+#include "sbutils/DataStructures.hpp"
+#include "sbutils/FileSearch.hpp"
+#include "sbutils/FileUtils.hpp"
+#include "sbutils/Print.hpp"
+#include "sbutils/TemporaryDirectory.hpp"
+#include "sbutils/Timer.hpp"
 
 #include "TestData.hpp"
 

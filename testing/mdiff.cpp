@@ -14,10 +14,12 @@
 #include "boost/program_options.hpp"
 
 #include "fmt/format.h"
+
 #include "sbutils/DataStructures.hpp"
 #include "sbutils/FileSearch.hpp"
 #include "sbutils/FolderDiff.hpp"
 #include "sbutils/Timer.hpp"
+
 #include <sstream>
 #include <string>
 #include <vector>

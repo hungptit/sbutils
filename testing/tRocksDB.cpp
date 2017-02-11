@@ -1,5 +1,7 @@
 #include "fmt/format.h"
+
 #include "sbutils/RocksDB.hpp"
+
 #include <memory>
 #include <string>
 

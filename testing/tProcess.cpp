@@ -1,7 +1,12 @@
 #include <fstream>
 #include <iostream>
+<<<<<<< HEAD
 #include "sbutils/TemporaryDirectory.hpp"
 #include "sbutils/Process.hpp"
+=======
+#include "TemporaryDirectory.hpp"
+#include "Process.hpp"
+>>>>>>> 38bd3e84850c86b3842f2ac8a3e044da15af8688
 #include "gtest/gtest.h"
 
 TEST(Basic, Positive) {

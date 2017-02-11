@@ -20,7 +20,6 @@
 
 #include "utils/FileSearch.hpp"
 #include "utils/FolderDiff.hpp"
-#include "utils/LevelDBIO.hpp"
 #include "utils/LookupTable.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Utils.hpp"

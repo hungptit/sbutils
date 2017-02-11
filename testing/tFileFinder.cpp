@@ -7,9 +7,9 @@
 #include <tuple>
 #include <vector>
 
-#include "utils/FileSearch.hpp"
-#include "utils/Print.hpp"
-#include "utils/TemporaryDirectory.hpp"
+#include "sbutils/FileSearch.hpp"
+#include "sbutils/Print.hpp"
+#include "sbutils/TemporaryDirectory.hpp"
 
 #include "gtest/gtest.h"
 #include "TestData.hpp"

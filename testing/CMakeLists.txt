@@ -9,6 +9,12 @@ set(SANDBOX "$ENV{SANDBOX}")
 message("LIBRARIES: ${LIBRARIES}")
 message("SANDBOX: ${SANDBOX}")
 
+set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
+
+set(CMAKE_INSTALL_PREFIX "/home/hungptit/sandbox/")
+
+message("LIBRARIES: ${LIBRARIES}")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Read the git tags to determine the project version
@@ -30,22 +36,28 @@ include(CXXFeatureCheck)
 # set(CMAKE_BUILD_TYPE Debug)
 
 set (CMAKE_BUILD_TYPE Release)
-add_cxx_compiler_flag(-O4)
+add_cxx_compiler_flag(-O3)
 
 add_cxx_compiler_flag(-std=c++14)
-add_cxx_compiler_flag(-Wall)
-add_cxx_compiler_flag(-Wextra)
-add_cxx_compiler_flag(-Wshadow)
+# add_cxx_compiler_flag(-Wall)
+# add_cxx_compiler_flag(-Wextra)
+
+# add_cxx_compiler_flag(-Wshadow)
 # add_cxx_compiler_flag(-Werror RELEASE)
 # add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
 # add_cxx_compiler_flag(-Werror MINSIZEREL)
 
 add_cxx_compiler_flag(-pedantic)
-add_cxx_compiler_flag(-pedantic-errors)
+# add_cxx_compiler_flag(-pedantic-errors)
 
 # add_cxx_compiler_flag(-Wshorten-64-to-32)
 add_cxx_compiler_flag(-Wfloat-equal)
 # add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
+
+add_cxx_compiler_flag(-Wshorten-64-to-32)
+# add_cxx_compiler_flag(-Wfloat-equal)
+add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
+
 add_cxx_compiler_flag(-fstrict-aliasing)
 if (HAVE_CXX_FLAG_FSTRICT_ALIASING)
   add_cxx_compiler_flag(-Wstrict-aliasing)
@@ -58,8 +70,7 @@ endif()
 
 add_cxx_compiler_flag(-DFMT_HEADER_ONLY)
 add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
-
-# set(CMAKE_CXX_COMPILER "g++-6") 
+# add_cxx_compiler_flag(-flto)
 
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -71,11 +82,10 @@ set(LIB_GTEST_MAIN "${LIBRARIES}/lib/libgtest_main.a")
 # Libraries used by rocksdb
 set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
-set(LIB_LZ4 "/usr/local/lib/liblz4.a")
+set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
 set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
-set(LIB_SNAPPY "${LIBRARIES}/lib/libsnappy.a")
+set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
-
 
 # This option make sure that we use the local boost version. Note that if the 
 # system boost is installed then CMake might use that boost version.
@@ -84,9 +94,9 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_NO_SYSTEM_PATHS FALSE) 
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${PROJECTS_FOLDER}/3p/boost")
-  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
+  set(BOOST_ROOT "${LIBRARIES}/")
+  set(BOOST_INCLUDE_DIRS "${LIBRARIES}/include")
+  set(BOOST_LIBRARY_DIRS "${LIBRARIES}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
 # message(${BOOST_ROOT})
@@ -105,27 +115,44 @@ include_directories ("${LIBRARIES}/src/tbb/include")
 include_directories ("${LIBRARIES}/include")
 
 # Use POCO static library
-include_directories("${PROJECTS_FOLDER}/3p/poco/include")
-set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${PROJECTS_FOLDER}/3p/poco/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${PROJECTS_FOLDER}/3p/poco/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${PROJECTS_FOLDER}/3p/poco/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${PROJECTS_FOLDER}/3p/poco/lib/libPocoXML.a")
-set(LIB_POCO_NET "${PROJECTS_FOLDER}/3p/poco/lib/libPocoNet.a")
+include_directories("${LIBRARIES}/include")
+set(LIB_POCO_FOUNDATION "${LIBRARIES}/lib/libPocoFoundation.a")
+set(LIB_POCO_UTIL "${LIBRARIES}/lib/libPocoUtil.a")
+set(LIB_POCO_DATA "${LIBRARIES}/lib/libPocoData.a")
+set(LIB_POCO_SQLITE "${LIBRARIES}/lib/libPocoDataSQLite.a")
+set(LIB_POCO_XML "${LIBRARIES}/lib/libPocoXML.a")
+set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
 
-set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
-set(LIB_JEMALLOC "${SANDBOX}/lib/libjemalloc.a")
+find_package(Boost REQUIRED date_time system filesystem graph program_options iostreams)
+
+# Include folder
+message("Root: ${ROOT_DIR}")
+include_directories ("${ROOT_DIR}")
+include_directories ("${LIBRARIES}/include")
+include_directories ("${ROOT_DIR}/fmt/")
+
+include_directories ("/local/projects/libraries/src/rocksdb/include")
+include_directories ("${ROOT_DIR}/cereal/include")
+
+# Use POCO static library
+include_directories("${LIBRARIES}/include")
+set(LIB_POCO_FOUNDATION "${LIBRARIES}/lib/libPocoFoundation.a")
+set(LIB_POCO_UTIL "${LIBRARIES}/lib/libPocoUtil.a")
+set(LIB_POCO_DATA "${LIBRARIES}/lib/libPocoData.a")
+set(LIB_POCO_SQLITE "${LIBRARIES}/lib/libPocoDataSQLite.a")
+set(LIB_POCO_XML "${LIBRARIES}/lib/libPocoXML.a")
+set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
 set(LIB_TBB "-ltbb")
 
 if (Boost_FOUND)
-  # message(${Boost_LIBRARIES})
-  # include_directories(${BOOST_INCLUDE_DIRS})
-  # set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
-  # foreach (src_file ${UNITTEST_SRC_FILES})
-  #   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-  #   TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_SNAPPY} ${LIB_TBB} -lpthread)
-  #   ADD_TEST(${src_file} ./${src_file})
-  # endforeach (src_file)
+  message(${Boost_LIBRARIES})
+  include_directories(${BOOST_INCLUDE_DIRS})
+  set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_SNAPPY} ${LIB_TBB} -lpthread)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
 
   # set(UNITTEST_SRC_FILES tProcess)
   # foreach (src_file ${UNITTEST_SRC_FILES})
@@ -157,5 +184,6 @@ if (Boost_FOUND)
       ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
       ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
   endforeach (src_file)
-  INSTALL_PROGRAMS(//$ENV{HOME}/sandbox/bin FILES ${COMMAND_SRC_FILES})
+
+  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

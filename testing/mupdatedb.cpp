@@ -5,11 +5,9 @@
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include "sbutils/RocksDB.hpp"
-
 #include <memory>
 
+#include "sbutils/RocksDB.hpp"
 #include "sbutils/FileSearch.hpp"
 #include "sbutils/FileUtils.hpp"
 #include "sbutils/Resources.hpp"
