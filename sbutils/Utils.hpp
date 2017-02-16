@@ -15,7 +15,7 @@ namespace {
     bool isValid(const utils::FileInfo &info, T &&first) {
         return first.isValid(info);
     }
-    
+	
     template <typename T, typename... Args>
     bool isValid(const utils::FileInfo &info, T &&first, Args&&... args) {
         return first.isValid(info) && isValid(info, std::forward<Args>(args)...);

@@ -25,6 +25,9 @@ get_git_version(GIT_VERSION)
 string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
+# For clang
+ # set(CMAKE_CXX_COMPILER "clang++") 
+
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
 string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
@@ -84,8 +87,8 @@ set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
 set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
 set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
-# set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
-set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
+set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
+# set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
@@ -105,11 +108,11 @@ endif (Boost_NO_SYSTEM_PATHS)
 find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
-message (${ROOT_DIR})
-include_directories ("${ROOT_DIR}")
-include_directories ("${LIBRARIES}/include")
+include_directories ("${ROOT_DIR}/")
 include_directories ("${ROOT_DIR}/fmt/")
+include_directories ("${ROOT_DIR}/spdlog/include")
 include_directories ("${ROOT_DIR}/cereal/include/")
+include_directories ("${LIBRARIES}/include")
 include_directories ("${LIBRARIES}/src/rocksdb/include")
 include_directories ("${LIBRARIES}/src/tbb/include")
 include_directories ("${LIBRARIES}/include")
@@ -144,14 +147,13 @@ if (Boost_FOUND)
   #   ADD_TEST(${src_file} ./${src_file})
   # endforeach (src_file)
 
-  # set(UNITTEST_SRC_FILES  tTest)
-  # foreach (src_file ${UNITTEST_SRC_FILES})
-  #   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-  #   TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} -lpthread -ldl)
-  #   ADD_TEST(${src_file} ./${src_file})
-  # endforeach (src_file)
-
-    set(UNITTEST_SRC_FILES  tRocksDB)
+  set(UNITTEST_SRC_FILES  tTest)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} -lpthread -ldl)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+  set(UNITTEST_SRC_FILES  tRocksDB)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES}
@@ -168,7 +170,7 @@ if (Boost_FOUND)
   endforeach (src_file)
 
 
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer mutest)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

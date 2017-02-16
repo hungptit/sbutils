@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
     using path = boost::filesystem::path;
 
     std::string branch;
+	std::string subBranch;
     std::string rootFolder;
     std::string client;
 
@@ -28,7 +29,8 @@ int main(int argc, char *argv[]) {
         ("verbose,v", "Display searched data.")
 		("root-folder,s", po::value<std::string>(&rootFolder)->default_value(defaultRootFolder), "P4 root folder.")
 		("client,c", po::value<std::string>(&client)->default_value(defaultClient), "P4 client.")
-		("branch,b", po::value<std::string>(&branch), "P4 branch.");
+		("branch,b", po::value<std::string>(&branch), "P4 branch.")
+		("sub-branch,c", po::value<std::string>(&subBranch)->default_value("anet/features/plaw/"), "P4 subbranch.");
     // clang-format on
 
     po::positional_options_description p;
@@ -43,7 +45,15 @@ int main(int argc, char *argv[]) {
     }
 
 	// Normalize the root folder path
-	rootFolder = boost::filesystem::canonical(rootFolder).string();
+	auto getAbsolutePathObj = [&rootFolder]() -> std::string {
+		path aPath(rootFolder);
+		if (!boost::filesystem::exists(aPath)) {
+			boost::filesystem::create_directory(aPath);
+		}
+		return aPath.string();
+	};
+
+	rootFolder = getAbsolutePathObj();
 	
     bool verbose = vm.count("verbose");
 
@@ -64,112 +74,112 @@ int main(int argc, char *argv[]) {
     // clang-format on
 
     // Write out the setup for synced files and folders.
-    writer << "\t//depot/anet/features/plaw/" << branch << "/athenax/release/..."
+    writer << "\t//depot/" << subBranch << branch << "/athenax/release/..."
            << " //" << client << "/athenax/release/..."
            << "\n"
-           << "\t//depot/anet/features/plaw/" << branch << "/prod/..."
+           << "\t//depot/" << subBranch << branch << "/prod/..."
            << " //" << client << "/prod/..."
            << "\n"
-           << "\t//depot/anet/features/plaw/" << branch << "/techops/..."
+           << "\t//depot/" << subBranch << branch << "/techops/..."
            << " //" << client << "/techops/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/.generated/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/.generated/..."
            << " //" << client << "/prod/.generated/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/activexcontrols/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/activexcontrols/..."
            << " //" << client << "/prod/activexcontrols/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/claimrules/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/claimrules/..."
            << " //" << client << "/prod/claimrules/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/data/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/data/..."
            << " //" << client << "/prod/data/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/appealforms/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/appealforms/..."
            << " //" << client << "/prod/htdocs/appealforms/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch
+           << "\t-//depot/" << subBranch << branch
            << "/prod/htdocs/billing/payersitenavigationguides/..."
            << " //" << client << "/prod/htdocs/billing/payersitenavigationguides/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/interfaces/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/interfaces/..."
            << " //" << client << "/prod/htdocs/static/interfaces/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/payorforms/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/payorforms/..."
            << " //" << client << "/prod/htdocs/static/payorforms/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/postings/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/postings/..."
            << " //" << client << "/prod/htdocs/postings/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/static/*.exe"
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/*.exe"
            << " //" << client << "/prod/htdocs/static/*.exe"
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/static/*.zip"
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/*.zip"
            << " //" << client << "/prod/htdocs/static/*.zip"
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch
+           << "\t-//depot/" << subBranch << branch
            << "/prod/htdocs/static/thirdparty/artemis/..."
            << " //" << client << "/prod/htdocs/static/thirdparty/artemis/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/static/claimrules/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/claimrules/..."
            << " //" << client << "/prod/htdocs/static/claimrules/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch
+           << "\t-//depot/" << subBranch << branch
            << "/prod/htdocs/static/clinicals/devices..."
            << " //" << client << "/prod/htdocs/static/clinicals/devices/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/htdocs/static/pagehelp/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/pagehelp/..."
            << " //" << client << "/prod/htdocs/static/pagehelp/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch
+           << "\t-//depot/" << subBranch << branch
            << "/prod/htdocs/static/shared/executable..."
            << " //" << client << "/prod/htdocs/static/shared/executable..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/mis/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/mis/..."
            << " //" << client << "/prod/mis/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/mswindows/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/mswindows/..."
            << " //" << client << "/prod/mswindow/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/ohelp_source/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/ohelp_source/..."
            << " //" << client << "/prod/ohelp_source/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/patientcycle/sounds/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/patientcycle/sounds/..."
            << " //" << client << "/prod/patientcycle/sounds/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch
+           << "\t-//depot/" << subBranch << branch
            << "/prod/perllib/Athena/PaperForm/PDF....pdf"
            << " //" << client << "/prod/perlib/Athena/PaperForms/PDF....pdf"
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch
+           << "\t-//depot/" << subBranch << branch
            << "/prod/scripts/app/clinicals/p4p/..."
            << " //" << client << "/prod/scripts/app/clinicals/p4p/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/prod/sugarcrm/..."
+           << "\t-//depot/" << subBranch << branch << "/prod/sugarcrm/..."
            << " //" << client << "/prod/sugarcrm/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/*/dailydml/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/*/dailydml/..."
            << " //" << client << "/techops/*/dailydml/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/*/dat/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/*/dat/..."
            << " //" << client << "/techops/*/dat/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/*/imports/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/*/imports/..."
            << " //" << client << "/techops/*/onetimejobs/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/*/oneoffscripts/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/*/oneoffscripts/..."
            << " //" << client << "/techops/*/oneoffscripts/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/*/onetimejobs/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/*/onetimejobs/..."
            << " //" << client << "/techops/*/onetimejobs/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/dat/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/dat/..."
            << " //" << client << "/techops/dat/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/mis/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/mis/..."
            << " //" << client << "/techops/mis/..."
            << "\n"
-           << "\t-//depot/anet/features/plaw/" << branch << "/techops/sugar/..."
+           << "\t-//depot/" << subBranch << branch << "/techops/sugar/..."
            << " //" << client << "/techops/sugar/..."
            << "\n";
 
