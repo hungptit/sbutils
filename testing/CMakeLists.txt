@@ -11,7 +11,7 @@ message("SANDBOX: ${SANDBOX}")
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 
-set(CMAKE_INSTALL_PREFIX "/home/hungptit/sandbox/")
+set(CMAKE_INSTALL_PREFIX "$ENV{SANDBOX}")
 
 message("LIBRARIES: ${LIBRARIES}")
 
@@ -84,15 +84,16 @@ set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
 set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
 set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
-set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
+# set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
+set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
 
-# This option make sure that we use the local boost version. Note that if the 
+# This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS FALSE) 
+set(Boost_NO_SYSTEM_PATHS TRUE)
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${LIBRARIES}/")
   set(BOOST_INCLUDE_DIRS "${LIBRARIES}/include")
@@ -158,8 +159,16 @@ if (Boost_FOUND)
       ${LIB_BZ2} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-  
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer mp4client)
+
+  set(COMMAND_SRC_FILES mp4client)
+  foreach (src_file ${COMMAND_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file}
+      ${Boost_LIBRARIES} -lpthread)
+  endforeach (src_file)
+
+
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
