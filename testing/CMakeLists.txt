@@ -1,7 +1,7 @@
 PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
-set(ROOT_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../")
+set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 set(LIBRARIES "$ENV{LIBRARIES}")
 set(SANDBOX "$ENV{SANDBOX}")
@@ -104,12 +104,11 @@ endif (Boost_NO_SYSTEM_PATHS)
 find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
-message(${PROJECTS_FOLDER})
-message (${ROOT_FOLDER})
-include_directories (${ROOT_FOLDER})
-include_directories (${ROOT_FOLDER}/cereal/include)
-include_directories (${ROOT_FOLDER}/fmt/)
-include_directories (${PROJECTS_FOLDER})
+message (${ROOT_DIR})
+include_directories ("${ROOT_DIR}")
+include_directories ("${LIBRARIES}/include")
+include_directories ("${ROOT_DIR}/fmt/")
+include_directories ("${ROOT_DIR}/cereal/include/")
 include_directories ("${LIBRARIES}/src/rocksdb/include")
 include_directories ("${LIBRARIES}/src/tbb/include")
 include_directories ("${LIBRARIES}/include")
@@ -123,26 +122,9 @@ set(LIB_POCO_SQLITE "${LIBRARIES}/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${LIBRARIES}/lib/libPocoXML.a")
 set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
 
-find_package(Boost REQUIRED date_time system filesystem graph program_options iostreams)
-
-# Include folder
-message("Root: ${ROOT_DIR}")
-include_directories ("${ROOT_DIR}")
-include_directories ("${LIBRARIES}/include")
-include_directories ("${ROOT_DIR}/fmt/")
-
-include_directories ("/local/projects/libraries/src/rocksdb/include")
-include_directories ("${ROOT_DIR}/cereal/include")
-
-# Use POCO static library
-include_directories("${LIBRARIES}/include")
-set(LIB_POCO_FOUNDATION "${LIBRARIES}/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${LIBRARIES}/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${LIBRARIES}/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${LIBRARIES}/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${LIBRARIES}/lib/libPocoXML.a")
-set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
 set(LIB_TBB "-ltbb")
+
+find_package(Boost REQUIRED date_time system filesystem graph program_options iostreams)
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})
@@ -177,7 +159,7 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer mp4client)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
