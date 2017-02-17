@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 		if (!boost::filesystem::exists(aPath)) {
 			boost::filesystem::create_directory(aPath);
 		}
-		return aPath.string();
+		return boost::filesystem::canonical(aPath).string();
 	};
 
 	rootFolder = getAbsolutePathObj();

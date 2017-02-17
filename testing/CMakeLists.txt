@@ -168,9 +168,9 @@ if (Boost_FOUND)
     TARGET_LINK_LIBRARIES(${src_file}
       ${Boost_LIBRARIES} -lpthread)
   endforeach (src_file)
+  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 
-
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer mutest)
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
