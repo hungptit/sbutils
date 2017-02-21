@@ -15,7 +15,7 @@
 
 template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;
-    writer << "Search results: \n";
+    // writer << "Search results: \n";
     std::for_each(results.begin(), results.end(),
                   [&writer](auto const &item) { writer << item.Path << "\n"; });
     fmt::print("{}", writer.str());

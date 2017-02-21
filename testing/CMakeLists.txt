@@ -26,7 +26,7 @@ string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
 # For clang
- # set(CMAKE_CXX_COMPILER "clang++") 
+ # set(CMAKE_CXX_COMPILER "clang++")
 
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
@@ -87,8 +87,8 @@ set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
 set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
 set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
-set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
-# set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
+# set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
+set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
