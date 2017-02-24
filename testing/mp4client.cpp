@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     using path = boost::filesystem::path;
 
     std::string branch;
-	std::string subBranch;
+    std::string subBranch;
     std::string rootFolder;
     std::string client;
 
@@ -52,8 +52,7 @@ int main(int argc, char *argv[]) {
 		}
 		return boost::filesystem::canonical(aPath).string();
 	};
-
-	rootFolder = getAbsolutePathObj();
+    rootFolder = getAbsolutePathObj();
 
     bool verbose = vm.count("verbose");
 
@@ -73,113 +72,109 @@ int main(int argc, char *argv[]) {
     writer << "View:\n";
     // clang-format on
 
+    // Normalize all paths
+    std::string sourcePath = (path("/depot") / path(subBranch) / path(branch)).string();
+
     // Write out the setup for synced files and folders.
-    writer << "\t//depot/" << subBranch << branch << "/athenax/release/..."
-           << " //" << client << "/athenax/release/..."
-           << "\n"
-           << "\t//depot/" << subBranch << branch << "/prod/..."
+    writer << "\t/" << sourcePath << "/athenax/release/..."
+           << " //" << client << "/athenax/release/...\n"
+           << "\t/" << sourcePath << "/prod/..."
            << " //" << client << "/prod/..."
            << "\n"
-           << "\t//depot/" << subBranch << branch << "/techops/..."
+           << "\t/" << sourcePath << "/techops/..."
            << " //" << client << "/techops/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/.generated/..."
+           << "\t-/" << sourcePath << "/prod/.generated/..."
            << " //" << client << "/prod/.generated/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/activexcontrols/..."
+           << "\t-/" << sourcePath << "/prod/activexcontrols/..."
            << " //" << client << "/prod/activexcontrols/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/claimrules/..."
+           << "\t-/" << sourcePath << "/prod/claimrules/..."
            << " //" << client << "/prod/claimrules/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/data/..."
+           << "\t-/" << sourcePath << "/prod/data/..."
            << " //" << client << "/prod/data/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/appealforms/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/appealforms/..."
            << " //" << client << "/prod/htdocs/appealforms/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch
-           << "/prod/htdocs/billing/payersitenavigationguides/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/billing/payersitenavigationguides/..."
            << " //" << client << "/prod/htdocs/billing/payersitenavigationguides/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/interfaces/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/interfaces/..."
            << " //" << client << "/prod/htdocs/static/interfaces/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/payorforms/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/payorforms/..."
            << " //" << client << "/prod/htdocs/static/payorforms/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/postings/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/postings/..."
            << " //" << client << "/prod/htdocs/postings/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/*.exe"
+           << "\t-/" << sourcePath << "/prod/htdocs/static/*.exe"
            << " //" << client << "/prod/htdocs/static/*.exe"
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/*.zip"
+           << "\t-/" << sourcePath << "/prod/htdocs/static/*.zip"
            << " //" << client << "/prod/htdocs/static/*.zip"
            << "\n"
-           << "\t-//depot/" << subBranch << branch
-           << "/prod/htdocs/static/thirdparty/artemis/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/static/thirdparty/artemis/..."
            << " //" << client << "/prod/htdocs/static/thirdparty/artemis/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/claimrules/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/static/claimrules/..."
            << " //" << client << "/prod/htdocs/static/claimrules/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch
-           << "/prod/htdocs/static/clinicals/devices..."
+           << "\t-/" << sourcePath << "/prod/htdocs/static/clinicals/devices..."
            << " //" << client << "/prod/htdocs/static/clinicals/devices/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/htdocs/static/pagehelp/..."
+           << "\t-/" << sourcePath << "/prod/htdocs/static/pagehelp/..."
            << " //" << client << "/prod/htdocs/static/pagehelp/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch
-           << "/prod/htdocs/static/shared/executable..."
+           << "\t-/" << sourcePath << "/prod/htdocs/static/shared/executable..."
            << " //" << client << "/prod/htdocs/static/shared/executable..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/mis/..."
+           << "\t-/" << sourcePath << "/prod/mis/..."
            << " //" << client << "/prod/mis/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/mswindows/..."
+           << "\t-/" << sourcePath << "/prod/mswindows/..."
            << " //" << client << "/prod/mswindow/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/ohelp_source/..."
+           << "\t-/" << sourcePath << "/prod/ohelp_source/..."
            << " //" << client << "/prod/ohelp_source/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/patientcycle/sounds/..."
+           << "\t-/" << sourcePath << "/prod/patientcycle/sounds/..."
            << " //" << client << "/prod/patientcycle/sounds/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch
-           << "/prod/perllib/Athena/PaperForm/PDF....pdf"
+           << "\t-/" << sourcePath << "/prod/perllib/Athena/PaperForm/PDF....pdf"
            << " //" << client << "/prod/perlib/Athena/PaperForms/PDF....pdf"
            << "\n"
-           << "\t-//depot/" << subBranch << branch
-           << "/prod/scripts/app/clinicals/p4p/..."
+           << "\t-/" << sourcePath << "/prod/scripts/app/clinicals/p4p/..."
            << " //" << client << "/prod/scripts/app/clinicals/p4p/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/prod/sugarcrm/..."
+           << "\t-/" << sourcePath << "/prod/sugarcrm/..."
            << " //" << client << "/prod/sugarcrm/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/*/dailydml/..."
+           << "\t-/" << sourcePath << "/techops/*/dailydml/..."
            << " //" << client << "/techops/*/dailydml/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/*/dat/..."
+           << "\t-/" << sourcePath << "/techops/*/dat/..."
            << " //" << client << "/techops/*/dat/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/*/imports/..."
+           << "\t-/" << sourcePath << "/techops/*/imports/..."
            << " //" << client << "/techops/*/onetimejobs/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/*/oneoffscripts/..."
+           << "\t-/" << sourcePath << "/techops/*/oneoffscripts/..."
            << " //" << client << "/techops/*/oneoffscripts/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/*/onetimejobs/..."
+           << "\t-/" << sourcePath << "/techops/*/onetimejobs/..."
            << " //" << client << "/techops/*/onetimejobs/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/dat/..."
+           << "\t-/" << sourcePath << "/techops/dat/..."
            << " //" << client << "/techops/dat/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/mis/..."
+           << "\t-/" << sourcePath << "/techops/mis/..."
            << " //" << client << "/techops/mis/..."
            << "\n"
-           << "\t-//depot/" << subBranch << branch << "/techops/sugar/..."
+           << "\t-/" << sourcePath << "/techops/sugar/..."
            << " //" << client << "/techops/sugar/..."
            << "\n";
 
