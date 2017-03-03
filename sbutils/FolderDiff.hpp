@@ -88,7 +88,7 @@ namespace utils {
                 const std::string aKey = utils::normalize_path(item);
                 auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
                 if (*it == aKey) {
-                    indexes.push_back(std::distance(vids.begin(), it));
+                  indexes.push_back(static_cast<index_type>(std::distance(vids.begin(), it)));
                 } else {
                     fmt::print("Could not find key {} in database\n", aKey);
                 }

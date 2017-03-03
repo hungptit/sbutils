@@ -8,6 +8,22 @@
 #include <vector>
 
 #include "fmt/format.h"
+#include "sbutils/FileUtils.hpp"
+
+using path = boost::filesystem::path;
+
+std::string removeRedundantSlash(const path &aPath) {
+  path results;
+  path currentPath(aPath);
+  while (!currentPath.empty()) {
+    std::string aStem = utils::normalize_path(currentPath.stem().string());
+    if (aStem != ".") {
+      results = path(aStem) / results;
+    }
+    currentPath = currentPath.parent_path();
+  }
+  return results.string();
+}
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
@@ -30,7 +46,7 @@ int main(int argc, char *argv[]) {
 		("root-folder,s", po::value<std::string>(&rootFolder)->default_value(defaultRootFolder), "P4 root folder.")
 		("client,c", po::value<std::string>(&client)->default_value(defaultClient), "P4 client.")
 		("branch,b", po::value<std::string>(&branch), "P4 branch.")
-		("sub-branch,u", po::value<std::string>(&subBranch)->default_value("anet/features/plaw/"), "P4 subbranch.");
+		("sub-branch,u", po::value<std::string>(&subBranch)->default_value("anet/features/plaw"), "P4 subbranch.");
     // clang-format on
 
     po::positional_options_description p;
@@ -73,8 +89,8 @@ int main(int argc, char *argv[]) {
     // clang-format on
 
     // Normalize all paths
-    std::string sourcePath = (path("/depot") / path(subBranch) / path(branch)).string();
-
+    const std::string sourcePath = removeRedundantSlash(path("/depot") / path(subBranch) / path(branch));
+    
     // Write out the setup for synced files and folders.
     writer << "\t/" << sourcePath << "/athenax/release/..."
            << " //" << client << "/athenax/release/...\n"
