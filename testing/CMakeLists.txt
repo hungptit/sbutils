@@ -87,8 +87,8 @@ set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
 set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
 set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
-set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
-# set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
+# set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
+set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
@@ -140,12 +140,12 @@ if (Boost_FOUND)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
-  # set(UNITTEST_SRC_FILES tProcess)
-  # foreach (src_file ${UNITTEST_SRC_FILES})
-  #   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-  #   TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
-  #   ADD_TEST(${src_file} ./${src_file})
-  # endforeach (src_file)
+  set(UNITTEST_SRC_FILES tProcess)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
 
   set(UNITTEST_SRC_FILES  tTest)
   foreach (src_file ${UNITTEST_SRC_FILES})
@@ -153,6 +153,7 @@ if (Boost_FOUND)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
+  
   set(UNITTEST_SRC_FILES  tRocksDB)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
@@ -170,6 +171,15 @@ if (Boost_FOUND)
   endforeach (src_file)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 
+  # mutest
+  set(COMMAND_SRC_FILES mutest)
+  foreach (src_file ${COMMMAND_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
+  
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
