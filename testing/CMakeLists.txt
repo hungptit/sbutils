@@ -172,13 +172,13 @@ if (Boost_FOUND)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 
   # mutest
-  set(COMMAND_SRC_FILES mutest)
-  foreach (src_file ${COMMMAND_SRC_FILES})
+  set(POCO_SRC_FILES mutest)
+  foreach (src_file ${POCO_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
+  INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})
   
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
   foreach (src_file ${COMMAND_SRC_FILES})

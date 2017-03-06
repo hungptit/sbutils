@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-namespace utils {
+namespace sbutils {
     enum DispOpt { MICROSECOND = 1000000, MILLISECOND = 1000, SECOND = 1 };
     template <DispOpt val> std::string getUnitString();
 

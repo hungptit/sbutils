@@ -7,9 +7,10 @@
 #include <tuple>
 #include <vector>
 
-#include "sbutils/Process.hpp"
 #include "fmt/format.h"
 #include "sbutils/FileUtils.hpp"
+#include "sbutils/Process.hpp"
+#include "sbutils/Timer.hpp"
 
 using path = boost::filesystem::path;
 
@@ -18,14 +19,19 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Allowed options");
 
     using path = boost::filesystem::path;
-	std::vector<std::string> unitTests;
-	
+    std::vector<std::string> unitTests;
+
+    bool nodbh = true;
+    bool failedOnly = true;
+    bool nocoverage = true;
+
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display verbose information.")
-		("coverage", "Run code coverage.")
-		("nodbh", "Do not use database")
+		("nocoverage", po::value<bool>(&nocoverage)->default_value(true), "Run code coverage.")
+		("nodbh", po::value<bool>(&nodbh)->default_value(true), "Do not use database")
+		("failedonly", po::value<bool>(&failedOnly)->default_value(true), "only dislay failed tests")
 		("tests,t", po::value<std::vector<std::string>>(&unitTests), "Test modules.");
     // clang-format on
 
@@ -40,35 +46,45 @@ int main(int argc, char *argv[]) {
         return EXIT_SUCCESS;
     }
 
-	if (unitTests.empty()) {
-		fmt::print("You need to provide a test module or test point!\n");
-		return EXIT_SUCCESS;
-	}
-	
-	std::vector<std::string> utestArgs;	
+    if (unitTests.empty()) {
+        fmt::print("You need to provide a test module or test point!\n");
+        return EXIT_SUCCESS;
+    }
+
+    std::vector<std::string> utestArgs;
 
     bool verbose = vm.count("verbose");
 
-	if (!vm.count("coverage")) {
-		utestArgs.push_back("--nocoverage");
-	}
+    if (nocoverage) {
+        utestArgs.push_back("--nocoverage");
+    }
 
-	if (vm.count("nodbh")) {
-		utestArgs.push_back("--nodbh");
-	}
+    if (nodbh) {
+        utestArgs.push_back("--nodbh");
+    }
 
-	std::for_each(unitTests.begin(), unitTests.end(), [&utestArgs](auto aTest){utestArgs.push_back(aTest);});
-	
+    if (failedOnly) {
+        utestArgs.push_back("--failedonly");
+    }
+
     fmt::MemoryWriter writer;
+    std::vector<std::tuple<std::string, sbutils::CommandOutput>> results;
+    auto testObj = [&results, &utestArgs, &writer](std::string &aTest) {
+					   sbutils::ElapsedTime<sbutils::SECOND> timer(aTest + ": ");
+        auto newArgs(utestArgs);
+        newArgs.push_back(aTest);
+        sbutils::CommandInfo args = std::make_tuple("utest", newArgs);
+        sbutils::CommandOutput outputs = sbutils::run(args, "./");
+        writer << "Output: \n" << std::get<0>(outputs) << "\n";
+        results.push_back(std::make_tuple(aTest, outputs));
 
-	// Execute given tests
-	sbutils::CommandInfo args = std::make_tuple("utest", utestArgs);
-	sbutils::CommandOutput outputs = sbutils::run(args, "./");
+    };
 
-	writer << "Error code: " << std::get<2>(outputs) << "\n\n";
-	writer << "Output: \n" << std::get<0>(outputs) << "\n";
-	writer << "Error: \n" << std::get<1>(outputs) << "\n";
-	
+    std::for_each(unitTests.begin(), unitTests.end(), testObj);
+
+    std::for_each(results.begin(), results.end(),
+                  [&writer](auto item) { writer << std::get<0>(item); });
+
     fmt::print("{}", writer.str());
     return EXIT_SUCCESS;
 }
