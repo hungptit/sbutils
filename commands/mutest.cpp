@@ -12,13 +12,14 @@
 #include "sbutils/Process.hpp"
 #include "sbutils/Timer.hpp"
 
+#include "tbb/parallel_invoke.h"
+#include "tbb/tbb.h"
+
 using path = boost::filesystem::path;
 
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-
-    using path = boost::filesystem::path;
     std::vector<std::string> unitTests;
 
     bool nodbh = true;
@@ -68,23 +69,25 @@ int main(int argc, char *argv[]) {
     }
 
     fmt::MemoryWriter writer;
-    std::vector<std::tuple<std::string, sbutils::CommandOutput>> results;
-    auto testObj = [&results, &utestArgs, &writer](std::string &aTest) {
-        sbutils::ElapsedTime<sbutils::SECOND> timer(aTest + ": ");
+    tbb::concurrent_vector<std::tuple<std::string, sbutils::CommandOutput>> results;
+    auto testObj = [&results, &utestArgs, &writer, &unitTests](const int index) {
+        sbutils::ElapsedTime<sbutils::SECOND> timer(unitTests[index] + ": ");
         auto newArgs(utestArgs);
-        newArgs.push_back(aTest);
+        newArgs.push_back(unitTests[index]);
         sbutils::CommandInfo args = std::make_tuple("utest", newArgs);
         sbutils::CommandOutput outputs = sbutils::run(args, "./");
-        writer << "Output: \n" << std::get<0>(outputs) << "\n";
-        results.push_back(std::make_tuple(aTest, outputs));
+        results.push_back(std::make_tuple(unitTests[index], outputs));
 
     };
 
-    std::for_each(unitTests.begin(), unitTests.end(), testObj);
+    int size = static_cast<int>(unitTests.size());
+    tbb::parallel_for(0, size, 1, testObj);
 
-    std::for_each(results.begin(), results.end(),
-                  [&writer](auto item) { writer << std::get<0>(item); });
+    if (verbose) {
+        std::for_each(results.begin(), results.end(),
+                      [&writer](auto item) { writer << std::get<0>(std::get<1>(item)); });
+    }
 
-    fmt::print("{}", writer.str());
+    fmt::print("{}\n", writer.str());
     return EXIT_SUCCESS;
 }
