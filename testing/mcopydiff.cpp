@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
         ("keys,k", "List all keys.")
         ("src_dir,s", po::value<std::vector<std::string>>(&srcPaths), "Source folder.")
         ("dst_dir,d", po::value<std::vector<std::string>>(&dstPaths), "Destination sandbox.")
-        ("database,b", po::value<std::string>(&database)->default_value(utils::Resources::Database), "File database.");
+        ("database,b", po::value<std::string>(&database)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -58,28 +58,28 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> srcDir, dstDir;
     std::for_each(srcPaths.begin(), srcPaths.end(), [&srcDir](const std::string &aPath) {
-        srcDir.emplace_back(utils::normalize_path(aPath));
+        srcDir.emplace_back(sbutils::normalize_path(aPath));
     });
 
     std::for_each(dstPaths.begin(), dstPaths.end(), [&dstDir](const std::string &aPath) {
-        dstDir.emplace_back(utils::normalize_path(aPath));
+        dstDir.emplace_back(sbutils::normalize_path(aPath));
     });
 
-    database = utils::normalize_path(database);
+    database = sbutils::normalize_path(database);
 
     if (verbose) {
         std::cout << "Database: " << database << std::endl;
     }
 
     {
-        std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
+        std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
-            utils::diffFolders_tbb(database, srcDir, verbose);
+            sbutils::diffFolders_tbb(database, srcDir, verbose);
 
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
         // folder.
-        utils::ElapsedTime<utils::SECOND> e("Copy files: ", verbose);
+        sbutils::ElapsedTime<sbutils::SECOND> e("Copy files: ", verbose);
 
         auto runObj = [&allEditedFiles, &allNewFiles, &allDeletedFiles, verbose](const std::string &aDstDir) {
             createParentFolders(aDstDir, allEditedFiles, verbose);

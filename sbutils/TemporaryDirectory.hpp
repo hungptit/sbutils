@@ -6,7 +6,7 @@
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
 
-namespace utils {
+namespace sbutils {
     const std::string getUniqueString() {
         return boost::lexical_cast<std::string>(
             boost::uuids::random_generator()());

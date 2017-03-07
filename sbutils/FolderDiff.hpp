@@ -18,21 +18,21 @@
 
 #include "tbb/parallel_invoke.h"
 
-namespace utils {
+namespace sbutils {
     template <typename Container>
     Container read_baseline(const std::string &database,
                             const std::vector<std::string> &folders, bool verbose = false) {
-        using IArchive = utils::DefaultIArchive;
+        using IArchive = sbutils::DefaultIArchive;
         Container allFiles;
 
-        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ", verbose);
+        sbutils::ElapsedTime<sbutils::MILLISECOND> t("Read baseline: ", verbose);
 
         // Open the database
-        std::unique_ptr<rocksdb::DB> db(utils::open(database));
+        std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
         if (folders.empty()) {
             std::string value;
             rocksdb::Status s =
-                db->Get(rocksdb::ReadOptions(), utils::Resources::AllFileKey, &value);
+                db->Get(rocksdb::ReadOptions(), sbutils::Resources::AllFileKey, &value);
             assert(s.ok());
             std::istringstream is(value);
             IArchive input(is);
@@ -61,7 +61,7 @@ namespace utils {
             auto readGraphObj = [&db, &g]() {
                 std::string value;
                 rocksdb::Status s =
-                    db->Get(rocksdb::ReadOptions(), utils::Resources::GraphKey, &value);
+                    db->Get(rocksdb::ReadOptions(), sbutils::Resources::GraphKey, &value);
                 assert(s.ok());
                 std::istringstream is(value);
                 IArchive input(is);
@@ -85,7 +85,7 @@ namespace utils {
             // code block assume that folders is sorted.
             std::vector<index_type> indexes;
             for (auto const &item : folders) {
-                const std::string aKey = utils::normalize_path(item);
+                const std::string aKey = sbutils::normalize_path(item);
                 auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
                 if (*it == aKey) {
                   indexes.push_back(static_cast<index_type>(std::distance(vids.begin(), it)));
@@ -104,7 +104,7 @@ namespace utils {
                 std::sort(allVids.begin(), allVids.end());
                 const auto readOpts = rocksdb::ReadOptions();
                 for (auto const &index : allVids) {
-                    const std::string aKey = utils::to_fixed_string(9, index);
+                    const std::string aKey = sbutils::to_fixed_string(9, index);
                     std::string value;
                     auto const s = db->Get(readOpts, aKey, &value);
                     assert(s.ok());
@@ -137,7 +137,7 @@ namespace utils {
     template <typename Container>
     std::tuple<Container, Container, Container> diff(Container &&first, Container &&second,
                                                      bool verbose = false) {
-        utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ", verbose);
+        sbutils::ElapsedTime<sbutils::MILLISECOND> t("Diff time: ", verbose);
         Container modifiedFiles;
         Container results;
         Container newFiles;
@@ -206,7 +206,7 @@ namespace utils {
         // Search for files in the given folders.
         using path = boost::filesystem::path;
         using PathContainer = std::vector<path>;
-        using Container = std::vector<utils::FileInfo>;
+        using Container = std::vector<sbutils::FileInfo>;
 
         PathContainer searchFolders;
         for (auto item : folders) {
@@ -215,16 +215,16 @@ namespace utils {
 
         // We do real work here
         using Visitor =
-            utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>;
+            sbutils::filesystem::SimpleVisitor<PathContainer, sbutils::filesystem::NormalPolicy>;
 
         auto searchObj = [&searchFolders]() -> Container {
             Visitor visitor;
-            utils::filesystem::dfs_file_search(searchFolders, visitor);
+            sbutils::filesystem::dfs_file_search(searchFolders, visitor);
             return visitor.getResults();
         };
 
         auto readObj = [dataFile, &folders, verbose]() {
-            return utils::read_baseline<Container>(dataFile, folders, verbose);
+            return sbutils::read_baseline<Container>(dataFile, folders, verbose);
         };
 
         using namespace std;
@@ -242,7 +242,7 @@ namespace utils {
             fmt::print("Number of files in the baseline: {}\n", baseline.size());
         }
 
-        return utils::diff(std::move(baseline), std::move(results));
+        return sbutils::diff(std::move(baseline), std::move(results));
     }
 
     auto diffFolders_tbb(const std::string &dataFile, const std::vector<std::string> &folders,
@@ -250,7 +250,7 @@ namespace utils {
         // Search for files in the given folders.
         using path = boost::filesystem::path;
         using PathContainer = std::vector<path>;
-        using Container = std::vector<utils::FileInfo>;
+        using Container = std::vector<sbutils::FileInfo>;
 
         PathContainer searchFolders;
         for (auto item : folders) {
@@ -260,16 +260,16 @@ namespace utils {
         // We do real work here
         Container baseline, results;
         using Visitor =
-            utils::filesystem::SimpleVisitor<PathContainer, utils::filesystem::NormalPolicy>;
+            sbutils::filesystem::SimpleVisitor<PathContainer, sbutils::filesystem::NormalPolicy>;
 
         auto searchObj = [&searchFolders, &results]() {
             Visitor visitor;
-            utils::filesystem::dfs_file_search(searchFolders, visitor);
+            sbutils::filesystem::dfs_file_search(searchFolders, visitor);
             results = visitor.getResults();
         };
 
         auto readObj = [dataFile, &folders, &baseline, verbose]() {
-            baseline = utils::read_baseline<Container>(dataFile, folders, verbose);
+            baseline = sbutils::read_baseline<Container>(dataFile, folders, verbose);
         };
 
         tbb::parallel_invoke(searchObj, readObj);
@@ -280,6 +280,6 @@ namespace utils {
             fmt::print("Number of files in the baseline: {}\n", baseline.size());
         }
 
-        return utils::diff(std::move(baseline), std::move(results));
+        return sbutils::diff(std::move(baseline), std::move(results));
     }
 }

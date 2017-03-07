@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     }
 
     auto verbose = vm.count("verbose");
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
+    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
     
     std::string jsonFile;
     if (vm.count("toJSON")) {
@@ -78,18 +78,18 @@ int main(int argc, char *argv[]) {
     // Search for files in the given folders.
     using path = boost::filesystem::path;
     using Container = std::vector<path>;
-    utils::filesystem::SimpleVisitor<Container, utils::filesystem::NormalPolicy> visitor;
+    sbutils::filesystem::SimpleVisitor<Container, sbutils::filesystem::NormalPolicy> visitor;
     Container searchFolders;
     for (auto item : folders) {
         searchFolders.emplace_back(path(item));
     }
-    utils::filesystem::dfs_file_search(searchFolders, visitor);
+    sbutils::filesystem::dfs_file_search(searchFolders, visitor);
     auto const & results = visitor.getResults();
-    const utils::ExtFilter<std::vector<std::string>> f1(extensions);
-    const utils::StemFilter<std::vector<std::string>> f2(stems);
-    const utils::SimpleFilter f3(pattern);
+    const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
+    const sbutils::StemFilter<std::vector<std::string>> f2(stems);
+    const sbutils::SimpleFilter f3(pattern);
     auto data =
-        (pattern.empty()) ? utils::filter(results, f1, f2) : utils::filter(results, f1, f2, f3);
+        (pattern.empty()) ? sbutils::filter(results, f1, f2) : sbutils::filter(results, f1, f2, f3);
 
     if (verbose) {
         fmt::print("Search folders:\n");

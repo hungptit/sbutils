@@ -16,7 +16,7 @@ std::string removeRedundantSlash(const path &aPath) {
   path results;
   path currentPath(aPath);
   while (!currentPath.empty()) {
-    std::string aStem = utils::normalize_path(currentPath.stem().string());
+    std::string aStem = sbutils::normalize_path(currentPath.stem().string());
     if (aStem != ".") {
       results = path(aStem) / results;
     }

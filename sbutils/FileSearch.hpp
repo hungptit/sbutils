@@ -16,7 +16,7 @@
 #include "tbb/tbb.h"
 #include "tbb/parallel_sort.h"
 
-namespace utils {
+namespace sbutils {
     namespace filesystem {
 
         struct DoNothingPolicy {

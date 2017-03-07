@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace utils {
+namespace sbutils {
     struct Resources {
         static const std::string Database;
         static const std::string Info;

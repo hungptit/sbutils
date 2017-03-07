@@ -14,11 +14,11 @@
 #include "tbb/parallel_invoke.h"
 #include "tbb/tbb.h"
 
-namespace utils {
+namespace sbutils {
     template <typename Container, typename FirstConstraint, typename... Constraints>
     auto filter_tbb(Container &&data, FirstConstraint &&f1, Constraints &&... fs) {
-        // utils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-        tbb::concurrent_vector<utils::FileInfo> results;
+        // utils::ElapsedTime<MILLISECOND> t1("Filtering files: ");
+        tbb::concurrent_vector<FileInfo> results;
 
         auto filterObj = [f1, &fs..., &results, &data](const int idx) {
             auto const &item = data[idx];
@@ -66,7 +66,7 @@ namespace utils {
         }
     };
 
-    auto copyFiles_tbb(const std::vector<utils::FileInfo> &files,
+    auto copyFiles_tbb(const std::vector<FileInfo> &files,
                        const boost::filesystem::path &dstDir, bool verbose = false) {
 
         CopyFiles copyObj(dstDir, &files, verbose);

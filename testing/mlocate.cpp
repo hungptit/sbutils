@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
         ("stems,s", po::value<std::vector<std::string>>(&stems), "File stems.")
         ("extensions,e", po::value<std::vector<std::string>>(&extensions), "File extensions.")
         ("pattern,p", po::value<std::string>(&pattern), "Search string pattern.")
-        ("database,d", po::value<std::string>(&database)->default_value(utils::Resources::Database), "File database.");
+        ("database,d", po::value<std::string>(&database)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -58,19 +58,19 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
+    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
 
     if (verbose) {
         std::cout << "Database: " << database << std::endl;
     }
 
-    using Container = std::vector<utils::FileInfo>;
+    using Container = std::vector<sbutils::FileInfo>;
     std::sort(folders.begin(), folders.end());
-    auto data = utils::read_baseline<Container>(database, folders, verbose);
-    const utils::ExtFilter<std::vector<std::string>> f1(extensions);
-    const utils::StemFilter<std::vector<std::string>> f2(stems);
-    const utils::SimpleFilter f3(pattern);
-    auto results = (pattern.empty()) ? utils::filter_tbb(data, f1, f2)
-                                     : utils::filter_tbb(data, f1, f2, f3);
+    auto data = sbutils::read_baseline<Container>(database, folders, verbose);
+    const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
+    const sbutils::StemFilter<std::vector<std::string>> f2(stems);
+    const sbutils::SimpleFilter f3(pattern);
+    auto results = (pattern.empty()) ? sbutils::filter_tbb(data, f1, f2)
+                                     : sbutils::filter_tbb(data, f1, f2, f3);
     print(results);
 }

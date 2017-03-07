@@ -40,7 +40,7 @@ namespace {
     }
 }
 
-namespace utils {
+namespace sbutils {
 
     template <typename Data> void disp(Data &data, const std::string &message) {
         std::cout << message << "[ ";

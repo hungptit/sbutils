@@ -21,7 +21,7 @@
 // }
 
 void test_rocksdb(const std::string &database) {
-    std::unique_ptr<rocksdb::DB> db(utils::open(database));
+    std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
 
     {
         std::string key("aKey");
