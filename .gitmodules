@@ -1,12 +1,24 @@
 [submodule "cereal"]
-	path = cereal
+	path = 3p/cereal
 	url = https://github.com/USCiLab/cereal.git
 [submodule "fmt"]
-	path = fmt
+	path = 3p/fmt
 	url = https://github.com/fmtlib/fmt.git
 [submodule "graph"]
 	path = graph
 	url = https://github.com/hungptit/graph.git
 [submodule "spdlog"]
-	path = spdlog
+	path = 3p/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "3p/Celero"]
+	path = 3p/Celero
+	url = https://github.com/DigitalInBlue/Celero.git
+[submodule "3p/googletest"]
+	path = 3p/googletest
+	url = https://github.com/google/googletest
+[submodule "3p/zlib"]
+	path = 3p/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "3p/poco"]
+	path = 3p/poco
+	url = https://github.com/pocoproject/poco.git
