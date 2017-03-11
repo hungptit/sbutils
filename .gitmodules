@@ -22,3 +22,15 @@
 [submodule "3p/poco"]
 	path = 3p/poco
 	url = https://github.com/pocoproject/poco.git
+[submodule "3p/rocksdb"]
+	path = 3p/rocksdb
+	url = https://github.com/facebook/rocksdb.git
+[submodule "3p/lz4"]
+	path = 3p/lz4
+	url = https://github.com/lz4/lz4.git
+[submodule "3p/jemalloc"]
+	path = 3p/jemalloc
+	url = https://github.com/jemalloc/jemalloc.git
+[submodule "3p/snappy"]
+	path = 3p/snappy
+	url = https://github.com/google/snappy.git

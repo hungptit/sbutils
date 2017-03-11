@@ -3,8 +3,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-set(LIBRARIES "$ENV{LIBRARIES}")
-set(SANDBOX "$ENV{SANDBOX}")
+set(LIBRARIES "$ENV{HOME}/libraries")
+set(SANDBOX "$ENV{HOME}/sandbox")
 
 message("LIBRARIES: ${LIBRARIES}")
 message("SANDBOX: ${SANDBOX}")
@@ -26,7 +26,7 @@ string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
 # For clang
- # set(CMAKE_CXX_COMPILER "clang++") 
+ set(CMAKE_CXX_COMPILER "clang++") 
 
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
@@ -83,10 +83,10 @@ set(LIB_GTEST "${LIBRARIES}/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${LIBRARIES}/lib/libgtest_main.a")
 
 # Libraries used by rocksdb
-set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
-set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
-set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
+set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
+set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
+set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
+set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
 set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
 # set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
@@ -96,7 +96,7 @@ set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS TRUE)
+set(Boost_NO_SYSTEM_PATHS FALSE)
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${LIBRARIES}/")
   set(BOOST_INCLUDE_DIRS "${LIBRARIES}/include")
@@ -109,13 +109,9 @@ find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_optio
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
-include_directories ("${ROOT_DIR}/fmt/")
-include_directories ("${ROOT_DIR}/spdlog/include")
-include_directories ("${ROOT_DIR}/cereal/include/")
+include_directories ("${ROOT_DIR}/include/")
 include_directories ("${LIBRARIES}/include")
-include_directories ("${LIBRARIES}/src/rocksdb/include")
-include_directories ("${LIBRARIES}/src/tbb/include")
-include_directories ("${LIBRARIES}/include")
+include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 
 # Use POCO static library
 include_directories("${LIBRARIES}/include")
@@ -128,7 +124,7 @@ set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
 
 set(LIB_TBB "-ltbb")
 
-find_package(Boost REQUIRED date_time system filesystem graph program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})

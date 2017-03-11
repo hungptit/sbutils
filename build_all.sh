@@ -16,7 +16,19 @@ printf "build spdlog"
 ./build_using_cmake.sh spdlog > /dev/null 
 
 printf "Build zlib\n"
-./build_using_cmake.sh zlib
+./build_using_cmake.sh zlib > /dev/null 
 
 printf "Build poco\n"
-sh build_using_cmake.sh poco "-DPOCO_STATIC=TRUE -DENABLE_DATA_ODBC=FALSE -DENABLE_DATA_MYSQL=FALSE -DENABLE_MONGODB=FALSE" > /dev/null
+./build_using_cmake.sh poco "-DPOCO_STATIC=TRUE -DENABLE_DATA_ODBC=FALSE -DENABLE_DATA_MYSQL=FALSE -DENABLE_MONGODB=FALSE" > /dev/null
+
+printf "build rocksdb"
+./build_rocksdb.sh > /dev/null 
+
+printf "Build lz4"
+./build_using_cmake.sh lz4 > /dev/null 
+
+printf "Build bzip2"
+./build_using_make.sh bzip2 > /dev/null 
+
+printf "Build jemalloc"
+./build_using_autogen.sh jemalloc > /dev/null
