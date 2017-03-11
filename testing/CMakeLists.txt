@@ -87,8 +87,7 @@ set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
 set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
 set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
-set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
-# set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
+set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
