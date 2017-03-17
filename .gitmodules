@@ -1,12 +1,39 @@
 [submodule "cereal"]
-	path = cereal
+	path = 3p/cereal
 	url = https://github.com/USCiLab/cereal.git
 [submodule "fmt"]
-	path = fmt
+	path = 3p/fmt
 	url = https://github.com/fmtlib/fmt.git
 [submodule "graph"]
 	path = graph
 	url = https://github.com/hungptit/graph.git
 [submodule "spdlog"]
-	path = spdlog
+	path = 3p/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "3p/Celero"]
+	path = 3p/Celero
+	url = https://github.com/DigitalInBlue/Celero.git
+[submodule "3p/googletest"]
+	path = 3p/googletest
+	url = https://github.com/google/googletest
+[submodule "3p/zlib"]
+	path = 3p/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "3p/poco"]
+	path = 3p/poco
+	url = https://github.com/pocoproject/poco.git
+[submodule "3p/rocksdb"]
+	path = 3p/rocksdb
+	url = https://github.com/facebook/rocksdb.git
+[submodule "3p/lz4"]
+	path = 3p/lz4
+	url = https://github.com/lz4/lz4.git
+[submodule "3p/jemalloc"]
+	path = 3p/jemalloc
+	url = https://github.com/jemalloc/jemalloc.git
+[submodule "3p/snappy"]
+	path = 3p/snappy
+	url = https://github.com/google/snappy.git
+[submodule "3p/CMake"]
+	path = 3p/CMake
+	url = https://github.com/Kitware/CMake.git

@@ -3,17 +3,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-set(LIBRARIES "$ENV{LIBRARIES}")
-set(SANDBOX "$ENV{SANDBOX}")
-
-message("LIBRARIES: ${LIBRARIES}")
-message("SANDBOX: ${SANDBOX}")
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
-
-set(CMAKE_INSTALL_PREFIX "$ENV{SANDBOX}")
-
-message("LIBRARIES: ${LIBRARIES}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -26,7 +17,11 @@ string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
 # For clang
+<<<<<<< HEAD
  # set(CMAKE_CXX_COMPILER "clang++")
+=======
+# set(CMAKE_CXX_COMPILER "clang++")
+>>>>>>> master
 
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
@@ -79,10 +74,11 @@ ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Used libraries
-set(LIB_GTEST "${LIBRARIES}/lib/libgtest.a")
-set(LIB_GTEST_MAIN "${LIBRARIES}/lib/libgtest_main.a")
+set(LIB_GTEST "${ROOT_DIR}/lib/libgtest.a")
+set(LIB_GTEST_MAIN "${ROOT_DIR}/lib/libgtest_main.a")
 
 # Libraries used by rocksdb
+<<<<<<< HEAD
 set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
 set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
@@ -90,17 +86,25 @@ set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
 # set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
 set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
 set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
+=======
+set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
+set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
+set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
+set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
+set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
+set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+>>>>>>> master
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS TRUE)
+set(Boost_NO_SYSTEM_PATHS FALSE)
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${LIBRARIES}/")
-  set(BOOST_INCLUDE_DIRS "${LIBRARIES}/include")
-  set(BOOST_LIBRARY_DIRS "${LIBRARIES}/lib")
+  set(BOOST_ROOT "${ROOT_DIR}/")
+  set(BOOST_INCLUDE_DIRS "${ROOT_DIR}/include")
+  set(BOOST_LIBRARY_DIRS "${ROOT_DIR}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
 # message(${BOOST_ROOT})
@@ -109,26 +113,20 @@ find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_optio
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
-include_directories ("${ROOT_DIR}/fmt/")
-include_directories ("${ROOT_DIR}/spdlog/include")
-include_directories ("${ROOT_DIR}/cereal/include/")
-include_directories ("${LIBRARIES}/include")
-include_directories ("${LIBRARIES}/src/rocksdb/include")
-include_directories ("${LIBRARIES}/src/tbb/include")
-include_directories ("${LIBRARIES}/include")
+include_directories ("${ROOT_DIR}/include/")
+include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 
 # Use POCO static library
-include_directories("${LIBRARIES}/include")
-set(LIB_POCO_FOUNDATION "${LIBRARIES}/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${LIBRARIES}/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${LIBRARIES}/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${LIBRARIES}/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${LIBRARIES}/lib/libPocoXML.a")
-set(LIB_POCO_NET "${LIBRARIES}/lib/libPocoNet.a")
+set(LIB_POCO_FOUNDATION "${ROOT_DIR}/lib/libPocoFoundation.a")
+set(LIB_POCO_UTIL "${ROOT_DIR}/lib/libPocoUtil.a")
+set(LIB_POCO_DATA "${ROOT_DIR}/lib/libPocoData.a")
+set(LIB_POCO_SQLITE "${ROOT_DIR}/lib/libPocoDataSQLite.a")
+set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
+set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
 
 set(LIB_TBB "-ltbb")
 
-find_package(Boost REQUIRED date_time system filesystem graph program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})
@@ -162,6 +160,7 @@ if (Boost_FOUND)
       ${LIB_BZ2} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
+<<<<<<< HEAD
 
   set(COMMAND_SRC_FILES mp4client msetupenv)
   foreach (src_file ${COMMAND_SRC_FILES})
@@ -189,4 +188,6 @@ if (Boost_FOUND)
   endforeach (src_file)
 
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
+=======
+>>>>>>> master
 endif (Boost_FOUND)

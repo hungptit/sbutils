@@ -36,8 +36,8 @@ int main(int argc, char *argv[]) {
     std::string rootFolder;
     std::string client;
 
-    std::string defaultClient = std::getenv("USER");
-    std::string defaultRootFolder = (path(std::getenv("HOME")) / path("p4")).string();
+    std::string defaultClient = std::getenv("P4CLIENT");
+    std::string defaultRootFolder = (path(std::getenv("P4_HOME"))).string();
 
     // clang-format off
     desc.add_options()
