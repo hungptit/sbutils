@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 		("root-folder,s", po::value<std::string>(&rootFolder)->default_value(defaultRootFolder), "P4 root folder.")
 		("client,c", po::value<std::string>(&client)->default_value(defaultClient), "P4 client.")
 		("branch,b", po::value<std::string>(&branch), "P4 branch.")
-		("sub-branch,c", po::value<std::string>(&subBranch)->default_value("anet/features/plaw/"), "P4 subbranch.");
+		("sub-branch,u", po::value<std::string>(&subBranch)->default_value("anet/features/plaw/"), "P4 subbranch.");
     // clang-format on
 
     po::positional_options_description p;
@@ -73,6 +73,8 @@ int main(int argc, char *argv[]) {
     writer << "View:\n";
     // clang-format on
 
+	// 
+	
     // Write out the setup for synced files and folders.
     writer << "\t//depot/" << subBranch << branch << "/athenax/release/..."
            << " //" << client << "/athenax/release/..."
