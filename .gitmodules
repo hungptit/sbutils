@@ -34,3 +34,6 @@
 [submodule "3p/snappy"]
 	path = 3p/snappy
 	url = https://github.com/google/snappy.git
+[submodule "3p/CMake"]
+	path = 3p/CMake
+	url = https://github.com/Kitware/CMake.git
