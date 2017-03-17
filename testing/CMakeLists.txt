@@ -17,11 +17,7 @@ string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
 # For clang
-<<<<<<< HEAD
  # set(CMAKE_CXX_COMPILER "clang++")
-=======
-# set(CMAKE_CXX_COMPILER "clang++")
->>>>>>> master
 
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
@@ -78,22 +74,12 @@ set(LIB_GTEST "${ROOT_DIR}/lib/libgtest.a")
 set(LIB_GTEST_MAIN "${ROOT_DIR}/lib/libgtest_main.a")
 
 # Libraries used by rocksdb
-<<<<<<< HEAD
-set(LIB_ROCKSDB "${LIBRARIES}/src/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${LIBRARIES}/lib/libz.a")
-set(LIB_LZ4 "${LIBRARIES}/lib/liblz4.a")
-set(LIB_BZ2 "${LIBRARIES}/lib/libbz2.a")
-# set(LIB_SNAPPY "/usr/local/lib/libsnappy.a")
-set(LIB_SNAPPY "/home/hdang/.linuxbrew/lib64/libsnappy.a") # A patch for old Linux system.
-set(LIB_JEMALLOC "${LIBRARIES}/lib/libjemalloc.a")
-=======
 set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
 set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
 set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
 set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
 set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
->>>>>>> master
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
@@ -160,34 +146,4 @@ if (Boost_FOUND)
       ${LIB_BZ2} -lpthread -ldl)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-<<<<<<< HEAD
-
-  set(COMMAND_SRC_FILES mp4client msetupenv)
-  foreach (src_file ${COMMAND_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} -lpthread)
-  endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
-
-  # mutest
-  set(POCO_SRC_FILES mutest)
-  foreach (src_file ${POCO_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
-    ADD_TEST(${src_file} ./${src_file})
-  endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})
-  
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
-  foreach (src_file ${COMMAND_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
-      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
-  endforeach (src_file)
-
-  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
-=======
->>>>>>> master
 endif (Boost_FOUND)
