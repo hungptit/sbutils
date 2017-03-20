@@ -38,10 +38,10 @@ namespace {
                                                        ".mexa64", ".so", ".dot", ".tmp"};
     };
 
-    template <typename Container, typename Filter> void print(Container &data, Filter &f) {
+    template <typename Container, typename Filter> void print(Container &data, Filter &f, const std::string &prefix) {
         for (auto item : data) {
             if (f.isValid(item)) {
-                fmt::print("{}\n", item.Path);
+                fmt::print("{0}{1}\n", prefix, item.Path);
             }
         }
     }
@@ -55,13 +55,13 @@ int main(int argc, char *argv[]) {
    
     std::string dataFile;
     std::vector<std::string> folders;
-    
+	
     // clang-format off
     desc.add_options()
-    ("help,h", "Print this help")
-    ("verbose,v", "Display searched data.")
-    ("keys,k", "List all keys.")
-      ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
+		("help,h", "Print this help")
+		("verbose,v", "Display searched data.")
+		("keys,k", "List all keys.")
+		("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
         ("database,d", po::value<std::string>(&dataFile)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
 
@@ -77,6 +77,11 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+	if (folders.empty()) {
+		fmt::print("You must provide folder paths!\n");
+		return EXIT_FAILURE;
+	}
+	
     bool verbose = vm.count("verbose");
     if (folders.empty()) {
         folders = {"matlab/src", "matlab/toolbox", "matlab/test", "matlab/resources"};
@@ -95,14 +100,9 @@ int main(int argc, char *argv[]) {
             sbutils::diffFolders_tbb(dataFile, folders, verbose);
 
         // Now we will display the results
-        std::cout << "---- Modified files: " << allEditedFiles.size() << " ----\n";
-        NormalFilter f;
-        print(allEditedFiles, f);
-
-        std::cout << "---- New files: " << allNewFiles.size() << " ----\n";
-        print(allNewFiles, f);
-
-        std::cout << "---- Deleted files: " << allDeletedFiles.size() << " ----\n";
-        print(allDeletedFiles, f);
+		NormalFilter f;
+        print(allEditedFiles, f, "*");        
+        print(allNewFiles, f, "+");
+        print(allDeletedFiles, f, "-");
     }
 }
