@@ -16,7 +16,7 @@
 #include "boost/filesystem.hpp"
 #include "graph/SparseGraph.hpp"
 
-namespace utils {
+namespace sbutils {
 
     using DefaultIArchive = cereal::BinaryInputArchive;
     using DefaultOArchive = cereal::BinaryOutputArchive;
@@ -189,13 +189,13 @@ namespace utils {
 
     template <typename OArchive, typename T, typename Stream>
     void serialize(const T &data, const std::string &title, Stream &os) {
-        utils::DefaultOArchive oar(os);
+        sbutils::DefaultOArchive oar(os);
         oar(title, data);
     }
 
     template <typename OArchive, typename T, typename Stream>
     void serialize(const T &data, Stream &os) {
-        utils::DefaultOArchive oar(os);
+		sbutils::DefaultOArchive oar(os);
         oar(data);
     }
 
@@ -212,8 +212,8 @@ namespace utils {
 }
 
 namespace std {
-    template <> struct hash<utils::FileInfo> {
-        using value_type = utils::FileInfo;
+    template <> struct hash<sbutils::FileInfo> {
+        using value_type = sbutils::FileInfo;
         typedef std::size_t result_type;
 
         result_type operator()(const value_type &aKey) const {

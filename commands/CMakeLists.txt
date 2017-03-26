@@ -2,9 +2,9 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
-set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+message("ROOT_DIR: ${ROOT_DIR}")
 
-set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
+set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -30,12 +30,11 @@ include(CXXFeatureCheck)
 # set(CMAKE_BUILD_TYPE Debug)
 
 set (CMAKE_BUILD_TYPE Release)
-add_cxx_compiler_flag(-O2)
+add_cxx_compiler_flag(-O3)
 add_cxx_compiler_flag(-march=native)
-
 add_cxx_compiler_flag(-std=c++14)
-# add_cxx_compiler_flag(-Wall)
-# add_cxx_compiler_flag(-Wextra)
+add_cxx_compiler_flag(-Wall)
+add_cxx_compiler_flag(-Wextra)
 
 # add_cxx_compiler_flag(-Wshadow)
 # add_cxx_compiler_flag(-Werror RELEASE)
@@ -89,13 +88,12 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_NO_SYSTEM_PATHS FALSE)
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${ROOT_DIR}/")
-  set(BOOST_INCLUDE_DIRS "${ROOT_DIR}/include")
-  set(BOOST_LIBRARY_DIRS "${ROOT_DIR}/lib")
+  set(BOOST_ROOT "${ROOT_DIR}")
+  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
 # message(${BOOST_ROOT})
-
 find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
@@ -104,6 +102,7 @@ include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 
 # Use POCO static library
+include_directories("${ROOT_DIR}/include")
 set(LIB_POCO_FOUNDATION "${ROOT_DIR}/lib/libPocoFoundation.a")
 set(LIB_POCO_UTIL "${ROOT_DIR}/lib/libPocoUtil.a")
 set(LIB_POCO_DATA "${ROOT_DIR}/lib/libPocoData.a")
@@ -116,35 +115,30 @@ set(LIB_TBB "-ltbb")
 find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
 if (Boost_FOUND)
-  message(${Boost_LIBRARIES})
-  include_directories(${BOOST_INCLUDE_DIRS})
-  set(UNITTEST_SRC_FILES tUnitTests tFileFinder)
-  foreach (src_file ${UNITTEST_SRC_FILES})
+  set(COMMAND_SRC_FILES mp4client)
+  foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_SNAPPY} ${LIB_TBB} -lpthread)
-    ADD_TEST(${src_file} ./${src_file})
+    TARGET_LINK_LIBRARIES(${src_file}
+      ${Boost_LIBRARIES} -lpthread)
   endforeach (src_file)
+  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 
-  set(UNITTEST_SRC_FILES tProcess)
-  foreach (src_file ${UNITTEST_SRC_FILES})
+  # mutest
+  set(POCO_SRC_FILES mutest)
+  foreach (src_file ${POCO_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -ltbb -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
-
-  set(UNITTEST_SRC_FILES  tTest)
-  foreach (src_file ${UNITTEST_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} -lpthread -ldl)
-    ADD_TEST(${src_file} ./${src_file})
-  endforeach (src_file)
+  INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})
   
-  set(UNITTEST_SRC_FILES  tRocksDB)
-  foreach (src_file ${UNITTEST_SRC_FILES})
+  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
+  foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES}
-      ${LIB_ROCKSDB} ${LIB_ZLIB} ${LIB_LZ4} ${LIB_SNAPPY} ${LIB_JEMALLOC}
-      ${LIB_BZ2} -lpthread -ldl)
-    ADD_TEST(${src_file} ./${src_file})
+    TARGET_LINK_LIBRARIES(${src_file}
+      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
+      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
   endforeach (src_file)
+
+  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

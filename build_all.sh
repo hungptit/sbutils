@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# Download required packages
+./download_source_code.sh http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz bzip2
+
 printf "Build fmt\n"
-./build_using_cmake.sh fmt > /dev/null
+./build_using_cmake.sh fmt "-DFMT_DOC=OFF -DFMT_TEST=OFF" > /dev/null
 
 printf "Build googletest\n"
 ./build_using_cmake.sh googletest > /dev/null
@@ -25,7 +28,7 @@ printf "build rocksdb"
 ./build_rocksdb.sh > /dev/null 
 
 printf "Build lz4"
-./build_using_cmake.sh lz4 > /dev/null 
+./build_using_make.sh lz4 > /dev/null 
 
 printf "Build bzip2"
 ./build_using_make.sh bzip2 > /dev/null 

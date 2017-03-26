@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
         ("verbose,v", "Display verbose information.")
         ("all-keys,a", "Display all keys in a given database")
         ("keys,k", po::value<std::vector<std::string>>(&keys), "List the content of given keys.")
-        ("database,d", po::value<std::string>(&database)->default_value(utils::Resources::Database), "File database.");
+        ("database,d", po::value<std::string>(&database)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -50,12 +50,12 @@ int main(int argc, char *argv[]) {
         fmt::print("database: {}\n", database);
     }
 
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
+    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
 
     // Open a given database
     rocksdb::Options options;
     options.create_if_missing = false;
-    std::unique_ptr<rocksdb::DB> db(utils::open(database, options));
+    std::unique_ptr<rocksdb::DB> db(sbutils::open(database, options));
     assert(db != nullptr);
 
     if (displayAllKeys) {

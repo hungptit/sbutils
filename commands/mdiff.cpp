@@ -27,7 +27,7 @@
 namespace {
     struct NormalFilter {
       public:
-        bool isValid(utils::FileInfo &item) {
+        bool isValid(sbutils::FileInfo &item) {
             return (std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
                               item.Extension) == ExcludedExtensions.end());
         }
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     ("verbose,v", "Display searched data.")
     ("keys,k", "List all keys.")
       ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
-        ("database,d", po::value<std::string>(&dataFile)->default_value(utils::Resources::Database), "File database.");
+        ("database,d", po::value<std::string>(&dataFile)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -88,11 +88,11 @@ int main(int argc, char *argv[]) {
     }
     
     {
-        utils::ElapsedTime<utils::SECOND> e("Diff time: ", verbose);
-        std::vector<utils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
+        sbutils::ElapsedTime<sbutils::SECOND> e("Diff time: ", verbose);
+        std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
 
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
-            utils::diffFolders_tbb(dataFile, folders, verbose);
+            sbutils::diffFolders_tbb(dataFile, folders, verbose);
 
         // Now we will display the results
         std::cout << "---- Modified files: " << allEditedFiles.size() << " ----\n";

@@ -45,14 +45,14 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
-    utils::ElapsedTime<utils::MILLISECOND> totalTimer("Total time: ", verbose);
+    sbutils::ElapsedTime<sbutils::MILLISECOND> totalTimer("Total time: ", verbose);
     
     std::vector<path> folders;
 
     if (vm.count("folders")) {
         auto list = vm["folders"].as<std::vector<std::string>>();
         std::for_each(list.begin(), list.end(), [&folders](auto const &item) {
-            folders.emplace_back(utils::normalize_path(item));
+            folders.emplace_back(sbutils::normalize_path(item));
         });
     } else {
         folders.emplace_back(boost::filesystem::current_path());
@@ -72,27 +72,27 @@ int main(int argc, char *argv[]) {
 
     // Build file information database
     using FileVisitor =
-        utils::filesystem::Visitor<decltype(folders),
-                                   utils::filesystem::NormalPolicy>;
+        sbutils::filesystem::Visitor<decltype(folders),
+                                   sbutils::filesystem::NormalPolicy>;
     FileVisitor visitor;
     {
-        utils::ElapsedTime<utils::MILLISECOND> searchTimer("Search time: ", verbose);
-        utils::filesystem::dfs_file_search(folders, visitor);
+        sbutils::ElapsedTime<sbutils::MILLISECOND> searchTimer("Search time: ", verbose);
+        sbutils::filesystem::dfs_file_search(folders, visitor);
     }
     
     // Save data to a rocksdb database.
     {
-        utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ", verbose);
+        sbutils::ElapsedTime<sbutils::SECOND> timer1("Serialization time: ", verbose);
 
         auto const results = visitor.getFolderHierarchy<index_type>();
 
         if (verbose) {
-            utils::print<cereal::JSONOutputArchive>(results,
+            sbutils::print<cereal::JSONOutputArchive>(results,
                                                     "Folder hierarchy");
         }
 
         results.info();
-        utils::writeToRocksDB(database, results);
+        sbutils::writeToRocksDB(database, results);
     }
 
     // Return

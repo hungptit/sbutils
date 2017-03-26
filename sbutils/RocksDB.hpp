@@ -9,16 +9,21 @@
 #include "Resources.hpp"
 #include "Utils.hpp"
 
-namespace utils {
+#include <stdexcept>
+
+namespace sbutils {
     template <typename T>
     rocksdb::DB *open(const std::string &database, T &&options) {
         rocksdb::DB *db = nullptr;
         rocksdb::Status status =
             rocksdb::DB::Open(std::forward<T>(options), database, &db);
 
-        assert(status.ok());
+        if (!status.ok()) {
+            const std::string errmsg("Cannot open " + database);
+            throw std::runtime_error(errmsg); 
+        }
+        
         assert(db);
-
         return db;
     }
 
@@ -30,7 +35,7 @@ namespace utils {
 
     template <typename T>
     void writeToRocksDB(const std::string &database, const T &results) {
-        std::unique_ptr<rocksdb::DB> db(utils::open(database));
+        std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
         rocksdb::Status s;
 
         // Write all data using batch mode.
@@ -40,19 +45,19 @@ namespace utils {
 
         // Write out all file information
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(results.AllFiles, os);
-        batch.Put(utils::Resources::AllFileKey, os.str());
+        serialize<sbutils::DefaultOArchive>(results.AllFiles, os);
+        batch.Put(sbutils::Resources::AllFileKey, os.str());
 
         // Write out graph information
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(results.Graph, os);
-        batch.Put(utils::Resources::GraphKey, os.str());
+        serialize<sbutils::DefaultOArchive>(results.Graph, os);
+        batch.Put(sbutils::Resources::GraphKey, os.str());
 
         // Write out vertex information
         auto const &vertexes = results.Vertexes;
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(vertexes, os);
-        batch.Put(utils::Resources::VertexKey, os.str());
+        serialize<sbutils::DefaultOArchive>(vertexes, os);
+        batch.Put(sbutils::Resources::VertexKey, os.str());
 
         // Write out vids only
         std::vector<std::string> vids;
@@ -61,15 +66,15 @@ namespace utils {
             vertexes.begin(), vertexes.end(),
             [&vids](auto const &item) { vids.emplace_back(item.Path); });
         os.str(std::string());
-        serialize<utils::DefaultOArchive>(vids, os);
-        batch.Put(utils::Resources::VIDKey, os.str());
+        serialize<sbutils::DefaultOArchive>(vids, os);
+        batch.Put(sbutils::Resources::VIDKey, os.str());
 
         // Write all vertexes into database and keys are the indexes.
         size_t counter = 0;
         auto writeObj = [&os, &batch, &counter](auto const &aVertex) {
           os.str(std::string());
-          serialize<utils::DefaultOArchive>(aVertex, os);
-          batch.Put(utils::to_fixed_string(9, counter), os.str());
+          serialize<sbutils::DefaultOArchive>(aVertex, os);
+          batch.Put(sbutils::to_fixed_string(9, counter), os.str());
           ++counter;
         };
 

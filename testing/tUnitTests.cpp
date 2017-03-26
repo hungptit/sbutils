@@ -18,7 +18,7 @@
 using path = boost::filesystem::path;
 
 namespace {
-  using Container = std::vector<utils::FileInfo>;
+  using Container = std::vector<sbutils::FileInfo>;
 
   std::tuple<Container, Container, Container> newdiff(Container &first, Container &second) {
     using value_type  = Container::value_type;
@@ -44,16 +44,16 @@ namespace {
 TEST(Display_Functions, Positive) {
     {
         std::vector<int> data = {1, 2, 3, 4, 5, 6};
-        utils::disp(data, "data: ");
+        sbutils::disp(data, "data: ");
     }
 
     {
         std::map<int, std::string> data = {{1, "a"}, {2, "b"}, {3, "c"}};
-        utils::disp(data, "data: ");
+        sbutils::disp(data, "data: ");
     }
 
     {
-        std::cout << "Current time: " << utils::getTimeStampString()
+        std::cout << "Current time: " << sbutils::getTimeStampString()
                   << std::endl;
     }
 
@@ -66,35 +66,35 @@ TEST(FileSystemUtilities, Positive) {
         boost::filesystem::temp_directory_path() /
         boost::filesystem::path("test");
     const std::string folderName = aFolder.string();
-    EXPECT_TRUE(utils::createDirectory(folderName));
-	EXPECT_TRUE(utils::isDirectory(folderName));
+    EXPECT_TRUE(sbutils::createDirectory(folderName));
+	EXPECT_TRUE(sbutils::isDirectory(folderName));
 
 	// TODO: Failed in Mac OS because /var to symlink to /private/var
-	// const std::string absPath = utils::getAbslutePath(folderName);	
+	// const std::string absPath = sbutils::getAbslutePath(folderName);	
     // EXPECT_EQ(absPath , folderName);
 	
-    EXPECT_TRUE(utils::getAbslutePath("./") == utils::getCurrentFolder());
-    EXPECT_TRUE(utils::remove(folderName));
+    EXPECT_TRUE(sbutils::getAbslutePath("./") == sbutils::getCurrentFolder());
+    EXPECT_TRUE(sbutils::remove(folderName));
 }
 
 TEST(FileSystemUtilities, Negative) {
     std::string folderName = "/usr/test";
-    ASSERT_ANY_THROW(utils::createDirectory(folderName));
-    EXPECT_FALSE(utils::remove(folderName));
-    EXPECT_FALSE(utils::isRegularFile(folderName));
-    EXPECT_FALSE(utils::isDirectory("tUnitTests.cpp"));
+    ASSERT_ANY_THROW(sbutils::createDirectory(folderName));
+    EXPECT_FALSE(sbutils::remove(folderName));
+    EXPECT_FALSE(sbutils::isRegularFile(folderName));
+    EXPECT_FALSE(sbutils::isDirectory("tUnitTests.cpp"));
 }
 
 TEST(TemporaryDirectory, Positive) {
-    utils::TemporaryDirectory tmpDir;
+    sbutils::TemporaryDirectory tmpDir;
     std::cout << tmpDir.getPath() << std::endl;
     EXPECT_TRUE(boost::filesystem::exists(tmpDir.getPath()));
 }
 
 TEST(ExporeFolderRootLevel, Positive) {
     {
-        utils::TemporaryDirectory tmpDir;
-        auto results = utils::exploreFolderAtRootLevel(tmpDir.getPath(), 0);
+        sbutils::TemporaryDirectory tmpDir;
+        auto results = sbutils::exploreFolderAtRootLevel(tmpDir.getPath(), 0);
         fmt::print("Folders:\n");
         for (auto item : std::get<0>(results)) {
             std::cout << item << "\n";
@@ -109,9 +109,9 @@ TEST(ExporeFolderRootLevel, Positive) {
 TEST(DataStructure, Positive) {
     // using IArchive = cereal::JSONInputArchive;
     using OArchive = cereal::JSONOutputArchive;
-    using value_type = utils::FileInfo;
+    using value_type = sbutils::FileInfo;
 
-    utils::TemporaryDirectory tmpDir;
+    sbutils::TemporaryDirectory tmpDir;
     TestData data(tmpDir.getPath());
         
     auto const aPath = tmpDir.getPath() / path("data/data.mat");
@@ -163,7 +163,7 @@ TEST(DataStructure, Positive) {
     }
 
     {
-        utils::RootFolder aFolder;
+        sbutils::RootFolder aFolder;
         aFolder.update(tmpDir.getPath());
         
         fmt::print("Current path: {}\n", aFolder.Path.string());
@@ -185,16 +185,16 @@ TEST(DFS, Positive) {
     using path = boost::filesystem::path;
     using OArchive = cereal::JSONOutputArchive;
     
-    utils::TemporaryDirectory tmpDir;
+    sbutils::TemporaryDirectory tmpDir;
     TestData data(tmpDir.getPath());
     std::vector<path> folders{tmpDir.getPath()};
     using FileVisitor =
-        utils::filesystem::Visitor<decltype(folders),
-                                   utils::filesystem::NormalPolicy>;
-    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ");
+        sbutils::filesystem::Visitor<decltype(folders),
+                                   sbutils::filesystem::NormalPolicy>;
+    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ");
     std::stringstream output;
     FileVisitor visitor;
-    utils::filesystem::dfs_file_search(std::move(folders), visitor);
+    sbutils::filesystem::dfs_file_search(std::move(folders), visitor);
     // visitor.print<OArchive>();
 
     // Get the folder hierarchy
