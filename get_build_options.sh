@@ -57,6 +57,9 @@ fi
 CMAKE_RELEASE_BUILD="-DCMAKE_BUILD_TYPE=Release"
 CMAKE_USE_CLANG="-DCMAKE_CXX_COMPILER=${CLANGPP} -DCMAKE_C_COMPILER=${CLANG}"
 
+EXTRA_CFLAGS="-march=native"
+EXTRA_CXXFLAGS="-march=native"
+
 # Display build configurations
 printf  "========= Build configuration =========\n"
 printf "ROOT_DIR: %s\n" "$ROOT_DIR"

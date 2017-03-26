@@ -17,7 +17,8 @@ string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
 # For clang
- # set(CMAKE_CXX_COMPILER "clang++")
+# set(CMAKE_CXX_COMPILER "clang++")
+# set(CMAKE_CXX_COMPILER "g++")
 
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
@@ -51,7 +52,6 @@ add_cxx_compiler_flag(-Wfloat-equal)
 add_cxx_compiler_flag(-Wshorten-64-to-32)
 # add_cxx_compiler_flag(-Wfloat-equal)
 add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
-
 add_cxx_compiler_flag(-fstrict-aliasing)
 if (HAVE_CXX_FLAG_FSTRICT_ALIASING)
   add_cxx_compiler_flag(-Wstrict-aliasing)
@@ -124,13 +124,13 @@ if (Boost_FOUND)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 
   # mutest
-  set(POCO_SRC_FILES mutest)
-  foreach (src_file ${POCO_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -ltbb -lpthread)
-    ADD_TEST(${src_file} ./${src_file})
-  endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})
+  # set(POCO_SRC_FILES mutest)
+  # foreach (src_file ${POCO_SRC_FILES})
+  #   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+  #   TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -ltbb -lpthread)
+  #   ADD_TEST(${src_file} ./${src_file})
+  # endforeach (src_file)
+  # INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})
   
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
   foreach (src_file ${COMMAND_SRC_FILES})

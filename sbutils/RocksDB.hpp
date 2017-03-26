@@ -3,26 +3,25 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <stdexcept>
+#include <iostream>
 
-#include "rocksdb/db.h"
 #include "DataStructures.hpp"
 #include "Resources.hpp"
 #include "Utils.hpp"
+#include "rocksdb/db.h"
 
-#include <stdexcept>
 
 namespace sbutils {
-    template <typename T>
-    rocksdb::DB *open(const std::string &database, T &&options) {
+    template <typename T> rocksdb::DB *open(const std::string &database, T &&options) {
         rocksdb::DB *db = nullptr;
-        rocksdb::Status status =
-            rocksdb::DB::Open(std::forward<T>(options), database, &db);
+        rocksdb::Status status = rocksdb::DB::Open(std::forward<T>(options), database, &db);
 
         if (!status.ok()) {
             const std::string errmsg("Cannot open " + database);
-            throw std::runtime_error(errmsg); 
+            throw std::runtime_error(errmsg);
         }
-        
+
         assert(db);
         return db;
     }
@@ -33,8 +32,7 @@ namespace sbutils {
         return open(database, options);
     }
 
-    template <typename T>
-    void writeToRocksDB(const std::string &database, const T &results) {
+    template <typename T> void writeToRocksDB(const std::string &database, const T &results) {
         std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
         rocksdb::Status s;
 
@@ -62,9 +60,8 @@ namespace sbutils {
         // Write out vids only
         std::vector<std::string> vids;
         vids.reserve(vertexes.size());
-        std::for_each(
-            vertexes.begin(), vertexes.end(),
-            [&vids](auto const &item) { vids.emplace_back(item.Path); });
+        std::for_each(vertexes.begin(), vertexes.end(),
+                      [&vids](auto const &item) { vids.emplace_back(item.Path); });
         os.str(std::string());
         serialize<sbutils::DefaultOArchive>(vids, os);
         batch.Put(sbutils::Resources::VIDKey, os.str());
@@ -72,17 +69,19 @@ namespace sbutils {
         // Write all vertexes into database and keys are the indexes.
         size_t counter = 0;
         auto writeObj = [&os, &batch, &counter](auto const &aVertex) {
-          os.str(std::string());
-          serialize<sbutils::DefaultOArchive>(aVertex, os);
-          batch.Put(sbutils::to_fixed_string(9, counter), os.str());
-          ++counter;
+            os.str(std::string());
+            serialize<sbutils::DefaultOArchive>(aVertex, os);
+            batch.Put(sbutils::to_fixed_string(9, counter), os.str());
+            ++counter;
         };
 
         std::for_each(vertexes.begin(), vertexes.end(), writeObj);
-        
+
         // Write all changes to the database
         auto const writeOpts = rocksdb::WriteOptions();
         s = db->Write(writeOpts, &batch);
-        assert(s.ok()); // Write all changes to the database
+        if (!s.ok()) {
+            std::cerr << "Cannot write data to " << database << "\n";
+        }; 
     }
-}
+} // namespace sbutils
