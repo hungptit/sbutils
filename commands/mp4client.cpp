@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	};
     rootFolder = getAbsolutePathObj();
 
-    bool verbose = vm.count("verbose");
+    // bool verbose = vm.count("verbose");
 
     fmt::MemoryWriter writer;
 
