@@ -101,6 +101,7 @@ find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_optio
 # Include folder
 include_directories ("${ROOT_DIR}/")
 include_directories ("${ROOT_DIR}/include/")
+include_directories ("${ROOT_DIR}/graph/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 
 # Use POCO static library
