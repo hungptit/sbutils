@@ -1,0 +1,45 @@
+* Who am I?
+  + My name is Hung and I am with Athena Worker team.
+
+* Questions [0%]
+  + How often do you run tests before submitting your code?
+  + How often do you get lost with the output of mutest command?
+  + How often do you wish the test can run faster?
+  + How often to you puzzle "How many threads should I use to run my tests"?
+  + How often do you ask yourself Am I breaking someone else code"?
+  + How often do you wish utest will figure out test that need to run from your changes?
+  + How often do you wish test results will be sent to you by mail :)?
+  + How does my test results look like last month?
+  + How often does this test failed?
+
+* Why do I create another test tool?
+  + I want to run tests as fast as possible.
+  + I want to have more descriptive report instead of a gaint amout of text.
+  + I want to see "Passed" before submitting my changes.
+  + I want to show the test results during code review.
+  + Sometime I want to receive an email about my test results.
+  + I do not want to kill dev server by running my tests because I know my coworkers will definitely hate me for that.
+ 
+* How
+  + mutest is built on top of utest so we will have at least the same functionality.
+	- Call utest from C++ using system call and pipe.
+  + Written in in modern C++ i.e C++11 amd C++14 and it takes advantage of many C++ libraries so it only take less than 200 lines of code. 
+  + Multi-threaded by design and it won't have over subscscription problem (thanks to TBB).
+
+* Demo 
+  + Run utest command.
+  + Run mutest command.
+	- More friendly (or standard) command line interface.
+    - Readable output format.
+	- Full log are saved in to JSON format for further processing.
+	- Can save data directly to RocksDB or LevelDB for offline analysis.
+	- Smarter then utest
+	  - Can figure out tests to run from a source code change (only limit to Worker source code for now)
+	  - Can avoid some silly mistake.
+	  - Can do early checking and disable some options that we never use.
+
+* Conclusion
+  + mutest provide another way to run test automatically.
+  + Save time by running test using multiple threads using smart thread schedule.
+  + Can coordinate with RabbitMQ to build a fully distributed testing system. 
+
