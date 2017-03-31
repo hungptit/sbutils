@@ -114,24 +114,7 @@ set(LIB_TBB "-ltbb")
 
 find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
-if (Boost_FOUND)
-  set(COMMAND_SRC_FILES mp4client)
-  foreach (src_file ${COMMAND_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} -lpthread)
-  endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
-  
-  # mutest
-  set(POCO_SRC_FILES mutest)
-  foreach (src_file ${POCO_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -ltbb -lpthread)
-    ADD_TEST(${src_file} ./${src_file})
-  endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})
-  
+if (Boost_FOUND) 
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
