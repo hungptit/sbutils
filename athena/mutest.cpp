@@ -25,6 +25,8 @@
 #include "cereal/types/string.hpp"
 #include "cereal/types/vector.hpp"
 
+#include "boost/lexical_cast.hpp"
+
 #include "spdlog/spdlog.h"
 
 auto console = spdlog::stdout_color_mt("console");
@@ -78,7 +80,7 @@ namespace {
             archive(cereal::make_nvp("Results", data));
         }
 
-		// Write to an output file.
+        // Write to an output file.
         std::ofstream ofs;
         ofs.open(outputFile, std::ofstream::out);
         ofs << ss.str();
@@ -88,17 +90,51 @@ namespace {
         console->info("Write all test results to \"{0}\"", outputFile);
     }
 
-    auto parseTestLog(const std::string &output) {
-        TestFinalResults results;
+    template <typename Iterator> auto parseNumber(Iterator begin, Iterator end) {
+        Iterator start, stop, pos = begin;
+        size_t value = 0;
+        for (; pos != end; ++pos) {
+            if (std::isdigit(*pos)) {
+                start = pos;
+                value += *pos - '0';
+                ++pos;
+                break;
+            }
+        }
 
-        unsigned int allTests = 101;
-        unsigned int passedTests = 99;
-        unsigned int failedTests = 1;
-        unsigned int skippedTests = 1;
+        for (; pos != end; ++pos) {
+            if (!std::isdigit(*pos)) {
+                break;
+            } else {
+                value = 10 * value + *pos - '0';
+            }
+        }
+
+        // fmt::print("Num -> {}\n", value);
+        return std::make_tuple(pos++, value);
+    }
+
+    auto parseTestLog(const std::string &output, const std::string &unitTestName) {
+        TestFinalResults results;
+        unsigned int allTests;
+        unsigned int passedTests;
+        unsigned int failedTests;
+        unsigned int skippedTests;
+
+        // The line which has a summary of test results will look like this
+        //
+        // Summary for WorkUnit::Delay: 8 tests, 8 passed, 0 failed, 0 skipped (100.00% success
+        // - skipped not counted)
+        //
+        // We just use a simple algorithm to extract numbers for now. Will need
+        // a better algorithm in the future.
+        auto pos = output.cbegin() + output.rfind(unitTestName) + unitTestName.size() + 1;
+        std::tie(pos, allTests) = parseNumber(pos, output.cend());
+        std::tie(pos, passedTests) = parseNumber(pos++, output.cend());
+        std::tie(pos, failedTests) = parseNumber(pos++, output.cend());
+        std::tie(pos, skippedTests) = parseNumber(pos++, output.cend());
 
         assert(allTests == (passedTests + failedTests + skippedTests));
-
-        // TODO: Implement this function
         return std::make_tuple(passedTests, failedTests, skippedTests);
     }
 }
@@ -167,24 +203,26 @@ int main(int argc, char *argv[]) {
         newArgs.push_back(unitTests[index]);
         sbutils::CommandInfo args = std::make_tuple("utest", newArgs);
         sbutils::CommandOutput outputs = sbutils::run(args, "./");
+        const std::string unitTestName(unitTests[index]);
 
         // Parse the test results
-        TestFinalResults unitTestResults = parseTestLog(std::get<0>(outputs));
+        TestFinalResults unitTestResults = parseTestLog(std::get<0>(outputs), unitTestName);
         const double runTime = timer.toc() / timer.ticksPerSecond();
 
-        results.push_back(std::make_tuple(unitTests[index], outputs, unitTestResults, runTime));
+        results.push_back(std::make_tuple(unitTestName, outputs, unitTestResults, runTime));
 
         // Log high level information to console.
         if (std::get<1>(unitTestResults) == 0) { // Passed
             console->info("Test results for {0}: {1} passed, {2} failed, {3} skipped, and "
-                          "total time is {4} seconds",
-                          unitTests[index], std::get<0>(unitTestResults),
+                          "total run time is {4} seconds",
+                          unitTestName, std::get<0>(unitTestResults),
                           std::get<1>(unitTestResults), std::get<2>(unitTestResults), runTime);
         } else {
-            console->critical(
-                "Test results for {0}: {1} passed, {2}, failed {3}, and total time is {4} seconds",
-                unitTests[index], std::get<0>(unitTestResults), std::get<1>(unitTestResults),
-                std::get<2>(unitTestResults), runTime);
+            console->critical("Test results for {0}: {1} passed, {2}, failed {3}, and total "
+                              "run time is {4} seconds",
+                              unitTestName, std::get<0>(unitTestResults),
+                              std::get<1>(unitTestResults), std::get<2>(unitTestResults),
+                              runTime);
         }
 
     };
