@@ -17,7 +17,8 @@ string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
 # For clang
- # set(CMAKE_CXX_COMPILER "clang++")
+# set(CMAKE_CXX_COMPILER "clang++")
+# set(CMAKE_CXX_COMPILER "g++")
 
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
@@ -31,7 +32,7 @@ include(CXXFeatureCheck)
 
 set (CMAKE_BUILD_TYPE Release)
 add_cxx_compiler_flag(-O3)
-
+add_cxx_compiler_flag(-march=native)
 add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 add_cxx_compiler_flag(-Wextra)
@@ -51,7 +52,6 @@ add_cxx_compiler_flag(-Wfloat-equal)
 add_cxx_compiler_flag(-Wshorten-64-to-32)
 # add_cxx_compiler_flag(-Wfloat-equal)
 add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
-
 add_cxx_compiler_flag(-fstrict-aliasing)
 if (HAVE_CXX_FLAG_FSTRICT_ALIASING)
   add_cxx_compiler_flag(-Wstrict-aliasing)
@@ -86,15 +86,15 @@ set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS TRUE)
+set(Boost_NO_SYSTEM_PATHS FALSE)
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${ROOT_DIR}/")
-  set(BOOST_INCLUDE_DIRS "${ROOT_DIR}/include")
-  set(BOOST_LIBRARY_DIRS "${ROOT_DIR}/lib")
+  set(BOOST_ROOT "${ROOT_DIR}")
+  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
 # message(${BOOST_ROOT})
-find_package(Boost 1.63 REQUIRED date_time system filesystem graph program_options iostreams)
+find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
