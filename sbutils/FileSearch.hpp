@@ -13,8 +13,8 @@
 #include "boost/filesystem.hpp"
 #include "fmt/format.h"
 
-#include "tbb/tbb.h"
 #include "tbb/parallel_sort.h"
+#include "tbb/tbb.h"
 
 namespace sbutils {
     namespace filesystem {
@@ -66,37 +66,52 @@ namespace sbutils {
             using path_container = std::vector<path>;
             using index_type = int;
             using vertex_type = Vertex<index_type>;
-            
+
             void visit(const path &aPath, PathContainer &stack) {
                 namespace fs = boost::filesystem;
                 directory_iterator endIter;
-                directory_iterator dirIter(aPath);
+                boost::system::error_code errcode, no_error;
+
+                // Return early if we cannot construct the directory iterator.
+                directory_iterator dirIter(aPath, errcode);
+                if (errcode != no_error) {
+                    return;
+                }
+
                 for (; dirIter != endIter; ++dirIter) {
                     auto const currentPath = dirIter->path();
-                    auto const status = dirIter->status();
+                    auto const status = dirIter->status(errcode);
+                    if (errcode != no_error) {
+                        continue; // Move on if we cannot get the status of a current path.
+                    }
                     auto const ftype = status.type();
-                    boost::system::error_code errcode;
                     const auto aStem = currentPath.stem().string();
                     const auto anExtension = currentPath.extension().string();
-                    if (ftype == boost::filesystem::regular_file) {
-                        vertex_data.emplace_back(
-                            FileInfo(status.permissions(), fs::file_size(currentPath, errcode),
-                                     currentPath.string(), std::move(aStem), std::move(anExtension),
-                                     fs::last_write_time(aPath, errcode)));
-                    } else if (ftype == boost::filesystem::directory_file) {
+                    switch (ftype) {
+                    case boost::filesystem::symlink_file:
+                    // Treat symlink as a regular file.
+                    case boost::filesystem::regular_file:
+                        vertex_data.emplace_back(FileInfo(
+                            status.permissions(), fs::file_size(currentPath, errcode),
+                            currentPath.string(), std::move(aStem), std::move(anExtension),
+                            fs::last_write_time(aPath, errcode)));
+                        break;
+                    case boost::filesystem::directory_file:
                         if (CustomFilter.isValidStem(aStem) &&
                             CustomFilter.isValidExt(anExtension)) {
                             edges.emplace_back(
                                 std::make_tuple(aPath.string(), currentPath.string()));
                             stack.emplace_back(currentPath);
                         }
-                    } else {
+                        break;
+                    default:
+                        // Do not know how to handle this case.
+                        break;
                     }
                 }
 
                 // Each vertex will store its path and a list of files at the
-                // root
-                // level of the current folder.
+                // root level of the current folder.
                 vertexes.emplace_back(vertex_type{aPath.string(), std::move(vertex_data)});
                 vertex_data.clear();
             }
@@ -122,8 +137,9 @@ namespace sbutils {
             }
 
             template <typename index_type> auto getFolderHierarchy() {
-                tbb::parallel_sort(vertexes.begin(), vertexes.end(),
-                                   [](auto const &x, auto const &y) { return x.Path < y.Path; });
+                tbb::parallel_sort(
+                    vertexes.begin(), vertexes.end(),
+                    [](auto const &x, auto const &y) { return x.Path < y.Path; });
 
                 // Create a lookup table
                 std::unordered_map<std::string, index_type> lookupTable;
@@ -174,35 +190,48 @@ namespace sbutils {
 
             void visit(const path &aPath, PathContainer &folders) {
                 namespace fs = boost::filesystem;
+                boost::system::error_code errcode;
+                boost::system::error_code no_error;
                 directory_iterator endIter;
-                directory_iterator dirIter(aPath);
+                directory_iterator dirIter(aPath, errcode);
+                if (errcode != no_error) {
+                    return;
+                }
+
                 for (; dirIter != endIter; ++dirIter) {
                     const auto currentPath = dirIter->path();
-                    const auto status = dirIter->status();
+                    const auto status = dirIter->status(errcode);
+                    if (errcode != no_error) {
+                        continue; // Move on if we cannot get the status of the current path.
+                    }
+                    const auto perms = status.permissions();
                     const auto ftype = status.type();
                     const auto aStem = currentPath.stem().string();
                     const auto anExtension = currentPath.extension().string();
-                    boost::system::error_code errcode;
-                    if (ftype == boost::filesystem::regular_file) {
+                    switch (ftype) {
+                    case boost::filesystem::symlink_file: // Treat symbolic link as a regular
+                                                          // file.
+                    case boost::filesystem::regular_file:
                         Results.emplace_back(FileInfo(
-                                                 status.permissions(), fs::file_size(currentPath, errcode),
-                            currentPath.string(), std::move(aStem), std::move(anExtension),
-                            fs::last_write_time(aPath)));
-                    } else if (ftype == boost::filesystem::directory_file) {
+                            perms, fs::file_size(currentPath, errcode), currentPath.string(),
+                            std::move(aStem), std::move(anExtension),
+                            fs::last_write_time(aPath, errcode)));
+                        break;
+                    case boost::filesystem::directory_file:
                         if (CustomFilter.isValidStem(aStem) &&
                             CustomFilter.isValidExt(anExtension)) {
                             folders.emplace_back(currentPath);
                         }
-                    } else {
-                        // Donot do anything here
+                        break;
+                    default:
+                        // Do not know how to handle this case.
+                        break;
                     }
                 }
             }
 
           private:
             Filter CustomFilter;
-            std::array<std::string, 1> ExcludedExtensions = {{".git"}};
-            std::array<std::string, 1> ExcludedStems = {{"CMakeFiles"}};
             std::vector<FileInfo> Results;
         };
 
@@ -215,7 +244,8 @@ namespace sbutils {
          * @return
          */
         template <typename Container, typename Visitor>
-        void dfs_file_search(const Container &searchPaths, Visitor &visitor, bool verbose = false) {
+        void dfs_file_search(const Container &searchPaths, Visitor &visitor,
+                             bool verbose = false) {
             ElapsedTime<MILLISECOND> timer("Search files: ", verbose);
             Container folders(searchPaths);
             while (!folders.empty()) {
