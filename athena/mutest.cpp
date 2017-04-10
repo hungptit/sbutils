@@ -32,8 +32,8 @@
 auto console = spdlog::stdout_color_mt("console");
 
 namespace {
-    // Test status, number of tests, number of passed test, number of failed
-    // tests, and number of skipped tests.
+    // number of passed test, number of failed tests, and number of skipped
+    // tests.
     using TestFinalResults = std::tuple<unsigned int, unsigned int, unsigned int>;
 
     // (Unit test name, output log, parsed results, test run time)
@@ -229,6 +229,20 @@ int main(int argc, char *argv[]) {
 
     int size = static_cast<int>(unitTests.size());
     tbb::parallel_for(0, size, 1, testObj);
+
+	// Print out the summary
+	size_t numberOfPassedTests = 0;
+	size_t numberOfFailedTests = 0;
+	size_t numberOfSkippedTests = 0;
+	for (auto const & item : results) {
+		auto const testResults = std::get<2>(item);
+		numberOfPassedTests += std::get<0>(testResults);
+		numberOfFailedTests += std::get<1>(testResults);
+		numberOfSkippedTests += std::get<2>(testResults);
+	}
+
+    console->info("{0} passed, {1} failed, and {2} skipped", numberOfPassedTests,
+                  numberOfFailedTests, numberOfSkippedTests);
 
     // Write results to an output file
     writeToFile<cereal::JSONOutputArchive>(results, outputFile);

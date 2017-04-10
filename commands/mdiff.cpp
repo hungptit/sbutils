@@ -33,9 +33,7 @@ namespace {
         }
 
       private:
-        std::vector<std::string> ExcludedExtensions = {".p",      ".d",  ".o",   ".ts",
-                                                       ".xml~",   ".m~", ".log", ".dbg",
-                                                       ".mexa64", ".so", ".dot", ".tmp"};
+        std::vector<std::string> ExcludedExtensions = {};
     };
 
     template <typename Container, typename Filter> void print(Container &data, Filter &f, const std::string &prefix) {

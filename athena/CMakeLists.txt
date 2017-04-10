@@ -111,12 +111,13 @@ set(LIB_POCO_SQLITE "${ROOT_DIR}/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
 set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
 
+# TBB library
 set(LIB_TBB "-ltbb")
 
 find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
 if (Boost_FOUND)
-  set(COMMAND_SRC_FILES mperlmodules)
+  set(COMMAND_SRC_FILES mperlmodules mdepgraph)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

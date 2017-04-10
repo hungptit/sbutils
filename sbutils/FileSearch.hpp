@@ -193,7 +193,10 @@ namespace sbutils {
                 boost::system::error_code errcode;
                 boost::system::error_code no_error;
                 directory_iterator endIter;
-                directory_iterator dirIter(aPath, errcode);
+
+				// Do not let directory_iterator constructure is failed then we
+				// won't visit a given folder.
+				directory_iterator dirIter(aPath, errcode);
                 if (errcode != no_error) {
                     return;
                 }

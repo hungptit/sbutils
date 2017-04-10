@@ -71,10 +71,6 @@ add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Used libraries
-set(LIB_GTEST "${ROOT_DIR}/lib/libgtest.a")
-set(LIB_GTEST_MAIN "${ROOT_DIR}/lib/libgtest_main.a")
-
 # Libraries used by rocksdb
 set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
 set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
@@ -94,9 +90,8 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
-
 # message(${BOOST_ROOT})
-find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
@@ -104,18 +99,8 @@ include_directories ("${ROOT_DIR}/graph")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 
-# Use POCO static library
-include_directories("${ROOT_DIR}/include")
-set(LIB_POCO_FOUNDATION "${ROOT_DIR}/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${ROOT_DIR}/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${ROOT_DIR}/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${ROOT_DIR}/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
-set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
-
+# TBB
 set(LIB_TBB "-ltbb")
-
-find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
 if (Boost_FOUND) 
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
@@ -125,6 +110,5 @@ if (Boost_FOUND)
       ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
       ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
   endforeach (src_file)
-
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)
