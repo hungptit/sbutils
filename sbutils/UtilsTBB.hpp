@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <type_traits>
 
 #include "DataStructures.hpp"
 #include "Timer.hpp"
@@ -18,9 +19,11 @@ namespace sbutils {
     template <typename Container, typename FirstConstraint, typename... Constraints>
     auto filter_tbb(Container &&data, FirstConstraint &&f1, Constraints &&... fs) {
         // utils::ElapsedTime<MILLISECOND> t1("Filtering files: ");
-        tbb::concurrent_vector<FileInfo> results;
+		using container_type = typename std::decay<Container>::type;
+		using output_type = typename container_type::value_type;
+        tbb::concurrent_vector<output_type> results;
 
-        auto filterObj = [f1, &fs..., &results, &data](const int idx) {
+        auto filterObj = [&f1, &fs..., &results, &data](const int idx) {
             auto const &item = data[idx];
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
                 results.push_back(item);
@@ -28,6 +31,8 @@ namespace sbutils {
         };
 
         int size = static_cast<int>(data.size());
+
+		// TODO: Need to split data into reasonable size blocks.
         tbb::parallel_for(0, size, 1, filterObj);
         return results;
     }
