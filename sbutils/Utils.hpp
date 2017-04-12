@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <type_traits>
 
 #include "DataStructures.hpp"
 #include "Timer.hpp"
@@ -95,8 +96,10 @@ namespace sbutils {
     auto filter(Container &&data, FirstConstraint &&f1,
                                         Constraints&&... fs) {
         // sbutils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-        std::vector<sbutils::FileInfo> results;
-        auto filterObj = [f1, &fs..., &results](const auto &item) {
+		using container_type = typename std::decay<Container>::type;
+		using output_type = typename container_type::value_type;
+        std::vector<output_type> results;
+        auto filterObj = [&f1, &fs..., &results](const auto &item) {
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
                 results.emplace_back(item);
             }
