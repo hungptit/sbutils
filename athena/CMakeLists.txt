@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 message("ROOT_DIR: ${ROOT_DIR}")
 
-set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
+set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -31,7 +31,7 @@ include(CXXFeatureCheck)
 
 set (CMAKE_BUILD_TYPE Release)
 add_cxx_compiler_flag(-O3)
-
+add_cxx_compiler_flag(-march=native)
 add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 add_cxx_compiler_flag(-Wextra)
@@ -101,6 +101,7 @@ include_directories ("${ROOT_DIR}/")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/graph/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
+include_directories ("${ROOT_DIR}/3p/tbb/include")
 
 # Use POCO static library
 include_directories("${ROOT_DIR}/include")
@@ -112,7 +113,9 @@ set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
 set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
 
 # TBB library
-set(LIB_TBB "-ltbb")
+set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+
+message("TBB: ${LIB_TBB}")
 
 find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 
@@ -139,7 +142,7 @@ if (Boost_FOUND)
   set(POCO_SRC_FILES mutest)
   foreach (src_file ${POCO_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -ltbb -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} ${LIB_TBB} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
   INSTALL_PROGRAMS("/bin/" FILES ${POCO_SRC_FILES})

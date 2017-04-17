@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include "sbutils/FileSearch.hpp"
@@ -14,13 +15,61 @@
 #include "sbutils/UtilsTBB.hpp"
 
 namespace {
-	template <typename Container> void print(Container &&results) {
-		fmt::MemoryWriter writer;
-		// writer << "Search results: \n";
-		std::for_each(results.begin(), results.end(),
-					  [&writer](auto const &item) { writer << item.Path << "\n"; });
-		fmt::print("{}", writer.str());
-	}
+    struct GetPerlModule {
+      public:
+        using output_type = std::string;
+        GetPerlModule(const std::string &pref, const std::string &suff)
+            : Prefix(pref), Suffix(suff){};
+        output_type operator()(const std::string &aPath) {
+            auto const begin = aPath.cbegin() + Prefix.size() + 1;
+            auto const end = aPath.cend() - Suffix.size();
+            std::string result;
+            result.reserve(std::distance(begin, end) + 8);
+
+            // Replace / by ::
+            for (auto it = begin; it != end; ++it) {
+                if (*it == '/') {
+                    result.push_back(':');
+                    result.push_back(':');
+                } else {
+                    result.push_back(*it);
+                }
+            }
+
+            return result;
+        }
+
+      private:
+        std::string Prefix;
+        std::string Suffix;
+    };
+
+    template <typename Container> void print(Container &&results) {
+        fmt::MemoryWriter writer;
+        std::for_each(results.begin(), results.end(),
+                      [&writer](auto const &item) { writer << (item) << "\n"; });
+        fmt::print("{}", writer.str());
+    }
+
+    template <typename Container, typename Op, typename FirstConstraint,
+              typename... Constraints>
+    auto filter_tbb2(Container &&data, Op &&op, FirstConstraint &&f1, Constraints &&... fs) {
+        // utils::ElapsedTime<MILLISECOND> t1("Filtering files: ");
+        // using input_type = typename Container::value_type;
+        using output_type = typename std::decay<Op>::type::output_type;
+        tbb::concurrent_vector<output_type> results;
+
+        auto filterObj = [&op, &f1, &fs..., &results, &data](const int idx) {
+            auto const &item = data[idx];
+            if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
+                results.push_back(op(item.Path));
+            }
+        };
+
+        int size = static_cast<int>(data.size());
+        tbb::parallel_for(0, size, 1, filterObj);
+        return results;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -45,7 +94,7 @@ int main(int argc, char *argv[]) {
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
-	
+
     if (vm.count("help")) {
         std::cout << "Usage: mperlmodules [options]\n";
         std::cout << desc;
@@ -56,12 +105,13 @@ int main(int argc, char *argv[]) {
 
     bool verbose = vm.count("verbose");
 
-	// Print verbose information
-	fmt::print("Database: {}\n", database);
-	fmt::print("Pattern: {}\n", pattern);
+    // Print verbose information
+    if (verbose) {
+        fmt::print("Database: {}\n", database);
+        fmt::print("Pattern: {}\n", pattern);
+    }
 
-
-	sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
+    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
 
     if (verbose) {
         std::cout << "Database: " << database << std::endl;
@@ -72,6 +122,8 @@ int main(int argc, char *argv[]) {
     auto data = sbutils::read_baseline<Container>(database, folders, verbose);
     const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
     const sbutils::SimpleFilter f2(pattern);
-    auto results = sbutils::filter_tbb(data, f1, f2);
+
+    GetPerlModule op("prod/perlib/Athena/", "_Test.pm");
+    auto results = filter_tbb2(data, op, f1, f2);
     print(results);
 }

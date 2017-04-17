@@ -30,7 +30,6 @@
 #include "spdlog/spdlog.h"
 
 auto console = spdlog::stdout_color_mt("console");
-
 namespace {
     // number of passed test, number of failed tests, and number of skipped
     // tests.
@@ -177,9 +176,9 @@ int main(int argc, char *argv[]) {
         return EXIT_SUCCESS;
     }
 
+    sbutils::Timer globalTimer;
     std::vector<std::string> utestArgs;
-
-    // bool verbose = vm.count("verbose");
+    bool verbose = vm.count("verbose");
 
     if (!vm.count("coverage")) {
         utestArgs.push_back("--nocoverage");
@@ -193,11 +192,10 @@ int main(int argc, char *argv[]) {
         utestArgs.push_back("--failedonly");
     }
 
-    console->info("Start to run tests!");
+    console->info("Start to run {0} unittests!", unitTests.size());
 
-    fmt::MemoryWriter writer;
     tbb::concurrent_vector<TestResults> results;
-    auto testObj = [&results, &utestArgs, &writer, &unitTests](const int index) {
+    auto testObj = [&results, &utestArgs, &unitTests, verbose](const int index) {
         sbutils::Timer timer;
         auto newArgs(utestArgs);
         newArgs.push_back(unitTests[index]);
@@ -213,16 +211,19 @@ int main(int argc, char *argv[]) {
 
         // Log high level information to console.
         if (std::get<1>(unitTestResults) == 0) { // Passed
-            console->info("Test results for {0}: {1} passed, {2} failed, {3} skipped, and "
-                          "total run time is {4} seconds",
-                          unitTestName, std::get<0>(unitTestResults),
-                          std::get<1>(unitTestResults), std::get<2>(unitTestResults), runTime);
-        } else {
-            console->critical("Test results for {0}: {1} passed, {2}, failed {3}, and total "
-                              "run time is {4} seconds",
+            if (verbose) {
+                console->info("Test results for {0}: {1} passed, {2} failed, {3} skipped, and "
+                              "total run time is {4} seconds",
                               unitTestName, std::get<0>(unitTestResults),
                               std::get<1>(unitTestResults), std::get<2>(unitTestResults),
                               runTime);
+            }
+        } else {
+            console->critical(
+                "Test results for {0}: {1} passed, {2} failed, {3} skipped, and total "
+                "run time is {4} seconds",
+                unitTestName, std::get<0>(unitTestResults), std::get<1>(unitTestResults),
+                std::get<2>(unitTestResults), runTime);
         }
 
     };
@@ -230,19 +231,21 @@ int main(int argc, char *argv[]) {
     int size = static_cast<int>(unitTests.size());
     tbb::parallel_for(0, size, 1, testObj);
 
-	// Print out the summary
-	size_t numberOfPassedTests = 0;
-	size_t numberOfFailedTests = 0;
-	size_t numberOfSkippedTests = 0;
-	for (auto const & item : results) {
-		auto const testResults = std::get<2>(item);
-		numberOfPassedTests += std::get<0>(testResults);
-		numberOfFailedTests += std::get<1>(testResults);
-		numberOfSkippedTests += std::get<2>(testResults);
-	}
+    // Print out the summary
+    size_t numberOfPassedTests = 0;
+    size_t numberOfFailedTests = 0;
+    size_t numberOfSkippedTests = 0;
+    for (auto const &item : results) {
+        auto const testResults = std::get<2>(item);
+        numberOfPassedTests += std::get<0>(testResults);
+        numberOfFailedTests += std::get<1>(testResults);
+        numberOfSkippedTests += std::get<2>(testResults);
+    }
 
-    console->info("{0} passed, {1} failed, and {2} skipped", numberOfPassedTests,
+    console->info("Test results: {0} passed, {1} failed, and {2} skipped", numberOfPassedTests,
                   numberOfFailedTests, numberOfSkippedTests);
+    console->info("Total run time: {} seconds.",
+                  globalTimer.toc() / globalTimer.ticksPerSecond());
 
     // Write results to an output file
     writeToFile<cereal::JSONOutputArchive>(results, outputFile);

@@ -4,7 +4,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 message("ROOT_DIR: ${ROOT_DIR}")
 
-set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
+# set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
+set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -100,7 +101,7 @@ include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 
 # TBB
-set(LIB_TBB "-ltbb")
+set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 
 if (Boost_FOUND) 
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
