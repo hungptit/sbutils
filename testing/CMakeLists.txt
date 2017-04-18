@@ -103,6 +103,7 @@ include_directories ("${ROOT_DIR}/")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/graph/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
+include_directories ("${ROOT_DIR}/3p/tbb/include")
 
 # Use POCO static library
 set(LIB_POCO_FOUNDATION "${ROOT_DIR}/lib/libPocoFoundation.a")
@@ -111,8 +112,7 @@ set(LIB_POCO_DATA "${ROOT_DIR}/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${ROOT_DIR}/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
 set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
-
-set(LIB_TBB "-ltbb")
+set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 
 find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
 

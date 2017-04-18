@@ -89,9 +89,12 @@ namespace {
         console->info("Write all test results to \"{0}\"", outputFile);
     }
 
+	// A simple integer number parser.
     template <typename Iterator> auto parseNumber(Iterator begin, Iterator end) {
         Iterator start, stop, pos = begin;
         size_t value = 0;
+
+		// Find the first digit
         for (; pos != end; ++pos) {
             if (std::isdigit(*pos)) {
                 start = pos;
@@ -101,6 +104,7 @@ namespace {
             }
         }
 
+		// Get all digits and stop if a non-digit character is found.
         for (; pos != end; ++pos) {
             if (!std::isdigit(*pos)) {
                 break;
@@ -110,6 +114,7 @@ namespace {
         }
 
         // fmt::print("Num -> {}\n", value);
+		// Return a tuple of ended iterator and value.
         return std::make_tuple(pos++, value);
     }
 
@@ -142,6 +147,7 @@ int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
     std::vector<std::string> unitTests;
+	std::vector<std::string> testDirs;
     bool failedOnly = true;
     std::string outputFile;
     std::string inputFile;
@@ -157,7 +163,8 @@ int main(int argc, char *argv[]) {
 		("failedonly", po::value<bool>(&failedOnly)->default_value(true), "only dislay failed tests")
 		("output-file,o", po::value<std::string>(&outputFile)->default_value(defaultOutputFile), "Output file name")
 		("input-file,i", po::value<std::string>(&inputFile)->default_value(""), "An input file which has test modules.")
-		("test-modules,t", po::value<std::vector<std::string>>(&unitTests), "Test modules.");
+		("test-modules,t", po::value<std::vector<std::string>>(&unitTests), "Test modules.")
+		("test-directories,f", po::value<std::vector<std::string>>(&testDirs), "Test folders.");
     // clang-format on
 
     po::positional_options_description p;

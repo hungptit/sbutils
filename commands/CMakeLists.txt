@@ -99,6 +99,7 @@ include_directories ("${ROOT_DIR}/")
 include_directories ("${ROOT_DIR}/graph")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
+include_directories ("${ROOT_DIR}/3p/tbb/include")
 
 # TBB
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")

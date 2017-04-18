@@ -44,10 +44,10 @@ namespace {
         std::string Suffix;
     };
 
-    template <typename Container> void print(Container &&results) {
+    template <typename Container> void print(Container &&results, const std::string &sep) {
         fmt::MemoryWriter writer;
         std::for_each(results.begin(), results.end(),
-                      [&writer](auto const &item) { writer << (item) << "\n"; });
+                      [&writer, &sep](auto const &item) { writer << (item) << sep; });
         fmt::print("{}", writer.str());
     }
 
@@ -125,5 +125,5 @@ int main(int argc, char *argv[]) {
 
     GetPerlModule op("prod/perlib/Athena/", "_Test.pm");
     auto results = filter_tbb2(data, op, f1, f2);
-    print(results);
+    print(results, " ");
 }

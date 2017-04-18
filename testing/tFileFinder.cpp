@@ -65,9 +65,3 @@ TEST(FileSearch, Positive) {
     test_file_search<sbutils::filesystem::NormalPolicy, 12>(tmpPath);
     test_file_search<sbutils::filesystem::MWPolicy, 12>(tmpPath);
 }
-
-TEST(FileSearc, Negative) {
-    boost::filesystem::path tmpPath("foo");
-    ASSERT_ANY_THROW(
-        (test_file_search<sbutils::filesystem::DoNothingPolicy, 13>(tmpPath)));
-}
