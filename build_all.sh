@@ -2,6 +2,7 @@
 
 # Download required packages
 ./download_source_code.sh http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz bzip2
+./download_source_code.sh http://sqlite.org/2017/sqlite-autoconf-3180000.tar.gz
 
 printf "Build fmt\n"
 ./build_using_cmake.sh fmt "-DFMT_DOC=OFF -DFMT_TEST=OFF" > /dev/null
@@ -35,3 +36,6 @@ printf "Build bzip2"
 
 printf "Build jemalloc"
 ./build_using_autogen.sh jemalloc > /dev/null
+
+printf "Build SQLite"
+./build_using_configure.sh sqlite "CFLAGS=-O3"
