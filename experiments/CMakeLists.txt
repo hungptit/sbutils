@@ -99,13 +99,12 @@ include_directories ("${ROOT_DIR}/")
 include_directories ("${ROOT_DIR}/graph")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
-include_directories ("${ROOT_DIR}/3p/tbb/include")
 
 # TBB
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
+  set(COMMAND_SRC_FILES intro asyncio syncio)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

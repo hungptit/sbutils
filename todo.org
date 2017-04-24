@@ -1,17 +1,7 @@
-* Commands
-** TODO mp4client: Switch to a p4 client.
-*** Input arguments: 
-**** branch
-**** sandbox: Use the current path by default
-*** What does it do
-**** Generate a text file name client.txt
-**** Change the client using a generated file
-***** 
-** TODO mp4sync
-*** Input arguments
-**** Sanbox path: Use the current path by default
-**** Branch: Branh want to sync
-** TODO mutest
-*** Goals
-**** Run given test points using multiple threads
-**** Run all unit test in given folders.
+#+STARTUP: logdone
+#+STARTUP: lognotedone
+#+TODO: TODO(t) CODECHECK QADEV QATEST COPYUP | DONE(d)
+#+STARTUP: indent
+
+* TODO Use boost::process instead of Poco::Process to avoid of issues on Mac.
+* 

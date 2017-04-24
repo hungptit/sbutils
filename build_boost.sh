@@ -18,7 +18,8 @@ cd $BOOST_SRC
 # Update all modules
 git fetch
 git pull
-git submodule update --recursive
+git submodule init;
+git submodule update --recursive;
 
 # Build Boost libraries
 ./bootstrap.sh --prefix=$BOOST_PREFIX --without-icu
