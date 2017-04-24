@@ -16,7 +16,7 @@
 int main(int argc, char *argv[]) {
     using namespace boost;
     using path = boost::filesystem::path;
-    using index_type = int;
+    using index_type = unsigned int;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
     std::string database;

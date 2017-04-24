@@ -64,7 +64,7 @@ namespace sbutils {
             using path = boost::filesystem::path;
             using directory_iterator = boost::filesystem::directory_iterator;
             using path_container = std::vector<path>;
-            using index_type = int;
+            using index_type = unsigned int;
             using vertex_type = Vertex<index_type>;
 
             void visit(const path &aPath, PathContainer &stack) {

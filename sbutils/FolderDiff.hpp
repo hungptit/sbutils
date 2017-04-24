@@ -41,7 +41,7 @@ namespace sbutils {
                 fmt::print("Number of files: {0}\n", allFiles.size());
             }
         } else {
-            using index_type = int;
+            using index_type = unsigned int;
             using edge_type = graph::BasicEdgeData<index_type>;
             using Graph = graph::SparseGraph<index_type, edge_type>;
 
