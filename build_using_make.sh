@@ -15,10 +15,8 @@ echo "Build folder: " $APKG_BUILD_FOLDER
 echo "Prefix folder: " $APKG_PREFIX
 
 # Build a given package
-cd $APKG_SRC
+pushd $APKG_SRC
 make clean
 make $BUILD_OPTS $EXTRA_MAKE_OPTIONS
 make PREFIX=$APKG_PREFIX install
-
-# Return to the external folder.
-cd $ROOT_DIR
+popd;

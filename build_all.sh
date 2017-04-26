@@ -3,6 +3,9 @@
 # Download required packages
 ./download_source_code.sh http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz bzip2
 
+printf "Build CMake\n";
+./build_using_configure.sh CMake > /dev/null
+
 printf "Build fmt\n"
 ./build_using_cmake.sh fmt "-DFMT_DOC=OFF -DFMT_TEST=OFF" > /dev/null
 
