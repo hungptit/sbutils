@@ -18,7 +18,7 @@ printf "Build Celero\n"
 printf "Build cereal\n"
 ./build_using_cmake.sh cereal "-DJUST_INSTALL_CEREAL=TRUE" > /dev/null 
 
-printf "build spdlog"
+printf "Build spdlog\n"
 ./build_using_cmake.sh spdlog > /dev/null 
 
 printf "Build zlib\n"
