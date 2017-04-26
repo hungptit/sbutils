@@ -23,11 +23,9 @@ cd $APKG_SRC
 $APKG_SRC/autogen.sh                    
 
 mkdir -p $APKG_BUILD_FOLDER
-cd $APKG_BUILD_FOLDER
+pushd $APKG_BUILD_FOLDER
 $APKG_SRC/configure --prefix=$APKG_PREFIX $EXTRA_CONFIG_OPTIONS
 make $BUILD_OPTS $EXTRA_MAKE_OPTIONS
 make install
-
-# Return to the external folder.
-cd $ROOT_DIR
+popd
 rm -rf $APKG_BUILD_FOLDER

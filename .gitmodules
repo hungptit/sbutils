@@ -41,3 +41,15 @@
 	path = 3p/tbb
 	url = https://github.com/01org/tbb.git
 	branch = master
+[submodule "3p/gperftools"]
+	path = 3p/gperftools
+	url = https://github.com/couchbase/gperftools
+	branch = master
+[submodule "3p/hwloc"]
+	path = 3p/hwloc
+	url = https://github.com/open-mpi/hwloc
+	branch = master
+[submodule "3p/hpx"]
+	path = 3p/hpx
+	url = https://github.com/STEllAR-GROUP/hpx.git
+	branch = master

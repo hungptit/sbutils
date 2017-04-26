@@ -3,7 +3,7 @@ source ./get_build_options.sh
 install_tbb() {
 	TBB_SRC=$SRC_DIR/tbb
 
-    cd $TBB_SRC
+    pushd $TBB_SRC
     make clean
 
 	# Customize some variables to make this build portable.
@@ -13,7 +13,7 @@ install_tbb() {
 	# Copy libraries to lib folder.
 	mkdir -p lib
     cp build/linux_intel64_gcc_cc*_release/*.so* lib/
-    cd $ROOT_DIR
+    popd;
 }
 
 # Build tbb

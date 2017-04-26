@@ -16,11 +16,9 @@ echo "Prefix folder: " $APKG_PREFIX
 rm -rf $APKG_BUILD_FOLDER
 mkdir -p $APKG_BUILD_FOLDER
 
-cd $APKG_BUILD_FOLDER
+pushd $APKG_BUILD_FOLDER
 $CMAKE $APKG_SRC -DCMAKE_INSTALL_PREFIX=$APKG_PREFIX $CMAKE_RELEASE_BUILD $CMAKE_OPTIONS 
 make $BUILD_OPTS $EXTRA_MAKE_OPTIONS
 make install
-
-# Return to the external folder.
-cd $ROOT_DIR
-rm -rf $APKG_BUILD_FOLDER
+popd;
+rm -rf $APKG_BUILD_FOLDER		# Cleanup build directory.

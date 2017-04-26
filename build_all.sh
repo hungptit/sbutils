@@ -4,6 +4,9 @@
 ./download_source_code.sh http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz bzip2
 ./download_source_code.sh http://sqlite.org/2017/sqlite-autoconf-3180000.tar.gz
 
+printf "Build CMake\n";
+./build_using_configure.sh CMake > /dev/null
+
 printf "Build fmt\n"
 ./build_using_cmake.sh fmt "-DFMT_DOC=OFF -DFMT_TEST=OFF" > /dev/null
 
@@ -16,7 +19,7 @@ printf "Build Celero\n"
 printf "Build cereal\n"
 ./build_using_cmake.sh cereal "-DJUST_INSTALL_CEREAL=TRUE" > /dev/null 
 
-printf "build spdlog"
+printf "Build spdlog\n"
 ./build_using_cmake.sh spdlog > /dev/null 
 
 printf "Build zlib\n"

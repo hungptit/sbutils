@@ -13,7 +13,7 @@ if [ ! -d $BOOST_SRC ]; then
     cd $BOOST_SRC
 fi
 
-cd $BOOST_SRC
+pushd $BOOST_SRC
 
 # Update all modules
 git fetch
@@ -28,5 +28,5 @@ git submodule update --recursive;
 ./b2 --build-dir=$TMPDIR/boost toolset=gcc stage
 ./b2 $BUILD_OPTS --disable-icu --ignore-site-config variant=release threading=multi install
 
-cd $ROOT_DIR
+popd;
 # rm -rf $BOOST_BUILD_DIR
