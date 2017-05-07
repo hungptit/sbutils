@@ -39,7 +39,7 @@ add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 # add_cxx_compiler_flag(-Wextra)
 
-add_cxx_compiler_flag(-Wshadow)
+# add_cxx_compiler_flag(-Wshadow)
 # add_cxx_compiler_flag(-Werror RELEASE)
 # add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
 # add_cxx_compiler_flag(-Werror MINSIZEREL)

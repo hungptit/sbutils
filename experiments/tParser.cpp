@@ -90,10 +90,11 @@ namespace perlmoddep {
                 }
             } else {
                 fmt::MemoryWriter writer;
-                writer << "parentNode: " << parentNode << "\n"
-                       << "previousNode: " << previousNode << "\n"
-                       << "currentNode: " << currentNode << "\n"
-                       << "The data is ill-formatted. We cann't parse the data!";
+                writer
+                    << "parentNode: " << parentNode << "\n"
+                    << "previousNode: " << previousNode << "\n"
+                    << "currentNode: " << currentNode << "\n"
+                    << "The data is ill-formatted. We cann't parse the data!";
                 throw(std::runtime_error(writer.str()));
             }
 
@@ -115,33 +116,71 @@ namespace perlmoddep {
 } // namespace perlmoddep
 
 namespace junit {
-  enum STATUS = {OK, FAILED, WIP, SKIPPED};
-  struct TestPoint {
-    STATUS Status;
-    unsigned int Index;
-    std::string Name;
-    std::string Body;
-  }
-  
-  
-  auto parseLog() {
-  
-  }
+    enum STATUS { OK, FAILED, WIP, SKIPPED };
+    struct TestPoint {
+        STATUS Status;
+        unsigned int Index;
+        std::string Name;
+        std::string Body;
+    };
 
-  void toJUnitXML() {
-    
-  }
-}
+  constexpr char eolChar('\n'), tabChar('\t'), spaceChar(' '); 
+  
+    template <typename Iter> auto parseLog(Iter begin, Iter end) {
 
-int main() {
-    {
-        const std::string dataFile("dep2.log");
-        std::string data = sbutils::read(dataFile);
-        auto edges = perlmoddep::parser(data.cbegin(), data.cend());
-        print(edges);
+      Iter prevIter(begin), currentIter(begin), emptyLineIter(begin);
+      std::string aLine;
+      std::vector<size_t> lineSizes;
+      std::vector<Iter> emptyLines;
+
+      fmt::MemoryWriter writer;
+      
+      while (currentIter != end) {
+        // Read the current line
+        for (; (currentIter != end) && (*currentIter != eolChar); ++currentIter) {
+        }
+        
+        size_t len = std::distance(prevIter, currentIter);
+        if (len == 0) {         
+          writer << "--- Start Block ---\n" << std::string(emptyLineIter, currentIter) << "--- Stop block ---\n";
+
+          // Skip next empty lines
+          for (; (currentIter != end) && (*currentIter == eolChar); ++currentIter) {
+          }
+          emptyLineIter = currentIter;
+        } else {
+          // fmt::print("{0} -> {1}\n", std::string(prevIter, currentIter), len);
+        }
+
+        // Move the next line if possible
+        if (currentIter == end) {
+          break;
+        } else {
+          ++currentIter;
+          prevIter = currentIter;
+        }
+      }
+
+      fmt::print("{}\n", writer.str());
+        // Package %s: Running unit tests for # subroutines.
     }
 
+    void toJUnitXML() {}
+} // namespace junit
+
+int main() {
+    // {
+    //     const std::string dataFile("dep2.log");
+    //     std::string data = sbutils::read(dataFile);
+    //     auto edges = perlmoddep::parser(data.cbegin(), data.cend());
+    //     print(edges);
+    // }
+
     {
-      
+        const std::string dataFile("WorkUnit--Utils.log");
+        std::string data = sbutils::read(dataFile);
+        junit::parseLog(data.cbegin(),data.cend());
+        
+        
     }
 }
