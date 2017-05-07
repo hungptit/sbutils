@@ -92,7 +92,8 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
-find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem iostreams)
+set(LIB_PROGRAM_OPTIONS "${ROOT_DIR}/lib/libboost_program_options.a")
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
@@ -109,7 +110,7 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
+      ${Boost_LIBRARIES} ${LIB_PROGRAM_OPTIONS} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
       ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
   endforeach (src_file)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})

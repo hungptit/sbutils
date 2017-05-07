@@ -6,3 +6,8 @@ foo*
 war*
 +B*
 ++A
+goo
++A
+++B
++++boo
+foo

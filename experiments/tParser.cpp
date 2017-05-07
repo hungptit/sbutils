@@ -4,6 +4,8 @@
 #include "fmt/format.h"
 #include "sbutils/FileUtils.hpp"
 
+#include "boost/unordered_set.hpp"
+
 namespace {
     template <typename Container> void print(Container &&edges) {
         std::for_each(edges.cbegin(), edges.cend(), [](auto &item) {
@@ -25,7 +27,8 @@ namespace perlmoddep {
     }
 
     template <typename Iter> auto parser(Iter begin, Iter end) {
-        std::vector<std::tuple<std::string, std::string>> edges;
+        using edge_type = std::tuple<std::string, std::string>;
+        boost::unordered_set<edge_type> edges;
 
         std::string parentNode, currentNode, previousNode;
         int currentNodeHeight = 0, previousNodeHeight = 0, parentNodeHeight = 0;
@@ -55,8 +58,6 @@ namespace perlmoddep {
             for (; (iter != end) && ((*iter) == delim); ++iter) {
             }
 
-            // fmt::print("distance: {}\n", std::distance(begin, iter));
-
             currentNodeHeight = std::distance(prevIter, iter);
             prevIter = iter;
 
@@ -68,9 +69,9 @@ namespace perlmoddep {
             // Get current edge information
             int steps = currentNodeHeight - previousNodeHeight;
             if (steps == 0) {
-                edges.push_back(std::make_tuple(parentNode, currentNode));
+                edges.emplace(std::make_tuple(parentNode, currentNode));
             } else if (steps == 1) {
-                edges.push_back(std::make_tuple(previousNode, currentNode));
+                edges.emplace(std::make_tuple(previousNode, currentNode));
                 stack.push_back(std::make_tuple(parentNodeHeight, parentNode));
                 parentNode = previousNode;
                 parentNodeHeight = previousNodeHeight;
@@ -85,12 +86,20 @@ namespace perlmoddep {
                 // The current node might be at the lower level than that of
                 // the parent node.
                 if (currentNodeHeight > parentNodeHeight) {
-                    edges.push_back(std::make_tuple(parentNode, currentNode));
+                    edges.emplace(std::make_tuple(parentNode, currentNode));
                 }
             } else {
-                throw(std::runtime_error(
-                    "The data is ill-formated. We need to stop here!\n"));
+                fmt::MemoryWriter writer;
+                writer << "parentNode: " << parentNode << "\n"
+                       << "previousNode: " << previousNode << "\n"
+                       << "currentNode: " << currentNode << "\n"
+                       << "The data is ill-formatted. We cann't parse the data!";
+                throw(std::runtime_error(writer.str()));
             }
+
+            // Get out of this loop if we have reached the end of the given
+            // range.
+            if (iter == end) break;
 
             // Move to the next line
             ++iter;
@@ -99,16 +108,40 @@ namespace perlmoddep {
             previousNodeHeight = currentNodeHeight;
         }
 
-        return edges;
+        // Return a unique list of edges.
+        return std::vector<edge_type>(edges.begin(), edges.end());
     }
 
 } // namespace perlmoddep
 
+namespace junit {
+  enum STATUS = {OK, FAILED, WIP, SKIPPED};
+  struct TestPoint {
+    STATUS Status;
+    unsigned int Index;
+    std::string Name;
+    std::string Body;
+  }
+  
+  
+  auto parseLog() {
+  
+  }
+
+  void toJUnitXML() {
+    
+  }
+}
+
 int main() {
     {
-        const std::string dataFile("dep1.log");
+        const std::string dataFile("dep2.log");
         std::string data = sbutils::read(dataFile);
         auto edges = perlmoddep::parser(data.cbegin(), data.cend());
         print(edges);
+    }
+
+    {
+      
     }
 }
