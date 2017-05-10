@@ -13,6 +13,8 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/UtilsTBB.hpp"
 
+#include "tbb/task_scheduler_init.h"
+
 template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;
     // writer << "Search results: \n";
