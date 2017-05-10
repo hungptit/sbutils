@@ -53,3 +53,19 @@
 	path = 3p/hpx
 	url = https://github.com/STEllAR-GROUP/hpx.git
 	branch = master
+[submodule "3p/gflags"]
+	path = 3p/gflags
+	url = https://github.com/gflags/gflags.git
+	branch = master
+[submodule "3p/proxygen"]
+	path = 3p/proxygen
+	url = https://github.com/facebook/proxygen.git
+	branch = master
+[submodule "3p/wangle"]
+	path = 3p/wangle
+	url = https://github.com/facebook/wangle.git
+	branch = master
+[submodule "3p/folly"]
+	path = 3p/folly
+	url = https://github.com/facebook/folly.git
+	branch = master

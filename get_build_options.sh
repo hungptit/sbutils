@@ -57,8 +57,8 @@ fi
 CMAKE_RELEASE_BUILD="-DCMAKE_BUILD_TYPE=Release"
 CMAKE_USE_CLANG="-DCMAKE_CXX_COMPILER=${CLANGPP} -DCMAKE_C_COMPILER=${CLANG}"
 
-EXTRA_CFLAGS="-march=native"
-EXTRA_CXXFLAGS="-march=native"
+EXTRA_CFLAGS="-O3 -march=native -DNDEBUG"
+EXTRA_CXXFLAGS="-O3 -march=native -DNDEBUG"
 
 # Display build configurations
 printf  "========= Build configuration =========\n"
