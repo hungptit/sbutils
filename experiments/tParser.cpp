@@ -1,4 +1,7 @@
+#include <algorithm>
+#include <cctype>
 #include <iostream>
+#include <regex>
 #include <vector>
 
 #include "fmt/format.h"
@@ -124,44 +127,154 @@ namespace junit {
         std::string Body;
     };
 
-  constexpr char eolChar('\n'), tabChar('\t'), spaceChar(' '); 
-  
+    constexpr char eolChar('\n'), tabChar('\t'), spaceChar(' ');
+
+    const std::string pkgStr("ackage ");
+    const std::string summaryStr("ummary for ");
+    const std::string testingStr("Testing ");
+
+    template <typename Iter> Iter gotoEOL(Iter iter, Iter end) {
+        for (; (iter != end) && (*iter != eolChar); ++iter) {
+        }
+        return iter;
+    }
+
+    template <typename Iter> Iter detectPkgName(Iter iter, Iter end) {
+        for (; (iter != end) && (*iter != spaceChar); ++iter) {
+        }
+        return --iter;
+    }
+
+    template <typename Iter> Iter detectSubroutineName(Iter iter, Iter end) {
+        for (; (iter != end) && (*iter != eolChar); ++iter) {
+        }
+        return iter;
+    }
+
+    template <typename Iter> Iter detectTestNumber(Iter iter, Iter end) {
+        for (; (iter != end) && std::isdigit(*iter); ++iter) {
+        }
+        return iter;
+    }
+
+    template <typename Iter> unsigned int getNumber(Iter iter, Iter end) {
+        unsigned int value = 0;
+        for (; (iter != end) && std::isdigit(*iter); ++iter) {
+            value = value * 10 + *iter - '0';
+        }
+        return value;
+    }
+
     template <typename Iter> auto parseLog(Iter begin, Iter end) {
 
-      Iter prevIter(begin), currentIter(begin), emptyLineIter(begin);
-      std::string aLine;
-      std::vector<size_t> lineSizes;
-      std::vector<Iter> emptyLines;
+        Iter prevIter(begin), currentIter(begin), emptyLineIter(begin);
+        std::string aLine;
+        std::vector<size_t> lineSizes;
+        std::vector<Iter> emptyLines;
 
-      fmt::MemoryWriter writer;
-      
-      while (currentIter != end) {
-        // Read the current line
-        for (; (currentIter != end) && (*currentIter != eolChar); ++currentIter) {
-        }
-        
-        size_t len = std::distance(prevIter, currentIter);
-        if (len == 0) {         
-          writer << "--- Start Block ---\n" << std::string(emptyLineIter, currentIter) << "--- Stop block ---\n";
+        fmt::MemoryWriter writer;
+        std::regex e;
 
-          // Skip next empty lines
-          for (; (currentIter != end) && (*currentIter == eolChar); ++currentIter) {
-          }
-          emptyLineIter = currentIter;
-        } else {
-          // fmt::print("{0} -> {1}\n", std::string(prevIter, currentIter), len);
+        // Skip the first line which is a utest command.
+        for (; (currentIter != end) && (*currentIter != eolChar);
+             ++currentIter) {
         }
 
-        // Move the next line if possible
+        currentIter = gotoEOL(currentIter, end);
         if (currentIter == end) {
-          break;
-        } else {
-          ++currentIter;
-          prevIter = currentIter;
+            return;
         }
-      }
 
-      fmt::print("{}\n", writer.str());
+        // Move to the beginning of the next line.
+        ++currentIter;
+        prevIter = currentIter;
+
+        bool isPkgBody = false;
+        std::string pkgName;
+        std::string subroutineName;
+
+        while (currentIter != end) {
+            const char ch(*currentIter);
+            if (!isPkgBody) {
+                if (ch == 'P') {
+                    ++currentIter;
+                    if (std::equal(pkgStr.cbegin(), pkgStr.cend(),
+                                   currentIter)) {
+                        // Extract the package name
+                        currentIter += pkgStr.size();
+                        prevIter = currentIter;
+                        currentIter = detectPkgName(currentIter, end);
+                        pkgName = std::string(prevIter, currentIter);
+                        fmt::print("{}\n", pkgName);
+                        isPkgBody = true;
+                    }
+
+                    // Move to the end of the current line
+                    currentIter = gotoEOL(currentIter, end);
+                }
+
+            } else {
+                if (ch == tabChar) {
+                    // Subroutine and test information.
+                    ++currentIter;
+                    prevIter = currentIter;
+                    if (*currentIter == spaceChar) {
+                        ++currentIter;
+                        // TODO: Parse test information
+                        auto iter = detectTestNumber(currentIter, end);
+                        if (iter != currentIter && (*iter == ')')) {
+                          // Save the current test information
+                          
+                          // Init data for new test 
+                          fmt::print("--{}\n",
+                                     getNumber(currentIter, iter));
+                          currentIter = iter + 2;
+                          prevIter = currentIter;
+                        }
+
+
+                        fmt::print("{}\n",
+                                   std::string(currentIter,
+                                               gotoEOL(currentIter, end)));
+                    } else if (std::isalpha(*currentIter)) {
+                      // Save the current test information if neccessary
+                      
+                        // Parse subroutine information which has this format
+                        // "Testing %s"
+                        currentIter += testingStr.size();
+                        prevIter = currentIter;
+                        currentIter = detectSubroutineName(currentIter, end);
+                        subroutineName = std::string(prevIter, currentIter);
+                        fmt::print("-{}-\n", subroutineName);
+                    }
+                } else if (ch == 'S') {
+                    ++currentIter;
+                    if (std::equal(summaryStr.cbegin(), summaryStr.cend(),
+                                   currentIter)) {
+                        currentIter += summaryStr.size() + pkgName.size() + 2;
+
+                        // TODO: Get total, passed, failed, and skipped tests.
+                        fmt::print("{}\n",
+                                   std::string(currentIter,
+                                               gotoEOL(currentIter, end)));
+                        break;
+                    }
+                }
+
+                // Move to the end of the current line
+                currentIter = gotoEOL(currentIter, end);
+            }
+
+            // Move the next line if possible
+            if (currentIter == end) {
+                break;
+            } else {
+                ++currentIter;
+                prevIter = currentIter;
+            }
+        }
+
+        fmt::print("{}\n", writer.str());
         // Package %s: Running unit tests for # subroutines.
     }
 
@@ -179,8 +292,6 @@ int main() {
     {
         const std::string dataFile("WorkUnit--Utils.log");
         std::string data = sbutils::read(dataFile);
-        junit::parseLog(data.cbegin(),data.cend());
-        
-        
+        junit::parseLog(data.cbegin(), data.cend());
     }
 }
