@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail				# Use Bash strict mode
 source ./get_build_options.sh
 
 PKGNAME=$1
@@ -16,11 +17,13 @@ echo "Prefix folder: " $APKG_PREFIX
 rm -rf $APKG_BUILD_FOLDER
 mkdir -p $APKG_BUILD_FOLDER
 
-cd $APKG_BUILD_FOLDER
+pushd $APKG_BUILD_FOLDER
 $CMAKE $APKG_SRC -DCMAKE_INSTALL_PREFIX=$APKG_PREFIX $CMAKE_RELEASE_BUILD $CMAKE_OPTIONS 
 make $BUILD_OPTS $EXTRA_MAKE_OPTIONS
 make install
 
-# Return to the external folder.
-cd $ROOT_DIR
+# Cleanup build folder
 rm -rf $APKG_BUILD_FOLDER
+
+# Return to the external folder.
+popd 

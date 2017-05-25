@@ -37,3 +37,6 @@
 [submodule "3p/CMake"]
 	path = 3p/CMake
 	url = https://github.com/Kitware/CMake.git
+[submodule "3p/rabbitmq-c"]
+	path = 3p/rabbitmq-c
+	url = https://github.com/alanxz/rabbitmq-c.git
