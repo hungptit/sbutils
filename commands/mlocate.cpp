@@ -59,6 +59,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+	// Check that the given database is valid
+	{
+		boost::filesystem::path aPath(database);
+		if (!boost::filesystem::exists(database)) {
+			throw std::runtime_error("Could not open the file information database: " + database + "\n");
+		}
+	}
+	
     bool verbose = vm.count("verbose");
     sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
 

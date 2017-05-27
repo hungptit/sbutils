@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail				# Use Bash strict mode
 source ./get_build_options.sh
 
 PKGNAME=$1
@@ -19,4 +20,4 @@ pushd $APKG_SRC
 make clean
 make $BUILD_OPTS $EXTRA_MAKE_OPTIONS
 make PREFIX=$APKG_PREFIX install
-popd;
+popd

@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail				# Use Bash strict mode
+
 ROOT_DIR=$PWD
 SRC_DIR=$ROOT_DIR/3p
 TMP_DIR=/tmp/build/

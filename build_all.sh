@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -euo pipefail				# Use Bash strict mode
 # Download required packages
 ./download_source_code.sh http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz bzip2
 ./download_source_code.sh http://sqlite.org/2017/sqlite-autoconf-3180000.tar.gz

@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail				# Use Bash strict mode
+
 # Parse input arguments
 PKGNAME=$1
 EXTRA_CONFIG_OPTIONS=$2

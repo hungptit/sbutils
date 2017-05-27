@@ -1,5 +1,7 @@
 #!/bin/bash
+set -euo pipefail				# Use Bash strict mode
 source ./get_build_options.sh
+
 # Build given package
 PKGNAME=$1
 EXTRA_CONFIG_OPTIONS=$2
@@ -19,13 +21,23 @@ echo "Extra make options: " $EXTRA_MAKE_OPTIONS
 echo "Extra installation options: " $EXTRA_INSTALL_OPTIONS
 
 # Build a given package
-cd $APKG_SRC
+pushd $APKG_SRC
 $APKG_SRC/autogen.sh                    
 
 mkdir -p $APKG_BUILD_FOLDER
 pushd $APKG_BUILD_FOLDER
 $APKG_SRC/configure --prefix=$APKG_PREFIX $EXTRA_CONFIG_OPTIONS
+<<<<<<< HEAD
 make $BUILD_OPTS $EXTRA_MAKE_OPTIONS
 make install
 popd
 rm -rf $APKG_BUILD_FOLDER
+=======
+make $BUILD_OPTS $EXTRA_MAKE_OPTIONS &&
+make install &&
+rm -rf $APKG_BUILD_FOLDER
+
+# Return to the external folder.
+popd
+
+>>>>>>> working

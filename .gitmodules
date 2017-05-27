@@ -37,6 +37,7 @@
 [submodule "3p/CMake"]
 	path = 3p/CMake
 	url = https://github.com/Kitware/CMake.git
+<<<<<<< HEAD
 [submodule "3p/tbb"]
 	path = 3p/tbb
 	url = https://github.com/01org/tbb.git
@@ -69,3 +70,8 @@
 	path = 3p/folly
 	url = https://github.com/facebook/folly.git
 	branch = master
+=======
+[submodule "3p/rabbitmq-c"]
+	path = 3p/rabbitmq-c
+	url = https://github.com/alanxz/rabbitmq-c.git
+>>>>>>> working
