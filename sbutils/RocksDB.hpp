@@ -15,10 +15,9 @@ namespace sbutils {
         rocksdb::DB *db = nullptr;
         rocksdb::Status status =
             rocksdb::DB::Open(std::forward<T>(options), database, &db);
-
-        assert(status.ok());
-        assert(db);
-
+		if (status.ok()) {
+			throw std::runtime_error("Could not open a given RocksDB database: " + database);
+		}
         return db;
     }
 
