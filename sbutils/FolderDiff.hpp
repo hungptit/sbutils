@@ -121,13 +121,8 @@ namespace sbutils {
             }
         }
 
-<<<<<<< HEAD:sbutils/FolderDiff.hpp
         // fmt::print("Number of files: {}\n", allFiles.size());
-
-=======
-        fmt::print("Number of files: {}\n", allFiles.size());
         
->>>>>>> 7131757f86d7d9490961ffe6c760831448565adb:FolderDiff.hpp
         return allFiles;
     }
 

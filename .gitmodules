@@ -69,3 +69,7 @@
 	path = 3p/folly
 	url = https://github.com/facebook/folly.git
 	branch = master
+[submodule "3p/EASTL"]
+	path = 3p/EASTL
+	url = https://github.com/electronicarts/EASTL.git
+	branch = master
