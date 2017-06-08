@@ -73,3 +73,11 @@
 	path = 3p/EASTL
 	url = https://github.com/electronicarts/EASTL.git
 	branch = master
+[submodule "3p/libcuckoo"]
+	path = 3p/libcuckoo
+	url = https://github.com/efficient/libcuckoo.git
+	branch = master
+[submodule "3p/how-to-use-pvs-studio-free"]
+	path = 3p/how-to-use-pvs-studio-free
+	url = https://github.com/viva64/how-to-use-pvs-studio-free.git
+	branch = master

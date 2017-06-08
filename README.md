@@ -195,3 +195,21 @@ There are utility classes in **sbutils** that can be used independently in other
 * TemporaryDirectory: Create a temporary folder and cleanup this folder when an object is destroyed. This class is very useful for writing unit tests.
 
 # FAQs #
+
+## How to use PVS-Studio ##
+
+Install PVS-Studio using this [guide](https://www.viva64.com/en/b/0457/#ID0E6PAE)
+
+Add PVS-Studio comments to all source files using [how-to-use-pvs-studio-free](https://github.com/viva64/how-to-use-pvs-studio-free.git)
+    
+    how-to-use-pvs-studio-free commands/
+
+Run analyzer
+
+    pvs-studio-analyzer trace -- make -j5
+    pvs-studio-analyzer analyze -j2 -l PVS-Studio.lic -o PVS-Studio.log
+    
+Convert the log into a readable format
+
+    plog-converter -a GA:1,2 -t tasklist -o ./ PVS-Studio.log > results.log
+
