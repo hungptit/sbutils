@@ -15,8 +15,8 @@ namespace sbutils {
     template <typename T> rocksdb::DB *open(const std::string &database, T &&options) {
         rocksdb::DB *db = nullptr;
         rocksdb::Status status = rocksdb::DB::Open(std::forward<T>(options), database, &db);
-		if (status.ok()) {
-			throw std::runtime_error("Could not open a given RocksDB database: " + database);
+		if (!status.ok()) {
+			throw std::runtime_error(status.ToString());
 		}
         return db;
     }

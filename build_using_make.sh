@@ -3,8 +3,8 @@ set -euo pipefail				# Use Bash strict mode
 source ./get_build_options.sh
 
 PKGNAME=$1
-EXTRA_MAKE_OPTIONS=$2
-EXTRA_INSTALL_OPTIONS=$3
+EXTRA_MAKE_OPTIONS=${2:-""}
+EXTRA_INSTALL_OPTIONS=${3:-""}
 
 # Build given package
 APKG_SRC=$SRC_DIR/$PKGNAME

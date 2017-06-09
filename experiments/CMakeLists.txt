@@ -104,12 +104,18 @@ include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio tTBB tRegex)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
       ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
-      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
+      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -lrt)
   endforeach (src_file)
-  INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
+
+  set(C_SRC_FILES tCTime)
+  foreach (src_file ${C_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file}
+      ${Boost_LIBRARIES} ${LIB_FMT} -lpthread -lrt)
+  endforeach (src_file)
 endif (Boost_FOUND)
