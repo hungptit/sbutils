@@ -103,19 +103,21 @@ include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 # TBB
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 
+# Celero
+set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+
 if (Boost_FOUND) 
   set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
-      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -lrt)
+      ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
   endforeach (src_file)
 
-  set(C_SRC_FILES tCTime)
-  foreach (src_file ${C_SRC_FILES})
+    set(COMMAND_SRC_FILES celeroCompressBools)
+  foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_FMT} -lpthread -lrt)
+      ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} ${LIB_CELERO} -lpthread)
   endforeach (src_file)
 endif (Boost_FOUND)
