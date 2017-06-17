@@ -104,6 +104,9 @@ include_directories ("${ROOT_DIR}/3p/tbb/include")
 
 # TBB
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+if (NOT EXISTS ${LIB_TBB})			# Fall back to system tbb libraries if we could not find the customized tbb.
+  set(LIB_TBB "-ltbb")
+endif() 
 
 if (Boost_FOUND) 
   set(COMMAND_SRC_FILES mlocate mfind mupdatedb mdiff mcopydiff mdbviewer)
