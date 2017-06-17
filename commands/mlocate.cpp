@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 	{
 		boost::filesystem::path aPath(database);
 		if (!boost::filesystem::exists(database)) {
-			throw std::runtime_error("Could not open the file information database: " + database + "\n");
+			throw std::runtime_error("File information database \"" + database + "\" does not exist\n");
 		}
 	}
 	
