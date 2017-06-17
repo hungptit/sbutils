@@ -1,8 +1,10 @@
 #!/bin/bash
+set -euo pipefail				# Use Bash strict mode
+
 # Parse input arguments
 PKGNAME=$1
-EXTRA_CONFIG_OPTIONS=$2
-EXTRA_MAKE_OPTIONS=$3
+EXTRA_CONFIG_OPTIONS=${2:-""}
+EXTRA_MAKE_OPTIONS=${3:-""}
 
 # Setup build configurations
 source ./get_build_options.sh

@@ -107,7 +107,7 @@ set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio tTBB tRegex)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

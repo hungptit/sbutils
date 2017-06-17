@@ -51,8 +51,7 @@ int main(int argc, char *argv[]) {
 
     if (vm.count("help")) {
         std::cout << desc;
-        fmt::print("Examples:\n\tmcopydiff matlab/toolbox matlab/test -d "
-                   "/sandbox/hungdang/mdlrefadvisor\n");
+        fmt::print("Examples:\n\tmcopydiff -s src_folder -d dest_folder\n");
         return 0;
     }
 

@@ -18,14 +18,16 @@ namespace {
 } // namespace
 
 namespace perlmoddep {
-    constexpr char eol('\n'), delim('+'), star('*');
+    constexpr char space(' '), eol('\n'), delim('+'), star('*');
 
     template <typename Iter> std::string getNodeName(Iter begin, Iter end) {
+		Iter currentIter = begin;
+		for (; (currentIter != end) && (currentIter != space); ++currentIter);
         Iter prevIter = end - 1;
         if ((*prevIter) == star) {
-            return std::string(begin, prevIter);
+            return std::string(currentIter, prevIter);
         } else {
-            return std::string(begin, end);
+            return std::string(currentIter, end);
         }
     }
 

@@ -11,18 +11,13 @@
 #include "Utils.hpp"
 #include "rocksdb/db.h"
 
-
 namespace sbutils {
     template <typename T> rocksdb::DB *open(const std::string &database, T &&options) {
         rocksdb::DB *db = nullptr;
         rocksdb::Status status = rocksdb::DB::Open(std::forward<T>(options), database, &db);
-
-        if (!status.ok()) {
-            const std::string errmsg("Cannot open " + database);
-            throw std::runtime_error(errmsg);
-        }
-
-        assert(db);
+		if (!status.ok()) {
+			throw std::runtime_error(status.ToString());
+		}
         return db;
     }
 

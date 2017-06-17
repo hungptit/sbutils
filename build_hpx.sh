@@ -2,8 +2,8 @@
 source ./get_build_options.sh 
 
 # Build hpx dependency libraries
-./build_using_autogen.sh gperftools > /dev/null
-./build_using_autogen.sh hwloc > /dev/null
+./build_using_autogen.sh gperftools "" "" ""  > /dev/null
+./build_using_autogen.sh hwloc "" "" "" > /dev/null
 
 # Cmake build options for HPX
 CMAKE_OPTIONS="-DHPX_WITH_EXAMPLES=FALSE -DHWLOC_ROOT=/home/hdang/projects/sbutils/ -DBOOST_ROOT=/home/hdang/projects/sbutils/ -DBUILD_TESTING=FALSE -DHPX_WITH_TESTS=FALSE -DHPX_WITH_COMPILE_ONLY_TESTS=FALSE"

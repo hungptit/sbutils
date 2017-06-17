@@ -17,7 +17,7 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/UtilsTBB.hpp"
 
-#include "tbb/task_scheduler_init.h"
+// #include "tbb/task_scheduler_init.h"
 
 template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;
@@ -63,6 +63,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+	// Check that the given database is valid
+	{
+		boost::filesystem::path aPath(database);
+		if (!boost::filesystem::exists(database)) {
+			throw std::runtime_error("Could not open the file information database: " + database + "\n");
+		}
+	}
+	
     bool verbose = vm.count("verbose");
     sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
 
