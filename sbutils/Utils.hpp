@@ -4,8 +4,8 @@
 #include <iostream>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 #include "DataStructures.hpp"
 #include "Timer.hpp"
@@ -16,11 +16,12 @@ namespace {
     bool isValid(const sbutils::FileInfo &info, T &&first) {
         return first.isValid(info);
     }
-	
+
     template <typename T, typename... Args>
-    bool isValid(const sbutils::FileInfo &info, T &&first, Args&&... args) {
-        return first.isValid(info) && isValid(info, std::forward<Args>(args)...);
-    }    
+    bool isValid(const sbutils::FileInfo &info, T &&first, Args &&... args) {
+        return first.isValid(info) &&
+               isValid(info, std::forward<Args>(args)...);
+    }
 }
 
 namespace sbutils {
@@ -36,22 +37,23 @@ namespace sbutils {
     //     explicit KnuthMorrisPrattFilter(const std::string &pattern)
     //         : SearchAlg(pattern.begin(), pattern.end()) {}
 
-    //     bool isValid(const FileInfo &info) { return SearchAlg(info.Path) != info.Path.end(); }
+    //     bool isValid(const FileInfo &info) { return SearchAlg(info.Path) !=
+    //     info.Path.end(); }
 
     //   private:
     //     boost::algorithm::knuth_morris_pratt<iter_type> SearchAlg;
     // };
-   
+
     template <typename Container> class ExtFilter {
       public:
-        explicit ExtFilter(Container &exts) : Extensions(exts) {}
-
+		ExtFilter(const Container &exts) : Extensions(exts) {};
+		
         bool isValid(const FileInfo &info) const {
             if (Extensions.empty()) {
                 return true;
             }
-            return (std::find(Extensions.begin(), Extensions.end(), info.Extension) !=
-                    Extensions.end());
+            return (std::find(Extensions.begin(), Extensions.end(),
+                              info.Extension) != Extensions.end());
         }
 
       private:
@@ -66,7 +68,8 @@ namespace sbutils {
             if (Stems.empty()) {
                 return true;
             }
-            return (std::find(Stems.begin(), Stems.end(), info.Stem) != Stems.end());
+            return (std::find(Stems.begin(), Stems.end(), info.Stem) !=
+                    Stems.end());
         }
 
       private:
@@ -92,12 +95,12 @@ namespace sbutils {
         return std::vector<sbutils::FileInfo>(begin, end);
     }
 
-    template <typename Container, typename FirstConstraint, typename... Constraints>
-    auto filter(Container &&data, FirstConstraint &&f1,
-                                        Constraints&&... fs) {
+    template <typename Container, typename FirstConstraint,
+              typename... Constraints>
+    auto filter(Container &&data, FirstConstraint &&f1, Constraints &&... fs) {
         // sbutils::ElapsedTime<utils::MILLISECOND> t1("Filtering files: ");
-		using container_type = typename std::decay<Container>::type;
-		using output_type = typename container_type::value_type;
+        using container_type = typename std::decay<Container>::type;
+        using output_type = typename container_type::value_type;
         std::vector<output_type> results;
         auto filterObj = [&f1, &fs..., &results](const auto &item) {
             if (isValid(item, f1, std::forward<Constraints>(fs)...)) {
@@ -110,8 +113,10 @@ namespace sbutils {
     }
 
     void createParentFolders(const boost::filesystem::path &dstDir,
-                             const std::vector<sbutils::FileInfo> &files, bool verbose = false) {
-        auto createParentObj = [&dstDir, verbose](const sbutils::FileInfo &info) {
+                             const std::vector<sbutils::FileInfo> &files,
+                             bool verbose = false) {
+        auto createParentObj = [&dstDir,
+                                verbose](const sbutils::FileInfo &info) {
             using namespace boost::filesystem;
             path aFile(dstDir / path(info.Path));
             path parentFolder(aFile.parent_path());
@@ -125,8 +130,8 @@ namespace sbutils {
         std::for_each(files.begin(), files.end(), createParentObj);
     }
 
-    bool copyAFile(const boost::filesystem::path dstDir, const sbutils::FileInfo &info,
-                   const bool verbose) {
+    bool copyAFile(const boost::filesystem::path dstDir,
+                   const sbutils::FileInfo &info, const bool verbose) {
         using namespace boost::filesystem;
         const auto options = copy_option::overwrite_if_exists;
         auto srcFile = path(info.Path);
@@ -144,14 +149,15 @@ namespace sbutils {
         if (needCopy) {
             copy_file(srcFile, dstFile, options);
             if (verbose) {
-                fmt::print("Copy {0} to {1}\n", srcFile.string(), dstFile.string());
+                fmt::print("Copy {0} to {1}\n", srcFile.string(),
+                           dstFile.string());
             }
         }
         return needCopy;
     }
 
-    bool deleteAFile(const boost::filesystem::path &parent, const sbutils::FileInfo &info,
-                     const bool verbose) {
+    bool deleteAFile(const boost::filesystem::path &parent,
+                     const sbutils::FileInfo &info, const bool verbose) {
         using namespace boost::filesystem;
         auto aFile = path(info.Path);
         auto dstFile = parent / aFile;
@@ -167,12 +173,13 @@ namespace sbutils {
     }
 
     auto copyFiles(const std::vector<sbutils::FileInfo> &files,
-                   const boost::filesystem::path &dstDir, bool verbose = false) {
+                   const boost::filesystem::path &dstDir,
+                   bool verbose = false) {
         using namespace boost::filesystem;
         size_t nfiles = 0, nbytes = 0;
         boost::system::error_code errcode;
-        auto copyFileObj = [&dstDir, &nfiles, &nbytes, verbose](const sbutils::FileInfo &info)
-        {
+        auto copyFileObj = [&dstDir, &nfiles, &nbytes,
+                            verbose](const sbutils::FileInfo &info) {
             const bool isCopied = copyAFile(dstDir, info, verbose);
             nfiles += isCopied;
             nbytes += info.Size;
@@ -183,7 +190,8 @@ namespace sbutils {
     }
 
     auto deleteFiles(const std::vector<sbutils::FileInfo> &files,
-                     const boost::filesystem::path &parent, bool verbose = false) {
+                     const boost::filesystem::path &parent,
+                     bool verbose = false) {
         using namespace boost::filesystem;
         size_t nfiles = 0;
         boost::system::error_code errcode;
