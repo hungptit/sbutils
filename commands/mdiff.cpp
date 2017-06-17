@@ -90,10 +90,6 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
-    if (folders.empty()) {
-        folders = {"prod"};
-    }
-
     if (verbose) {
         std::cout << "Database: " << dataFile << std::endl;
     }
@@ -102,7 +98,7 @@ int main(int argc, char *argv[]) {
         sbutils::ElapsedTime<sbutils::SECOND> e("Diff time: ", verbose);
         std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles,
             allDeletedFiles;
-
+		
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             sbutils::diffFolders_tbb(dataFile, folders, verbose);
 
