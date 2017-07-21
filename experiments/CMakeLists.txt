@@ -107,7 +107,7 @@ set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex Source)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex Source tFloor tVexingParse)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
@@ -118,6 +118,6 @@ if (Boost_FOUND)
   # foreach (src_file ${COMMAND_SRC_FILES})
   #   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
   #   TARGET_LINK_LIBRARIES(${src_file}
-  #     ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} ${LIB_CELERO} -lpthread)
+  #     ${Boost_LqIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} ${LIB_CELERO} -lpthread)
   # endforeach (src_file)
 endif (Boost_FOUND)
