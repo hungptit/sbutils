@@ -1,4 +1,5 @@
-// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// This is an independent project of an individual developer. Dear PVS-Studio,
+// please check it.
 
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
@@ -6,15 +7,15 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
-#include <memory>
 
-#include "sbutils/RocksDB.hpp"
 #include "sbutils/FileSearch.hpp"
 #include "sbutils/FileUtils.hpp"
 #include "sbutils/Resources.hpp"
+#include "sbutils/RocksDB.hpp"
 #include "sbutils/Timer.hpp"
 
 int main(int argc, char *argv[]) {
@@ -36,7 +37,9 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("database", -1);
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
+        vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -63,20 +66,19 @@ int main(int argc, char *argv[]) {
     assert(db != nullptr);
 
     if (displayAllKeys) {
-        std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
-        std::vector<std::string> allKeys;
-        
+        keys.clear();
+        std::unique_ptr<rocksdb::Iterator> it(
+            db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-          allKeys.emplace_back(it->key().ToString());
+            assert(it->status().ok());
+            keys.emplace_back(it->key().ToString());
         }
 
         fmt::print("Number of keys: {}\n", keys.size());
-        if (verbose) {
-            std::for_each(allKeys.begin(), allKeys.end(),
-                          [](const auto & aKey) { fmt::print("{0}\n", aKey); });
-        }
-
-        assert(it->status().ok()); // Check for any errors found during the scan
+        fmt::MemoryWriter writer;
+        std::for_each(keys.begin(), keys.end(),
+                      [&writer](const auto &aKey) { writer << aKey << "\n"; });
+        fmt::print("{0}\n", writer.str());
     } else if (!keys.empty()) {
         // Display the key-value of a given list of keys
         std::for_each(keys.begin(), keys.end(), [&db](auto const &aKey) {
@@ -89,7 +91,8 @@ int main(int argc, char *argv[]) {
         // Display a summary of a given RocksDB database.
         std::size_t counter = 0;
         std::size_t valueSizes = 0;
-        std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
+        std::unique_ptr<rocksdb::Iterator> it(
+            db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             ++counter;
             const rocksdb::Slice aSlice = it->value();
