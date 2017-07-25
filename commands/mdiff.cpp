@@ -33,8 +33,7 @@ namespace {
     struct NormalFilter {
       public:
         bool isValid(sbutils::FileInfo &item) {
-            return (std::find(ExcludedExtensions.begin(),
-                              ExcludedExtensions.end(),
+            return (std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
                               item.Extension) == ExcludedExtensions.end());
         }
 
@@ -50,7 +49,7 @@ namespace {
             }
         }
     }
-}
+} // namespace
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -65,17 +64,14 @@ int main(int argc, char *argv[]) {
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
-        ("keys,k", "List all keys.")
         ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
-        ("database,d", po::value<std::string>(&dataFile)->default_value(sbutils::Resources::Database), "File database.");
+        ("database,d", po::value<std::string>(&dataFile)->default_value(sbutils::Resources::Database), "File information database.");
     // clang-format on
 
     po::positional_options_description p;
     p.add("folders", -1);
     po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
-        vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -96,9 +92,8 @@ int main(int argc, char *argv[]) {
 
     {
         sbutils::ElapsedTime<sbutils::SECOND> e("Diff time: ", verbose);
-        std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles,
-            allDeletedFiles;
-		
+        std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
+
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             sbutils::diffFolders_tbb(dataFile, folders, verbose);
 
