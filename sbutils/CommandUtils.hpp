@@ -5,12 +5,9 @@
 #include <tuple>
 #include <vector>
 
-#include "sbutils/FileSearch.hpp"
-#include "sbutils/FileUtils.hpp"
-#include "sbutils/FolderDiff.hpp"
-#include "sbutils/Resources.hpp"
-#include "sbutils/Timer.hpp"
-#include "sbutils/UtilsTBB.hpp"
+#include "FileUtils.hpp"
+#include "FolderDiff.hpp"
+#include "UtilsTBB.hpp"
 
 namespace sbutils {
     struct MLocateArgs {
@@ -30,8 +27,8 @@ namespace sbutils {
         const sbutils::ExtFilter<std::vector<std::string>> f1(args.Extensions);
         const sbutils::StemFilter<std::vector<std::string>> f2(args.Stems);
         const sbutils::SimpleFilter f3(args.Pattern);
-        auto results = (args.Pattern.empty()) ? sbutils::filter_tbb(data, f1, f2)
-                                              : sbutils::filter_tbb(data, f1, f2, f3);
+        auto results = (args.Pattern.empty()) ? filter_tbb(data, f1, f2)
+                                              : filter_tbb(data, f1, f2, f3);
         return results;
     }
 } // namespace sbutils

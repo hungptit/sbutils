@@ -37,9 +37,7 @@ int main(int argc, char *argv[]) {
     po::positional_options_description p;
     p.add("database", -1);
     po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv).options(desc).positional(p).run(),
-        vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);
 
     if (vm.count("help")) {
@@ -67,8 +65,7 @@ int main(int argc, char *argv[]) {
 
     if (displayAllKeys) {
         keys.clear();
-        std::unique_ptr<rocksdb::Iterator> it(
-            db->NewIterator(rocksdb::ReadOptions()));
+        std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             assert(it->status().ok());
             keys.emplace_back(it->key().ToString());
@@ -91,8 +88,7 @@ int main(int argc, char *argv[]) {
         // Display a summary of a given RocksDB database.
         std::size_t counter = 0;
         std::size_t valueSizes = 0;
-        std::unique_ptr<rocksdb::Iterator> it(
-            db->NewIterator(rocksdb::ReadOptions()));
+        std::unique_ptr<rocksdb::Iterator> it(db->NewIterator(rocksdb::ReadOptions()));
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             ++counter;
             const rocksdb::Slice aSlice = it->value();

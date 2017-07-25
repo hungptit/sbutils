@@ -45,7 +45,7 @@ add_cxx_compiler_flag(-Wall)
 # add_cxx_compiler_flag(-Werror MINSIZEREL)
 
 add_cxx_compiler_flag(-pedantic)
-# add_cxx_compiler_flag(-pedantic-errors)
+add_cxx_compiler_flag(-pedantic-errors)
 
 # add_cxx_compiler_flag(-Wshorten-64-to-32)
 add_cxx_compiler_flag(-Wfloat-equal)

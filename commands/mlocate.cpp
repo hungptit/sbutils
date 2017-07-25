@@ -54,7 +54,8 @@ int main(int argc, char *argv[]) {
         std::cout << desc;
         std::cout << "Examples:\n";
         std::cout << "\t mlocate -d .database -s AutoFix\n";
-        std::cout << "\t mlocate -s AutoFix # if the current folder contains a file information database i.e \".database\" folder\n";
+        std::cout << "\t mlocate -s AutoFix # if the current folder contains a file "
+                     "information database i.e \".database\" folder\n";
         return 0;
     }
 

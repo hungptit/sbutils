@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display more information.")
-		("max-threads", po::value<unsigned int>(&numberOfThreads)->default_value(2), "Specify the maximum number of used threads.")
+        ("max-threads", po::value<unsigned int>(&numberOfThreads)->default_value(2), "Specify the maximum number of used threads.")
         ("src_dir,s", po::value<std::vector<std::string>>(&srcPaths), "Source folder.")
         ("dst_dir,d", po::value<std::vector<std::string>>(&dstPaths), "Destination sandbox.")
         ("database,b", po::value<std::string>(&database)->default_value(sbutils::Resources::Database), "File database.");

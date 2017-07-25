@@ -61,8 +61,8 @@ int main(int argc, char *argv[]) {
 
     std::string dataFile;
     std::vector<std::string> folders;
-	unsigned int numberOfThreads;
-	
+    unsigned int numberOfThreads;
+
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     }
 
     {
-		tbb::task_scheduler_init task_scheduler(numberOfThreads);
+        tbb::task_scheduler_init task_scheduler(numberOfThreads);
         sbutils::ElapsedTime<sbutils::SECOND> e("Diff time: ", verbose);
         std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
 
