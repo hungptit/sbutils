@@ -4,12 +4,11 @@
 
 #include "boost/program_options.hpp"
 #include <array>
-#include <fstream>
-#include <iostream>
 #include <string>
 #include <tuple>
 #include <vector>
 
+#include "sbutils/CommandUtils.hpp"
 #include "sbutils/FileSearch.hpp"
 #include "sbutils/FileUtils.hpp"
 #include "sbutils/FolderDiff.hpp"
@@ -17,11 +16,10 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/UtilsTBB.hpp"
 
-// #include "tbb/task_scheduler_init.h"
+#include "tbb/task_scheduler_init.h"
 
 template <typename Container> void print(Container &&results) {
     fmt::MemoryWriter writer;
-    // writer << "Search results: \n";
     std::for_each(results.begin(), results.end(),
                   [&writer](auto const &item) { writer << item.Path << "\n"; });
     fmt::print("{}", writer.str());
@@ -30,22 +28,19 @@ template <typename Container> void print(Container &&results) {
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
-    std::string database;
-    std::vector<std::string> stems;
-    std::vector<std::string> extensions;
-    std::vector<std::string> folders;
-    std::string pattern;
+    sbutils::MLocateArgs args;
+    unsigned int numberOfThreads;
 
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
-        ("keys,k", "List all keys.")
-        ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
-        ("stems,s", po::value<std::vector<std::string>>(&stems), "File stems.")
-        ("extensions,e", po::value<std::vector<std::string>>(&extensions), "File extensions.")
-        ("pattern,p", po::value<std::string>(&pattern), "Search string pattern.")
-        ("database,d", po::value<std::string>(&database)->default_value(sbutils::Resources::Database), "File database.");
+		("max-threads", po::value<unsigned int>(&numberOfThreads)->default_value(1), "Specify the maximum number of used threads.")
+        ("folders,f", po::value<std::vector<std::string>>(&args.Folders), "Search folders.")
+        ("stems,s", po::value<std::vector<std::string>>(&args.Stems), "File stems.")
+        ("extensions,e", po::value<std::vector<std::string>>(&args.Extensions), "File extensions.")
+        ("pattern,p", po::value<std::string>(&args.Pattern), "Search string pattern.")
+        ("database,d", po::value<std::string>(&args.Database)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
 
     po::positional_options_description p;
@@ -59,32 +54,27 @@ int main(int argc, char *argv[]) {
         std::cout << desc;
         std::cout << "Examples:\n";
         std::cout << "\t mlocate -d .database -s AutoFix\n";
-        std::cout << "\t mlocate -s AutoFix\n";
+        std::cout << "\t mlocate -s AutoFix # if the current folder contains a file information database i.e \".database\" folder\n";
         return 0;
     }
 
-	// Check that the given database is valid
-	{
-		boost::filesystem::path aPath(database);
-		if (!boost::filesystem::exists(database)) {
-			throw std::runtime_error("File information database \"" + database + "\" does not exist\n");
-		}
-	}
-	
-    bool verbose = vm.count("verbose");
-    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
-
-    if (verbose) {
-        std::cout << "Database: " << database << std::endl;
+    // Check that the given database is valid
+    {
+        boost::filesystem::path aPath(args.Database);
+        if (!boost::filesystem::exists(args.Database)) {
+            throw std::runtime_error("File information database \"" + args.Database +
+                                     "\" does not exist\n");
+        }
     }
 
-    using Container = std::vector<sbutils::FileInfo>;
-    std::sort(folders.begin(), folders.end());
-    auto data = sbutils::read_baseline<Container>(database, folders, verbose);
-    const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
-    const sbutils::StemFilter<std::vector<std::string>> f2(stems);
-    const sbutils::SimpleFilter f3(pattern);
-    auto results = (pattern.empty()) ? sbutils::filter_tbb(data, f1, f2)
-                                     : sbutils::filter_tbb(data, f1, f2, f3);
-    print(results);
+    args.Verbose = vm.count("verbose");
+    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", args.Verbose);
+    tbb::task_scheduler_init task_scheduler(numberOfThreads);
+
+    if (args.Verbose) {
+        std::cout << "Database: " << args.Database << std::endl;
+    }
+
+    // Display files that match given constraints.
+    print(sbutils::LocateFiles(args));
 }

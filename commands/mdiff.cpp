@@ -29,6 +29,8 @@
 #include <string>
 #include <vector>
 
+#include "tbb/task_scheduler_init.h"
+
 namespace {
     struct NormalFilter {
       public:
@@ -59,11 +61,13 @@ int main(int argc, char *argv[]) {
 
     std::string dataFile;
     std::vector<std::string> folders;
-
+	unsigned int numberOfThreads;
+	
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
+		("max-threads", po::value<unsigned int>(&numberOfThreads)->default_value(2), "Specify the maximum number of used threads.")
         ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
         ("database,d", po::value<std::string>(&dataFile)->default_value(sbutils::Resources::Database), "File information database.");
     // clang-format on
@@ -91,6 +95,7 @@ int main(int argc, char *argv[]) {
     }
 
     {
+		tbb::task_scheduler_init task_scheduler(numberOfThreads);
         sbutils::ElapsedTime<sbutils::SECOND> e("Diff time: ", verbose);
         std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
 

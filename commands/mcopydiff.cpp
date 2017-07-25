@@ -23,6 +23,8 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/UtilsTBB.hpp"
 
+#include "tbb/task_scheduler_init.h"
+
 int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
@@ -32,12 +34,13 @@ int main(int argc, char *argv[]) {
     bool verbose = false;
     std::string database;
     std::vector<std::string> dstPaths;
+    unsigned int numberOfThreads;
 
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display more information.")
-        ("keys,k", "List all keys.")
+		("max-threads", po::value<unsigned int>(&numberOfThreads)->default_value(2), "Specify the maximum number of used threads.")
         ("src_dir,s", po::value<std::vector<std::string>>(&srcPaths), "Source folder.")
         ("dst_dir,d", po::value<std::vector<std::string>>(&dstPaths), "Destination sandbox.")
         ("database,b", po::value<std::string>(&database)->default_value(sbutils::Resources::Database), "File database.");
@@ -75,6 +78,7 @@ int main(int argc, char *argv[]) {
     }
 
     {
+        tbb::task_scheduler_init task_scheduler(numberOfThreads);
         std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =
             sbutils::diffFolders_tbb(database, srcDir, verbose);
@@ -84,23 +88,24 @@ int main(int argc, char *argv[]) {
         // folder.
         sbutils::ElapsedTime<sbutils::SECOND> e("Copy files: ", verbose);
 
-        auto runObj = [&allEditedFiles, &allNewFiles, &allDeletedFiles, verbose](const std::string &aDstDir) {
+        auto runObj = [&allEditedFiles, &allNewFiles, &allDeletedFiles,
+                       verbose](const std::string &aDstDir) {
             createParentFolders(aDstDir, allEditedFiles, verbose);
             createParentFolders(aDstDir, allNewFiles, verbose);
 
             std::tuple<size_t, size_t> results1, results2;
-            size_t results3; 
-            
-            auto copyEditedFileObj = [&allEditedFiles, &aDstDir, verbose,&results1]() {
-                results1 = copyFiles_tbb(allEditedFiles, aDstDir, verbose);
+            size_t results3;
+
+            auto copyEditedFileObj = [&allEditedFiles, &aDstDir, verbose, &results1]() {
+                results1 = sbutils::copyFiles_tbb(allEditedFiles, aDstDir, verbose);
             };
 
             auto copyNewFileObj = [&allNewFiles, &aDstDir, verbose, &results2]() {
-                results2 = copyFiles_tbb(allNewFiles, aDstDir, verbose);
+                results2 = sbutils::copyFiles_tbb(allNewFiles, aDstDir, verbose);
             };
 
             auto deleteFileObj = [&allDeletedFiles, &aDstDir, verbose, &results3]() {
-                results3 = deleteFiles(allDeletedFiles, aDstDir, verbose);
+                results3 = sbutils::deleteFiles(allDeletedFiles, aDstDir, verbose);
             };
 
             tbb::parallel_invoke(copyEditedFileObj, copyNewFileObj, deleteFileObj);

@@ -88,7 +88,7 @@ namespace sbutils {
                 const std::string aKey = sbutils::normalize_path(item);
                 auto it = std::lower_bound(vids.begin(), vids.end(), aKey);
                 if (*it == aKey) {
-                  indexes.push_back(static_cast<index_type>(std::distance(vids.begin(), it)));
+                    indexes.push_back(static_cast<index_type>(std::distance(vids.begin(), it)));
                 } else {
                     fmt::print("Could not find key {} in database\n", aKey);
                 }
@@ -122,7 +122,7 @@ namespace sbutils {
         }
 
         // fmt::print("Number of files: {}\n", allFiles.size());
-        
+
         return allFiles;
     }
 
@@ -214,8 +214,8 @@ namespace sbutils {
         }
 
         // We do real work here
-        using Visitor =
-            sbutils::filesystem::SimpleVisitor<PathContainer, sbutils::filesystem::NormalPolicy>;
+        using Visitor = sbutils::filesystem::SimpleVisitor<PathContainer,
+                                                           sbutils::filesystem::NormalPolicy>;
 
         auto searchObj = [&searchFolders]() -> Container {
             Visitor visitor;
@@ -259,8 +259,8 @@ namespace sbutils {
 
         // We do real work here
         Container baseline, results;
-        using Visitor =
-            sbutils::filesystem::SimpleVisitor<PathContainer, sbutils::filesystem::NormalPolicy>;
+        using Visitor = sbutils::filesystem::SimpleVisitor<PathContainer,
+                                                           sbutils::filesystem::NormalPolicy>;
 
         auto searchObj = [&searchFolders, &results]() {
             Visitor visitor;
@@ -282,4 +282,4 @@ namespace sbutils {
 
         return sbutils::diff(std::move(baseline), std::move(results));
     }
-}
+} // namespace sbutils
