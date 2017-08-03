@@ -14,6 +14,7 @@
 #include "cereal/types/vector.hpp"
 
 #include "boost/filesystem.hpp"
+#include "boost/functional/hash.hpp"
 #include "graph/SparseGraph.hpp"
 
 namespace sbutils {
@@ -221,6 +222,14 @@ namespace std {
             result_type const h1(std::hash<uintmax_t>()(aKey.Size));
             result_type const h2(std::hash<std::string>()(aKey.Path));
             return h1 ^ (h2 << 1);
+        }
+    };
+
+	template <typename ...T> struct hash<std::tuple<T...>> {
+		using value_type = std::tuple<T...>;
+		typedef std::size_t result_type;
+        result_type operator()(const value_type &aKey) const {
+            return boost::hash<value_type>(aKey);
         }
     };
 }

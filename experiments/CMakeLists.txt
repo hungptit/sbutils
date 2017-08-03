@@ -85,7 +85,7 @@ set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS FALSE)
+set(Boost_NO_SYSTEM_PATHS TRUE)
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${ROOT_DIR}")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
@@ -96,6 +96,7 @@ find_package(Boost REQUIRED date_time system filesystem program_options iostream
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
+include_directories ("${ROOT_DIR}/3p/folly")
 include_directories ("${ROOT_DIR}/graph")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
@@ -107,7 +108,7 @@ set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
 set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex Source tFloor tVexingParse)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex Source fb)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}

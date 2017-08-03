@@ -1,10 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
-#include <stdexcept>
-#include <iostream>
 
 #include "DataStructures.hpp"
 #include "Resources.hpp"
@@ -15,9 +15,9 @@ namespace sbutils {
     template <typename T> rocksdb::DB *open(const std::string &database, T &&options) {
         rocksdb::DB *db = nullptr;
         rocksdb::Status status = rocksdb::DB::Open(std::forward<T>(options), database, &db);
-		if (!status.ok()) {
-			throw std::runtime_error(status.ToString());
-		}
+        if (!status.ok()) {
+            throw std::runtime_error(status.ToString());
+        }
         return db;
     }
 
@@ -77,6 +77,12 @@ namespace sbutils {
         s = db->Write(writeOpts, &batch);
         if (!s.ok()) {
             std::cerr << "Cannot write data to " << database << "\n";
-        }; 
+        };
     }
+
+    // TODO: A function which return all keys from a RocksDB database
+
+    // TODO: A function which will serialize data to a string and store it in a given
+    // key. Use param pack to reduce code duplication.
+
 } // namespace sbutils
