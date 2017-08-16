@@ -86,3 +86,7 @@
 	url = https://github.com/viva64/how-to-use-pvs-studio-free.git
 	branch = master
 
+[submodule "include/date"]
+	path = include/date
+	url = https://github.com/HowardHinnant/date.git
+	branch = master
