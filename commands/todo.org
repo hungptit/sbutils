@@ -1,0 +1,6 @@
+* TODO msearch [%]
+  + [ ] Store the content of all files in a folder in NoSQL database.
+  + [ ] Allow users to specify the file extensions that they want to store.
+  + [ ] Use fast string matching algorithm for searching.
+  + [ ] Support multithreading using Intel TBB.
+
