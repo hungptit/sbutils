@@ -30,16 +30,6 @@ TEST(Filter, Positive) {
         EXPECT_TRUE(filter.isValidExt(".cpp"));
         EXPECT_TRUE(filter.isValidStem("foo"));
     }
-
-    {
-        sbutils::filesystem::MWPolicy filter;
-        EXPECT_FALSE(filter.isValidExt(".sbtools"));
-        EXPECT_FALSE(filter.isValidStem("doxygen"));
-        EXPECT_FALSE(filter.isValidStem("doc"));
-        EXPECT_TRUE(filter.isValidStem("CMakeFiles"));
-        EXPECT_TRUE(filter.isValidExt(".cpp"));
-        EXPECT_TRUE(filter.isValidStem("foo"));
-    }
 }
 
 TEST(FileDatabase, Positive) {
@@ -65,5 +55,4 @@ TEST(FileSearch, Positive) {
     auto tmpPath = tmpDir.getPath();
     test_file_search<sbutils::filesystem::DoNothingPolicy, 13>(tmpPath);
     test_file_search<sbutils::filesystem::NormalPolicy, 12>(tmpPath);
-    test_file_search<sbutils::filesystem::MWPolicy, 12>(tmpPath);
 }

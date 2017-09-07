@@ -38,7 +38,7 @@ namespace {
     };
 
     std::for_each(first.begin(), first.end(), deletedFunc);
-    
+
     return std::make_tuple(std::move(newFiles), std::move(modifiedFiles), std::move(deletedFiles));
   }
 }
@@ -72,9 +72,9 @@ TEST(FileSystemUtilities, Positive) {
 	EXPECT_TRUE(sbutils::isDirectory(folderName));
 
 	// TODO: Failed in Mac OS because /var to symlink to /private/var
-	// const std::string absPath = sbutils::getAbslutePath(folderName);	
+	// const std::string absPath = sbutils::getAbslutePath(folderName);
     // EXPECT_EQ(absPath , folderName);
-	
+
     EXPECT_TRUE(sbutils::getAbslutePath("./") == sbutils::getCurrentFolder());
     EXPECT_TRUE(sbutils::remove(folderName));
 }
@@ -115,7 +115,7 @@ TEST(DataStructure, Positive) {
 
     sbutils::TemporaryDirectory tmpDir;
     TestData data(tmpDir.getPath());
-        
+
     auto const aPath = tmpDir.getPath() / path("data/data.mat");
 
     {
@@ -148,14 +148,14 @@ TEST(DataStructure, Positive) {
 
         std::vector<value_type> v{aFile, aFile};
         std::unordered_set<value_type> dict(v.begin(), v.end());
-        
+
         dict.reserve(4);
         dict.emplace(aFile);
         dict.emplace(aFile);
-        
+
         EXPECT_TRUE(dict.size() == 1);
         EXPECT_TRUE(dict.find(aFile) != dict.end());
-        
+
         map.emplace(std::make_pair("aKey", aFile));
         map["foo"] = aFile;
         map["boo"] = aFile;
@@ -167,9 +167,9 @@ TEST(DataStructure, Positive) {
     {
         sbutils::RootFolder aFolder;
         aFolder.update(tmpDir.getPath());
-        
+
         fmt::print("Current path: {}\n", aFolder.Path.string());
-        
+
         auto printObj = [](auto &item){fmt::print("{}\n", item.string());};
 
         // fmt::print("Files:\n");
@@ -186,7 +186,7 @@ TEST(DataStructure, Positive) {
 TEST(DFS, Positive) {
     using path = boost::filesystem::path;
     using OArchive = cereal::JSONOutputArchive;
-    
+
     sbutils::TemporaryDirectory tmpDir;
     TestData data(tmpDir.getPath());
     std::vector<path> folders{tmpDir.getPath()};
@@ -197,10 +197,10 @@ TEST(DFS, Positive) {
     std::stringstream output;
     FileVisitor visitor;
     sbutils::filesystem::dfs_file_search(std::move(folders), visitor);
-    // visitor.print<OArchive>();
+    visitor.print<OArchive>();
 
     // Get the folder hierarchy
-    auto results = visitor.getFolderHierarchy<int>();                                   
+    auto results = visitor.getFolderHierarchy<unsigned int>();
     {
         OArchive oar(output);
         oar(cereal::make_nvp("Folder hierarchy", results));

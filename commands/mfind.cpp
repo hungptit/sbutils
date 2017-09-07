@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
                       [](auto const &val) { fmt::print("{0}\n", val.Path); });
     }
 
+	// Write results to a JSON file.
     if (!jsonFile.empty()) {
         std::ostringstream os;
         {

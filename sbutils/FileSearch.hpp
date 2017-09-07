@@ -41,23 +41,8 @@ namespace sbutils {
             const std::array<std::string, 2> ExcludedStems = {{"CMakeFiles", "CMakeTmp"}};
         };
 
-        class MWPolicy {
-          public:
-            bool isValidExt(const std::string &anExtension) {
-                return std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
-                                 anExtension) == ExcludedExtensions.end();
-            }
 
-            bool isValidStem(const std::string &aStem) {
-                return std::find(ExcludedStems.begin(), ExcludedStems.end(), aStem) ==
-                       ExcludedStems.end();
-            }
-
-          private:
-            const std::array<std::string, 1> ExcludedExtensions = {{".sbtools"}};
-            const std::array<std::string, 2> ExcludedStems = {{"doc", "doxygen"}};
-        };
-
+		// This visitor class is used to build the file information database. 
         template <typename PathContainer, typename Filter> class Visitor {
           public:
             using container_type = std::vector<FileInfo>;
@@ -99,7 +84,7 @@ namespace sbutils {
                     case boost::filesystem::directory_file:
                         if (CustomFilter.isValidStem(aStem) &&
                             CustomFilter.isValidExt(anExtension)) {
-                            edges.emplace_back(
+                            Edges.emplace_back(
                                 std::make_tuple(aPath.string(), currentPath.string()));
                             stack.emplace_back(currentPath);
                         }
@@ -112,56 +97,56 @@ namespace sbutils {
 
                 // Each vertex will store its path and a list of files at the
                 // root level of the current folder.
-                vertexes.emplace_back(vertex_type{aPath.string(), std::move(vertex_data)});
+                Vertexes.emplace_back(vertex_type{aPath.string(), std::move(vertex_data)});
                 vertex_data.clear();
             }
 
             template <typename OArchive> void print() {
                 size_t counter = 0;
-                std::for_each(vertexes.begin(), vertexes.end(),
+                std::for_each(Vertexes.begin(), Vertexes.end(),
                               [&counter](auto const &item) { counter += item.Files.size(); });
 
                 std::stringstream output;
 
                 {
                     OArchive oar(output);
-                    oar(cereal::make_nvp("All vertexes", vertexes));
+                    oar(cereal::make_nvp("All vertexes", Vertexes));
                 }
 
                 fmt::print("{}\n", output.str());
 
                 fmt::print("Summary:\n");
-                fmt::print("Number of vertexes: {0}\n", vertexes.size());
-                fmt::print("Number of edgess: {0}\n", edges.size());
+                fmt::print("Number of vertexes: {0}\n", Vertexes.size());
+                fmt::print("Number of edgess: {0}\n", Edges.size());
                 fmt::print("Number of files: {0}\n", counter);
             }
 
             template <typename index_type> auto getFolderHierarchy() {
                 tbb::parallel_sort(
-                    vertexes.begin(), vertexes.end(),
+                    Vertexes.begin(), Vertexes.end(),
                     [](auto const &x, auto const &y) { return x.Path < y.Path; });
 
                 // Create a lookup table
                 std::unordered_map<std::string, index_type> lookupTable;
                 int counter = 0;
-                lookupTable.reserve(vertexes.size());
+                lookupTable.reserve(Vertexes.size());
                 auto updateDictObj = [&lookupTable, &counter](auto const &item) {
                     lookupTable.emplace(std::make_pair(item.Path, counter));
                     ++counter;
                 };
 
-                std::for_each(vertexes.begin(), vertexes.end(), updateDictObj);
+                std::for_each(Vertexes.begin(), Vertexes.end(), updateDictObj);
 
                 // Prepare the input for our folder hierarchy graph
                 using graph_edge_type = graph::BasicEdgeData<index_type>;
                 std::vector<graph_edge_type> allEdges;
-                allEdges.reserve(edges.size());
-                for (auto anEdge : edges) {
+                allEdges.reserve(Edges.size());
+                for (auto const &anEdge : Edges) {
                     allEdges.push_back(graph_edge_type(lookupTable[std::get<0>(anEdge)],
                                                        lookupTable[std::get<1>(anEdge)]));
                 }
                 tbb::parallel_sort(allEdges.begin(), allEdges.end());
-                return FolderHierarchy<index_type>(std::move(vertexes), std::move(allEdges));
+                return FolderHierarchy<index_type>(std::move(Vertexes), std::move(allEdges));
             }
 
           private:
@@ -171,8 +156,8 @@ namespace sbutils {
 
             // Information about the folder hierarchy.
             using edge_type = std::tuple<std::string, std::string>;
-            std::vector<edge_type> edges;
-            std::vector<vertex_type> vertexes;
+            std::vector<edge_type> Edges;
+            std::vector<vertex_type> Vertexes;
 
             // Data that will be used to filter search space.
             std::array<std::string, 1> ExcludedExtensions = {{".git"}};
