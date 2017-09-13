@@ -90,3 +90,11 @@
 	path = include/date
 	url = https://github.com/HowardHinnant/date.git
 	branch = master
+[submodule "3p/scylla"]
+	path = 3p/scylla
+	url = https://github.com/scylladb/scylla.git
+	branch = master
+[submodule "3p/seastar"]
+	path = 3p/seastar
+	url = https://github.com/scylladb/seastar.git
+	branch = master

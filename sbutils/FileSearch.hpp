@@ -41,8 +41,7 @@ namespace sbutils {
             const std::array<std::string, 2> ExcludedStems = {{"CMakeFiles", "CMakeTmp"}};
         };
 
-
-		// This visitor class is used to build the file information database. 
+        // This visitor class is used to build the file information database.
         template <typename PathContainer, typename Filter> class Visitor {
           public:
             using container_type = std::vector<FileInfo>;
@@ -179,9 +178,9 @@ namespace sbutils {
                 boost::system::error_code no_error;
                 directory_iterator endIter;
 
-				// Do not let directory_iterator constructure is failed then we
-				// won't visit a given folder.
-				directory_iterator dirIter(aPath, errcode);
+                // Do not let directory_iterator constructure is failed then we
+                // won't visit a given folder.
+                directory_iterator dirIter(aPath, errcode);
                 if (errcode != no_error) {
                     return;
                 }
@@ -223,6 +222,67 @@ namespace sbutils {
             std::vector<FileInfo> Results;
         };
 
+		// Search for files which satisfy FolderFilter and FileFilter constraints
+        template <typename PathContainer, typename FolderFilter, typename FileFilter>
+        class SimpleSearchVisitor {
+          public:
+            using container_type = std::vector<FileInfo>;
+            using path = boost::filesystem::path;
+            using directory_iterator = boost::filesystem::directory_iterator;
+            using path_container = std::vector<path>;
+
+			std::vector<std::string> getResults() { return std::move(Results); }
+
+            void visit(const path &aPath, PathContainer &folders) {
+                namespace fs = boost::filesystem;
+                boost::system::error_code errcode;
+                boost::system::error_code no_error;
+                directory_iterator endIter;
+
+                // Do not let directory_iterator constructure is failed then we
+                // won't visit a given folder.
+                directory_iterator dirIter(aPath, errcode);
+                if (errcode != no_error) {
+                    return;
+                }
+
+                for (; dirIter != endIter; ++dirIter) {
+                    const auto currentPath = dirIter->path();
+                    const auto status = dirIter->status(errcode);
+                    if (errcode != no_error) {
+                        continue; // Move on if we cannot get the status of the current path.
+                    }
+                    const auto ftype = status.type();
+                    const auto aStem = currentPath.stem().string();
+                    const auto anExtension = currentPath.extension().string();
+                    switch (ftype) {
+                    case boost::filesystem::symlink_file: // Treat symbolic link as a regular
+                                                          // file.
+                    case boost::filesystem::regular_file:
+                        if (CustomFileFilter.isValidStem(aStem) &&
+                            CustomFileFilter.isValidExt(anExtension)) {
+                            Results.emplace_back(currentPath.string());
+                        }
+                        break;
+                    case boost::filesystem::directory_file:
+                        if (CustomFolderFilter.isValidStem(aStem) &&
+                            CustomFolderFilter.isValidExt(anExtension)) {
+                            folders.emplace_back(currentPath);
+                        }
+                        break;
+                    default:
+                        // Do not know how to handle this case.
+                        break;
+                    }
+                }
+            }
+
+          private:
+            FolderFilter CustomFolderFilter;
+            FileFilter CustomFileFilter;
+            std::vector<std::string> Results;
+        };
+
         /**
          * Search for files in given folders using depth-first-search algorithm.
          *
@@ -261,5 +321,5 @@ namespace sbutils {
                 visitor.visit(aPath, folders);
             }
         }
-    }
-}
+    } // namespace filesystem
+} // namespace sbutils
