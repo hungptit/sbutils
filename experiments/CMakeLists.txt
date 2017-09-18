@@ -17,10 +17,6 @@ get_git_version(GIT_VERSION)
 string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
-# For clang
-# set(CMAKE_CXX_COMPILER "clang++")
-# set(CMAKE_CXX_COMPILER "g++")
-
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
 string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
@@ -30,6 +26,8 @@ include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
 
 # set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_CXX_COMPILER "clang++")
+# add_cxx_compiler_flag(--stdlib=libc++)
 
 set (CMAKE_BUILD_TYPE Release)
 add_cxx_compiler_flag(-O3)
@@ -51,9 +49,9 @@ add_cxx_compiler_flag(-pedantic)
 add_cxx_compiler_flag(-Wfloat-equal)
 # add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
 
-add_cxx_compiler_flag(-Wshorten-64-to-32)
+# add_cxx_compiler_flag(-Wshorten-64-to-32)
 # add_cxx_compiler_flag(-Wfloat-equal)
-add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
+# add_cxx_compiler_flag(-Wint-to-void-pointer-cast)
 
 add_cxx_compiler_flag(-fstrict-aliasing)
 if (HAVE_CXX_FLAG_FSTRICT_ALIASING)
@@ -96,23 +94,36 @@ find_package(Boost REQUIRED date_time system filesystem program_options iostream
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
-include_directories ("${ROOT_DIR}/3p/folly")
 include_directories ("${ROOT_DIR}/graph")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
+# include_directories ("${ROOT_DIR}/3p/folly/folly")
 
 # TBB
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+if (NOT EXISTS ${LIB_TBB})			# Fall back to system tbb libraries if we could not find the customized tbb.
+  set(LIB_TBB "-ltbb")
+endif() 
 
 # Celero
 set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
+# Compile standard C++ example using the latest version of gcc.
+set(CMAKE_CXX_COMPILER "g++-7")
+set(COMMAND_SRC_FILES tRegex tFuture)
+foreach (src_file ${COMMAND_SRC_FILES})
+  ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+  TARGET_LINK_LIBRARIES(${src_file} -lpthread)
+endforeach (src_file)
+
+
+# Need to use Boost
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio tRegex Source fb)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio Source)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
+      ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
   endforeach (src_file)
 
   #   set(COMMAND_SRC_FILES celeroCompressBools)
