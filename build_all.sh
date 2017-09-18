@@ -7,6 +7,9 @@ set -euo pipefail				# Use Bash strict mode
 printf "Build CMake\n";
 ./build_using_configure.sh CMake > /dev/null
 
+printf "Build Catch\n";
+./build_using_cmake.sh Catch
+
 printf "Build fmt\n"
 ./build_using_cmake.sh fmt "-DFMT_DOC=OFF -DFMT_TEST=OFF" > /dev/null
 

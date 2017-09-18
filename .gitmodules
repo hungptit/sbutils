@@ -98,3 +98,11 @@
 	path = 3p/seastar
 	url = https://github.com/scylladb/seastar.git
 	branch = master
+[submodule "3p/Catch"]
+	path = 3p/Catch
+	url = https://github.com/philsquared/Catch/
+	branch = master
+[submodule "3p/yaml-cpp"]
+	path = 3p/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+	branch = master

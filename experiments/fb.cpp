@@ -1,6 +1,7 @@
 #include <iostream>
+#include <stdexcept>
+#include "folly/FBString.h"
 
-#include "FBString.h"
 int main() {
-
+	folly::fbstring str("Hello");
 }

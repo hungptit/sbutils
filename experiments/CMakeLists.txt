@@ -108,15 +108,6 @@ endif()
 # Celero
 set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
-# Compile standard C++ example using the latest version of gcc.
-set(CMAKE_CXX_COMPILER "g++-7")
-set(COMMAND_SRC_FILES tRegex tFuture)
-foreach (src_file ${COMMAND_SRC_FILES})
-  ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-  TARGET_LINK_LIBRARIES(${src_file} -lpthread)
-endforeach (src_file)
-
-
 # Need to use Boost
 if (Boost_FOUND) 
   set(COMMAND_SRC_FILES tParser intro asyncio syncio Source)
@@ -133,3 +124,12 @@ if (Boost_FOUND)
   #     ${Boost_LqIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} ${LIB_CELERO} -lpthread)
   # endforeach (src_file)
 endif (Boost_FOUND)
+
+# Compile standard C++ example using the latest version of gcc.
+set(CMAKE_CXX_COMPILER "g++-7")
+set(COMMAND_SRC_FILES tRegex tFuture tCatch)
+foreach (src_file ${COMMAND_SRC_FILES})
+  ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+  TARGET_LINK_LIBRARIES(${src_file} -lpthread)
+  ADD_TEST(${src_file} ./${src_file})
+endforeach (src_file)
