@@ -126,8 +126,17 @@ if (Boost_FOUND)
 endif (Boost_FOUND)
 
 # Compile standard C++ example using the latest version of gcc.
-set(CMAKE_CXX_COMPILER "g++-7")
+# set(CMAKE_CXX_COMPILER "g++-7")
 set(COMMAND_SRC_FILES tRegex tFuture tCatch)
+foreach (src_file ${COMMAND_SRC_FILES})
+  ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+  TARGET_LINK_LIBRARIES(${src_file} -lpthread)
+  ADD_TEST(${src_file} ./${src_file})
+endforeach (src_file)
+
+# Folly examples
+include_directories ("/home/hdang/.linuxbrew/include/")
+set(COMMAND_SRC_FILES fb)
 foreach (src_file ${COMMAND_SRC_FILES})
   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
   TARGET_LINK_LIBRARIES(${src_file} -lpthread)
