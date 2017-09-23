@@ -4,6 +4,17 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 message("ROOT_DIR: ${ROOT_DIR}")
 
+include(FindThreads)
+include(CheckIncludeFiles)
+include(CheckCXXCompilerFlag)
+
+# Check compiler flags
+CHECK_CXX_COMPILER_FLAG("-std=c++14" CXX14)
+
+if (NOT CXX14)
+  message(FATAL_ERROR "C++ compiler does not support C++14")
+endif()
+
 # set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
@@ -136,9 +147,19 @@ endforeach (src_file)
 
 # Folly examples
 include_directories ("/home/hdang/.linuxbrew/include/")
+set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+
+set(COMMAND_SRC_FILES fbstring)
+foreach (src_file ${COMMAND_SRC_FILES})
+  ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+  TARGET_LINK_LIBRARIES(${src_file} ${LIB_JEMALLOC}  -lpthread)
+  ADD_TEST(${src_file} ./${src_file})
+endforeach (src_file)
+
+
 set(COMMAND_SRC_FILES fb)
 foreach (src_file ${COMMAND_SRC_FILES})
   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-  TARGET_LINK_LIBRARIES(${src_file} -lpthread)
+  TARGET_LINK_LIBRARIES(${src_file} ${LIB_CELERO}  -lpthread)
   ADD_TEST(${src_file} ./${src_file})
 endforeach (src_file)

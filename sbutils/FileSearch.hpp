@@ -42,6 +42,12 @@ namespace sbutils {
         };
 
         // This visitor class is used to build the file information database.
+        // TODO: Need to optimize for space by storing the file index only.  We
+        // also need to rename vertex_data to child_ids or children to make it
+        // more intuitive Split file path, permission, stem, extension, file
+        // size and use index to store edges.  This will save 2x memory at
+        // runtime. We also need to resort file path vector later to improve
+        // runtime performance.
         template <typename PathContainer, typename Filter> class Visitor {
           public:
             using container_type = std::vector<FileInfo>;
@@ -66,7 +72,7 @@ namespace sbutils {
                     auto const currentPath = dirIter->path();
                     auto const status = dirIter->status(errcode);
                     if (errcode != no_error) {
-                        continue; // Move on if we cannot get the status of a current path.
+                        continue; // Move on if we cannot get the status of a given path.
                     }
                     auto const ftype = status.type();
                     const auto aStem = currentPath.stem().string();
@@ -120,6 +126,7 @@ namespace sbutils {
                 fmt::print("Number of files: {0}\n", counter);
             }
 
+			// TODO: Need to resort the index.
             template <typename index_type> auto getFolderHierarchy() {
                 tbb::parallel_sort(
                     Vertexes.begin(), Vertexes.end(),
@@ -222,7 +229,7 @@ namespace sbutils {
             std::vector<FileInfo> Results;
         };
 
-		// Search for files which satisfy FolderFilter and FileFilter constraints
+        // Search for files which satisfy FolderFilter and FileFilter constraints
         template <typename PathContainer, typename FolderFilter, typename FileFilter>
         class SimpleSearchVisitor {
           public:
@@ -231,7 +238,7 @@ namespace sbutils {
             using directory_iterator = boost::filesystem::directory_iterator;
             using path_container = std::vector<path>;
 
-			std::vector<std::string> getResults() { return std::move(Results); }
+            std::vector<std::string> getResults() { return std::move(Results); }
 
             void visit(const path &aPath, PathContainer &folders) {
                 namespace fs = boost::filesystem;
