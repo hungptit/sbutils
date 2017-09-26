@@ -4,7 +4,6 @@
 #include "folly/FBVector.h"
 
 #include "cereal/cereal.hpp"
-#include <cereal/archives/binary.hpp>
 #include <cereal/types/memory.hpp>
 
 namespace cereal {

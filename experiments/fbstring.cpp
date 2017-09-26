@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
+#include <cereal/archives/binary.hpp>
+
 #include "fb.hpp"
 
 int main() {

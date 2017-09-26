@@ -196,7 +196,7 @@ TEST(DFS, Positive) {
     sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ");
     std::stringstream output;
     FileVisitor visitor;
-    sbutils::filesystem::dfs_file_search(std::move(folders), visitor);
+    sbutils::dfs_file_search(std::move(folders), visitor);
     visitor.print<OArchive>();
 
     // Get the folder hierarchy

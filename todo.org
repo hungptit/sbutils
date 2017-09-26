@@ -4,4 +4,5 @@
 #+STARTUP: indent
 
 * TODO Use boost::process instead of Poco::Process to avoid of issues on Mac.
-* 
+* TODO Use fbstring for string related functionality.
+* TODO 

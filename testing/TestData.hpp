@@ -39,7 +39,7 @@ namespace {
             auto gitFolder = createFolder(TmpDir, ".git");
             createTestFile(gitFolder / path("test.cpp"));
 
-            auto sbtoolsFolder = createFolder(TmpDir, ".sbtools");
+            auto sbtoolsFolder = createFolder(TmpDir, ".subversion");
             createTestFile(sbtoolsFolder / path("foo.p"));
 
             createFolder(TmpDir, "CMakeFiles");

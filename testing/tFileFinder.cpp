@@ -42,7 +42,7 @@ void test_file_search(boost::filesystem::path &tmpDir) {
     using Container = std::vector<boost::filesystem::path>;
     sbutils::filesystem::SimpleVisitor<Container, Filter> visitor;
     Container searchFolders{tmpDir};
-    sbutils::filesystem::dfs_file_search(searchFolders, visitor);
+    sbutils::dfs_file_search(searchFolders, visitor);
     auto results = visitor.getResults();
     std::cout << "== Search results ==\n";
     sbutils::print(results);

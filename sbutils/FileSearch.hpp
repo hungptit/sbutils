@@ -16,22 +16,29 @@
 #include "tbb/parallel_sort.h"
 #include "tbb/tbb.h"
 
+#include "graph/DataStructures.hpp"
+#include "PathSearchAlgorithms.hpp"
+
+
 namespace sbutils {
     namespace filesystem {
 
         struct DoNothingPolicy {
-            bool isValidStem(const std::string &) { return true; }
-            bool isValidExt(const std::string &) { return true; }
+            template <typename String> bool isValidStem(String &&) { return true; }
+            template <typename String> bool isValidExt(String &&) { return true; }
         };
 
         class NormalPolicy {
           public:
-            bool isValidExt(const std::string &anExtension) {
+
+			template<typename T>
+            bool isValidExt(T &&anExtension) {
                 return std::find(ExcludedExtensions.begin(), ExcludedExtensions.end(),
                                  anExtension) == ExcludedExtensions.end();
             }
 
-            bool isValidStem(const std::string &aStem) {
+			template<typename T>
+            bool isValidStem(T &&aStem) {
                 return std::find(ExcludedStems.begin(), ExcludedStems.end(), aStem) ==
                        ExcludedStems.end();
             }
@@ -41,6 +48,8 @@ namespace sbutils {
             const std::array<std::string, 2> ExcludedStems = {{"CMakeFiles", "CMakeTmp"}};
         };
 
+
+		
         // This visitor class is used to build the file information database.
         // TODO: Need to optimize for space by storing the file index only.  We
         // also need to rename vertex_data to child_ids or children to make it
@@ -126,7 +135,7 @@ namespace sbutils {
                 fmt::print("Number of files: {0}\n", counter);
             }
 
-			// TODO: Need to resort the index.
+            // TODO: Need to resort the index.
             template <typename index_type> auto getFolderHierarchy() {
                 tbb::parallel_sort(
                     Vertexes.begin(), Vertexes.end(),
@@ -289,44 +298,5 @@ namespace sbutils {
             FileFilter CustomFileFilter;
             std::vector<std::string> Results;
         };
-
-        /**
-         * Search for files in given folders using depth-first-search algorithm.
-         *
-         * @param searchPaths
-         * @param visitor
-         *
-         * @return
-         */
-        template <typename Container, typename Visitor>
-        void dfs_file_search(const Container &searchPaths, Visitor &visitor,
-                             bool verbose = false) {
-            ElapsedTime<MILLISECOND> timer("Search files: ", verbose);
-            Container folders(searchPaths);
-            while (!folders.empty()) {
-                auto aPath = folders.back();
-                folders.pop_back();
-                visitor.visit(aPath, folders);
-            }
-        }
-
-        /**
-         * Search for files in given folders using breath-first-search
-         * algorithm.
-         *
-         * @param searchPaths
-         * @param visitor
-         *
-         * @return
-         */
-        template <typename Visitor, typename Container>
-        void bfs_file_search(const Container &searchPaths, Visitor &visitor) {
-            Container folders(searchPaths);
-            while (!folders.empty()) {
-                auto aPath = folders.front();
-                folders.pop_front();
-                visitor.visit(aPath, folders);
-            }
-        }
     } // namespace filesystem
 } // namespace sbutils
