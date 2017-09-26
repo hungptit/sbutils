@@ -16,10 +16,12 @@
 #include "sbutils/FileDB.hpp"
 #include "sbutils/PathFilter.hpp"
 
-#include "gtest/gtest.h"
 #include "TestData.hpp"
 
-TEST(Filter, Positive) {
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
+TEST_CASE("Filter", "") {
 	// DonothingPolicy
     {
 		using path = boost::filesystem::path;
@@ -77,17 +79,15 @@ size_t bfs(const boost::filesystem::path &root, const bool verbose = false) {
 	return visitor.Paths.size();
 }
 
-
-TEST(DFS, Positive) {
+TEST_CASE("File search algorithms", "dfs/bfs") {
 	sbutils::TemporaryDirectory tmpDir;
     TestData testData(tmpDir.getPath());
-	EXPECT_EQ(dfs<sbutils::NullPolicy>(tmpDir.getPath()), 20);
-	EXPECT_EQ(dfs<sbutils::NormalPolicy>(tmpDir.getPath()), 17);
-}
-
-TEST(BFS, Positive) {
-	sbutils::TemporaryDirectory tmpDir;
-    TestData testData(tmpDir.getPath());
-	EXPECT_EQ(bfs<sbutils::NullPolicy>(tmpDir.getPath()), 20);
-	EXPECT_EQ(bfs<sbutils::NormalPolicy>(tmpDir.getPath()), 17);
+	SECTION("dfs search algorithm") {
+		REQUIRE(dfs<sbutils::NullPolicy>(tmpDir.getPath()) == 20);
+		REQUIRE(dfs<sbutils::NormalPolicy>(tmpDir.getPath()) == 17);
+	}
+	SECTION("bfs search algorithm") {
+		REQUIRE(bfs<sbutils::NullPolicy>(tmpDir.getPath()) == 20);
+		REQUIRE(bfs<sbutils::NormalPolicy>(tmpDir.getPath()) == 17);
+	}
 }

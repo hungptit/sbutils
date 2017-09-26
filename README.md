@@ -2,7 +2,7 @@
 
 # Features #
 
-* Written using C++11/C++14 and all commands are multi-threaded using TBB.
+* Written using C++11/C++14 and all commands are multi-threaded.
 
 * **mfind**: Find files in given folders using search patterns, file stems, and file extensions. 
 
@@ -10,7 +10,7 @@
 
 * **mdiff**: Find files that have modified in a given sandbox.
 
-* **mcopydiff**: Copy all changes that we have made in a given sandbox to a new sandbox.
+* **mcopydiff**: Copy/backup all changes that we have made in a given folders to new folders.
 
 # Installation #
 
