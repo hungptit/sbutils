@@ -14,10 +14,13 @@
 
 #include "fmt/format.h"
 
-#include "sbutils/FileSearch.hpp"
 #include "sbutils/Print.hpp"
 #include "sbutils/Timer.hpp"
 #include "sbutils/Utils.hpp"
+
+#include "sbutils/FileDB.hpp"
+#include "sbutils/PathFilter.hpp"
+#include "sbutils/PathSearchAlgorithms.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -80,49 +83,30 @@ int main(int argc, char *argv[]) {
     }
 
     // Search for files in the given folders.
+	using String = std::string;
     using path = boost::filesystem::path;
     using Container = std::vector<path>;
-    sbutils::filesystem::SimpleVisitor<Container, sbutils::filesystem::NormalPolicy> visitor;
+    sbutils::SimpleFileVisitor<String, Container, sbutils::NormalPolicy> visitor;
     Container searchFolders;
     for (auto item : folders) {
         searchFolders.emplace_back(path(item));
     }
-    sbutils::filesystem::dfs_file_search(searchFolders, visitor);
-    auto const & results = visitor.getResults();
-    const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
-    const sbutils::StemFilter<std::vector<std::string>> f2(stems);
-    const sbutils::SimpleFilter f3(pattern);
-    auto data =
-        (pattern.empty()) ? sbutils::filter(results, f1, f2) : sbutils::filter(results, f1, f2, f3);
+    sbutils::dfs_file_search(searchFolders, visitor);
 
-    if (verbose) {
-        fmt::print("Search folders:\n");
-        for (const auto &val : folders) {
-            fmt::print("{}\n", val);
-        }
-        fmt::print("Number of files: {}\n", data.size());
-        std::for_each(data.begin(), data.end(), [](auto const &val) {
-            fmt::print("({0}, {1}, {2}, {3})\n", val.Path, val.Size, val.Permissions,
-                       val.TimeStamp);
-        });
-    } else {
-        fmt::print("Number of files: {}\n", data.size());
-        std::for_each(data.begin(), data.end(),
-                      [](auto const &val) { fmt::print("{0}\n", val.Path); });
-    }
+	const auto & data = visitor.Paths;
 
-	// Write results to a JSON file.
-    if (!jsonFile.empty()) {
-        std::ostringstream os;
-        {
-            cereal::JSONOutputArchive oar(os);
-            oar("Search results", results);
-        }
+	// TODO: Need to support different patterns
+// const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
+    // const sbutils::StemFilter<std::vector<std::string>> f2(stems);
+    // const sbutils::SimpleFilter f3(pattern);
+    // auto data =
+    //     (pattern.empty()) ? sbutils::filter(results, f1, f2) : sbutils::filter(results, f1, f2, f3);
 
-        // Write to a JSON file
-        std::ofstream myfile(jsonFile);
-        myfile << os.str() << std::endl;
-    }
-
+	fmt::MemoryWriter writer;
+	fmt::print("Number of files: {}\n", data.size());
+	std::for_each(data.begin(), data.end(),
+				  [&writer](auto const &val) { writer << val << "\n"; });
+	fmt::print("{}\n", writer.str());
+	
     return 0;
 }
