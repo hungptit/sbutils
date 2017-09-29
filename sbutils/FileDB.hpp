@@ -12,8 +12,6 @@
 #include "fmt/format.h"
 #include "graph/DataStructures.hpp"
 
-// TODO: Does use string when pushing data into stack improve search algorithm's performance? 
-
 namespace sbutils {
     enum DirStatus { UNDISCOVERED, VISITED, PROCESSED };
 
@@ -29,6 +27,65 @@ namespace sbutils {
         }
     };
 
+    // A minimal path visitor which only handles path.
+    template <typename String, typename PathContainer, typename Filter>
+    struct MinimalFileVisitor {
+        using path = boost::filesystem::path;
+        using directory_iterator = boost::filesystem::directory_iterator;
+        using path_container = PathContainer;
+        using file_type = boost::filesystem::file_type;
+
+        // Data
+        std::vector<String> Paths;
+        Filter CustomFilter;
+        std::unordered_set<String> Status;
+
+        // Explore the first level of a given folder.
+        void visit(const path &aPath, PathContainer &stack) {
+            namespace fs = boost::filesystem;
+            directory_iterator endIter;
+            boost::system::error_code errcode, no_error;
+
+            // Return early if we cannot construct the directory iterator.
+            directory_iterator dirIter(aPath, errcode);
+            if (errcode != no_error) {
+                return;
+            }
+
+            for (; dirIter != endIter; ++dirIter) {
+                auto const &currentPath = dirIter->path();
+                auto const &currentPathStr = currentPath.string();
+				auto const it = Status.find(currentPathStr);
+                if (it != Status.end()) {
+                    continue; // The current path has been processed.
+                }
+
+                auto const status = dirIter->status(errcode);
+                if (errcode != no_error) {
+                    continue; // Move on if we cannot get the status of a given path.
+                }
+
+                const file_type ftype = status.type();
+                switch (ftype) {
+                case boost::filesystem::symlink_file:
+                    // TODO: Need to find out the best way to handle symlink.
+                    break;
+                case boost::filesystem::regular_file:
+                    Paths.emplace_back(currentPathStr);
+                    break;
+                case boost::filesystem::directory_file:
+					Status.emplace_hint(it, currentPathStr);
+					Paths.emplace_back(currentPath.string());
+					stack.emplace_back(currentPath);
+                    break;
+				default:
+                    // Do not know how to handle this case.
+                    break;
+                }
+            }
+        }
+    };
+
     // Simple visitor which only handle path, stem, and extension.
     template <typename String, typename PathContainer, typename Filter>
     struct SimpleFileVisitor {
@@ -37,11 +94,11 @@ namespace sbutils {
         using path_container = PathContainer;
         using file_type = boost::filesystem::file_type;
 
-		// Data
+        // Data
         std::vector<String> Paths;
         Filter CustomFilter;
-        std::unordered_map<String, DirStatus> Status;
-		
+        std::unordered_set<String> Status;
+
         // Explore the first level of a given folder.
         void visit(const path &aPath, PathContainer &stack) {
             namespace fs = boost::filesystem;
@@ -76,19 +133,17 @@ namespace sbutils {
                     // TODO: Need to find out the best way to handle symlink.
                     break;
                 case boost::filesystem::regular_file:
-                    Status.emplace(std::make_pair(currentPathStr, PROCESSED));
                     Paths.emplace_back(currentPathStr);
                     break;
                 case boost::filesystem::directory_file:
-                    Status.emplace(std::make_pair(currentPathStr, PROCESSED));
-					// We only interrested in folders that satisfy CustomFilter's constraints.
+                    Status.emplace_hint(it, currentPathStr);
+                    // We only interrested in folders that satisfy CustomFilter's constraints.
                     if (CustomFilter.isValidStem(aStem) &&
                         CustomFilter.isValidExt(anExtension)) {
                         Paths.emplace_back(currentPath.string());
                         stack.emplace_back(currentPath);
                     }
                     break;
-
                 default:
                     // Do not know how to handle this case.
                     break;
@@ -125,16 +180,11 @@ namespace sbutils {
             const index_type parentIdx = hasParent ? it->second : 0;
 
             for (; dirIter != endIter; ++dirIter) {
-                auto const currentPath = dirIter->path();
-                auto const currentPathStr = currentPath.string();
+                auto const & currentPath = dirIter->path();
+                auto const & currentPathStr = currentPath.string();
                 auto const it = Status.find(currentPathStr);
                 if (it != Status.end()) {
                     continue; // The current path has been processed.
-                }
-
-                // If we have already visit this path then move on.
-                if (LookupTabble.find(currentPathStr) != LookupTabble.end()) {
-                    continue;
                 }
 
                 auto const status = dirIter->status(errcode);
@@ -151,7 +201,7 @@ namespace sbutils {
                     // TODO: Need to find out the best way to handle symlink.
                     break;
                 case boost::filesystem::regular_file:
-                    Status.emplace(std::make_pair(currentPathStr, PROCESSED));
+                    Status.emplace(currentPathStr);
                     if (hasParent) {
                         Edges.emplace_back(edge_type(parentIdx, Paths.size()));
                     }
@@ -218,10 +268,10 @@ namespace sbutils {
 
         // Dictionary
         std::unordered_map<String, index_type> LookupTabble;
-        std::unordered_map<String, DirStatus> Status;
+        std::unordered_set<String> Status;
 
         // Edge information.
         std::vector<edge_type> Edges;
     };
 
-} // namespace filesystem
+} // namespace sbutils
