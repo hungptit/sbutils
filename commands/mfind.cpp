@@ -18,7 +18,10 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/Utils.hpp"
 
-#include "sbutils/FileDB.hpp"
+#include "sbutils/PathVisitor.hpp"
+#include "sbutils/MinimalPathVisitor.hpp"
+#include "sbutils/SimplePathVisitor.hpp"
+#include "sbutils/FileDBVisitor.hpp"
 #include "sbutils/PathFilter.hpp"
 #include "sbutils/PathSearchAlgorithms.hpp"
 
@@ -85,13 +88,13 @@ int main(int argc, char *argv[]) {
     // Search for files in the given folders.
 	using String = std::string;
     using path = boost::filesystem::path;
-    using Container = std::vector<path>;
-    sbutils::SimpleFileVisitor<String, Container, sbutils::NormalPolicy> visitor;
+    using Container = std::deque<path>;
+    sbutils::MinimalFileVisitor<String, Container, sbutils::NormalPolicy> visitor;
     Container searchFolders;
     for (auto item : folders) {
         searchFolders.emplace_back(path(item));
     }
-    sbutils::dfs_file_search(searchFolders, visitor);
+    sbutils::bfs_file_search(searchFolders, visitor);
 
 	const auto & data = visitor.Paths;
 
