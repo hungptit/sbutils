@@ -6,21 +6,19 @@ namespace {
     class TestData {
       public:
         using path = boost::filesystem::path;
-        explicit TestData(const path &currentPath) : TmpDir(currentPath) {
-            init();
-        }
+        explicit TestData(const path &currentPath, const bool verbose = false) : TmpDir(currentPath) { init(verbose); }
 
       private:
         boost::filesystem::path TmpDir;
 
-        void createTestFile(const path &aFile) {
+        void createTestFile(const path &aFile, const bool verbose = false) {
             std::ofstream outfile(aFile.string());
             outfile << "Fake data for testing.\n";
             outfile.close();
             if (boost::filesystem::exists(aFile)) {
-                std::cout << aFile.string() << " is created" << std::endl;
+                if (verbose) std::cout << aFile.string() << " is created" << std::endl;
             } else {
-                std::cout << "Cannot create " << aFile.string() << std::endl;
+                std::cerr << "Cannot create " << aFile.string() << std::endl;
             }
         }
 
@@ -30,7 +28,7 @@ namespace {
             return fullPath;
         }
 
-        void init() {
+        void init(const bool verbose) {
             createTestFile(TmpDir / path("README.md"));
 
             auto dataFolder = createFolder(TmpDir, "data");
@@ -60,4 +58,4 @@ namespace {
             auto docFolder = createFolder(TmpDir, "doc");
         }
     };
-}
+} // namespace

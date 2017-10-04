@@ -4,7 +4,8 @@
 
 namespace sbutils {
     // A visitor class for building file information database.
-    template <typename String, typename PathContainer, typename Filter> class FileDBVisitor {
+    template <typename String, typename PathContainer, typename FFilter, typename DFilter>
+    class FileDBVisitor {
       public:
         using path = boost::filesystem::path;
         using directory_iterator = boost::filesystem::directory_iterator;
@@ -26,13 +27,13 @@ namespace sbutils {
                 return;
             }
 
-            auto const it = LookupTabble.find(aPath.string());
-            const bool hasParent = it != LookupTabble.end();
+            auto const it = LookupTable.find(aPath.string());
+            const bool hasParent = it != LookupTable.end();
             const index_type parentIdx = hasParent ? it->second : 0;
 
             for (; dirIter != endIter; ++dirIter) {
-                auto const & currentPath = dirIter->path();
-                auto const & currentPathStr = currentPath.string();
+                auto const &currentPath = dirIter->path();
+                auto const &currentPathStr = currentPath.string();
                 auto const it = Status.find(currentPathStr);
                 if (it != Status.end()) {
                     continue; // The current path has been processed.
@@ -47,11 +48,7 @@ namespace sbutils {
                 const auto aStem = currentPath.stem().string();
                 const auto anExtension = currentPath.extension().string();
 
-                switch (ftype) {
-                case boost::filesystem::symlink_file:
-                    // TODO: Need to find out the best way to handle symlink.
-                    break;
-                case boost::filesystem::regular_file:
+                if (ftype == boost::filesystem::regular_file) {
                     Status.emplace(currentPathStr);
                     if (hasParent) {
                         Edges.emplace_back(edge_type(parentIdx, Paths.size()));
@@ -61,12 +58,13 @@ namespace sbutils {
                     FileSizes.push_back(fs::file_size(currentPath, errcode));
                     LastWriteTimes.push_back(fs::last_write_time(currentPath, errcode));
                     Types.push_back(ftype);
-                    break;
-                case boost::filesystem::directory_file:
+                }
+
+                if (ftype == boost::filesystem::directory_file) {
                     Status.emplace(currentPathStr);
-                    if (CustomFilter.isValidStem(aStem) &&
-                        CustomFilter.isValidExt(anExtension)) { // We need to filter unwanted
-                                                                // folders such as ".git".
+                    if (DirFilter.isValidStem(aStem) &&
+                        DirFilter.isValidExt(anExtension)) { // We need to filter unwanted
+                        // folders such as ".git".
                         if (hasParent) {
                             Edges.emplace_back(edge_type(parentIdx, Paths.size()));
                         }
@@ -75,33 +73,12 @@ namespace sbutils {
 
                         // We will compute the the size of folders later.
                         FileSizes.push_back(0);
-
                         LastWriteTimes.push_back(fs::last_write_time(currentPath, errcode));
                         Types.push_back(ftype);
                         stack.emplace_back(currentPath);
                     }
-                    break;
-
-                default:
-                    // Do not know how to handle this case.
-                    break;
                 }
             }
-        }
-
-        void print() {
-            fmt::MemoryWriter writer;
-            const size_t N = Paths.size();
-
-            for (auto idx = 0; idx < N; ++idx) {
-                writer << Paths[idx] << ", " << Permissions[idx] << ", " << FileSizes[idx]
-                       << ", " << LastWriteTimes[idx] << "," << Types[idx] << "\n";
-            }
-
-            fmt::print("Summary:\n");
-            fmt::print("Number of vertexes: {0}\n", Paths.size());
-            fmt::print("Number of edgess: {0}\n", Edges.size());
-            fmt::print(writer.str());
         }
 
       public:
@@ -115,13 +92,12 @@ namespace sbutils {
         std::vector<file_type> Types;
 
       private:
-        Filter CustomFilter;
-
-        // Dictionary
-        std::unordered_map<String, index_type> LookupTabble;
+        FFilter FileFilter;
+		DFilter DirFilter;
         std::unordered_set<String> Status;
+		std::unordered_map<String, index_type> LookupTable;
 
         // Edge information.
         std::vector<edge_type> Edges;
     };
-}
+} // namespace sbutils

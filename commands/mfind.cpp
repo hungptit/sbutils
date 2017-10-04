@@ -18,27 +18,50 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/Utils.hpp"
 
-#include "sbutils/PathVisitor.hpp"
 #include "sbutils/MinimalPathVisitor.hpp"
-#include "sbutils/SimplePathVisitor.hpp"
-#include "sbutils/FileDBVisitor.hpp"
 #include "sbutils/PathFilter.hpp"
 #include "sbutils/PathSearchAlgorithms.hpp"
+#include "sbutils/PathSearchVisitor.hpp"
+#include "sbutils/PathVisitor.hpp"
+#include "sbutils/SimplePathVisitor.hpp"
+
+template <typename Iterator>
+void print(Iterator begin, Iterator end, const bool summary = false) {
+    if (summary) {
+        fmt::print("Number of found files and folders: {}\n", std::distance(begin, end));
+    } else {
+        fmt::MemoryWriter writer;
+        std::for_each(begin, end, [&writer](auto const &val) { writer << val << "\n"; });
+        fmt::print("{}\n", writer.str());
+    }
+}
 
 int main(int argc, char *argv[]) {
     using namespace boost;
     namespace po = boost::program_options;
-    po::options_description desc("Allowed options");
+    using String = std::string;
+    using path = boost::filesystem::path;
+    using Container = std::vector<path>;
+
+    po::options_description desc(
+        "Usage: mfind folder_paths [options] [paths]\nFind all files and "
+        "folders from the list of given folders.\n\nAllowed options:");
+
+    std::vector<std::string> folders;
+    std::vector<std::string> stems;
+    std::vector<std::string> extensions;
+    std::string pattern;
 
     // clang-format off
     desc.add_options()
         ("help,h", "Print this help")
         ("verbose,v", "Display searched data.")
-        ("toJSON,j", po::value<std::string>(), "Output results in a JSON file.")
-        ("folders,f", po::value<std::vector<std::string>>(), "Search folders.")
-        ("file-stems,s", po::value<std::vector<std::string>>(), "File stems.")
-        ("extensions,e", po::value<std::vector<std::string>>(), "File extensions.")
-        ("pattern,p", po::value<std::string>(), "A search pattern.");
+		("all,a", "Search all files including files in some special folders such as .git.")
+		("report", "Only report statistical information")
+        ("folders,f", po::value<std::vector<std::string>>(&folders), "Search folders.")
+        ("file-stems,s", po::value<std::vector<std::string>>(&stems), "File stems.")
+        ("extensions,e", po::value<std::vector<std::string>>(&extensions), "File extensions.")
+        ("pattern,p", po::value<std::string>(&pattern), "A search pattern.");
     // clang-format on
 
     po::positional_options_description p;
@@ -54,62 +77,49 @@ int main(int argc, char *argv[]) {
 
     auto verbose = vm.count("verbose");
     sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
-    
+
     std::string jsonFile;
     if (vm.count("toJSON")) {
         jsonFile = vm["toJSON"].as<std::string>();
     }
 
-    using boost::filesystem::path;
+    using path = boost::filesystem::path;
 
     boost::system::error_code errcode;
-    std::vector<std::string> folders;
-    if (vm.count("folders")) {
-        for (auto item : vm["folders"].as<std::vector<std::string>>()) {
-            folders.emplace_back(path(item).string());
+
+    // If folders is empty then we will
+    if (folders.empty()) folders.emplace_back("./");
+    Container searchPaths;
+    std::for_each(folders.cbegin(), folders.cend(), [&searchPaths](auto item) {
+        searchPaths.emplace_back(path(item));
+    });
+
+    // Search for files in the given folders.
+
+    if (vm.count("all")) {
+        sbutils::MinimalFileVisitor<String, Container> visitor;
+        sbutils::dfs_file_search(searchPaths, visitor);
+        print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
+    } else {
+        if (extensions.empty() && stems.empty()) {
+            // Will skip .git folder.
+            sbutils::SimpleFileVisitor<String, Container, sbutils::FolderPolicy> visitor;
+            sbutils::dfs_file_search(searchPaths, visitor);
+            print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
+        } else {
+            using container_type = decltype(extensions);
+            using string_type = std::string;
+
+            sbutils::NormalPolicy<string_type, container_type> fileFilter(
+                std::move(stems), std::move(extensions));
+            sbutils::FolderPolicy folderFilter;
+            sbutils::PathSearchVisitor<String, Container, decltype(folderFilter),
+                                       decltype(fileFilter)>
+                visitor(folderFilter, fileFilter, std::move(pattern));
+            sbutils::dfs_file_search(searchPaths, visitor);
+            print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
         }
     }
 
-    std::vector<std::string> stems;
-    if (vm.count("file-stems")) {
-        stems = vm["file-stems"].as<std::vector<std::string>>();
-    }
-
-    std::vector<std::string> extensions;
-    if (vm.count("extensions")) {
-        extensions = vm["extensions"].as<std::vector<std::string>>();
-    }
-
-    std::string pattern;
-    if (vm.count("pattern")) {
-        pattern = vm["pattern"].as<std::string>();
-    }
-
-    // Search for files in the given folders.
-	using String = std::string;
-    using path = boost::filesystem::path;
-    using Container = std::deque<path>;
-    sbutils::MinimalFileVisitor<String, Container, sbutils::NormalPolicy> visitor;
-    Container searchFolders;
-    for (auto item : folders) {
-        searchFolders.emplace_back(path(item));
-    }
-    sbutils::bfs_file_search(searchFolders, visitor);
-
-	const auto & data = visitor.Paths;
-
-	// TODO: Need to support different patterns
-// const sbutils::ExtFilter<std::vector<std::string>> f1(extensions);
-    // const sbutils::StemFilter<std::vector<std::string>> f2(stems);
-    // const sbutils::SimpleFilter f3(pattern);
-    // auto data =
-    //     (pattern.empty()) ? sbutils::filter(results, f1, f2) : sbutils::filter(results, f1, f2, f3);
-
-	fmt::MemoryWriter writer;
-	fmt::print("Number of files: {}\n", data.size());
-	std::for_each(data.begin(), data.end(),
-				  [&writer](auto const &val) { writer << val << "\n"; });
-	fmt::print("{}\n", writer.str());
-	
     return 0;
 }

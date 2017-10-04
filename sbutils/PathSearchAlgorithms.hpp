@@ -7,7 +7,6 @@ namespace sbutils {
      * @param searchPaths
      * @param visitor
      *
-     * @return
      */
     template <typename Container, typename Visitor>
     void dfs_file_search(const Container &searchPaths, Visitor &visitor) {
@@ -26,7 +25,6 @@ namespace sbutils {
      * @param searchPaths
      * @param visitor
      *
-     * @return
      */
     template <typename Visitor, typename Container>
     void bfs_file_search(const Container &searchPaths, Visitor &visitor) {
