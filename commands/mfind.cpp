@@ -18,6 +18,7 @@
 #include "sbutils/Timer.hpp"
 #include "sbutils/Utils.hpp"
 
+#include "sbutils/BasePathVisitor.hpp"
 #include "sbutils/MinimalPathVisitor.hpp"
 #include "sbutils/PathFilter.hpp"
 #include "sbutils/PathSearchAlgorithms.hpp"
@@ -90,22 +91,32 @@ int main(int argc, char *argv[]) {
     // If folders is empty then we will
     if (folders.empty()) folders.emplace_back("./");
     Container searchPaths;
-    std::for_each(folders.cbegin(), folders.cend(), [&searchPaths](auto item) {
-        searchPaths.emplace_back(path(item));
-    });
+    std::for_each(folders.cbegin(), folders.cend(),
+                  [&searchPaths](auto item) { searchPaths.emplace_back(path(item)); });
 
     // Search for files in the given folders.
 
+    using BaseVisitor = typename sbutils::BasePathVisitor<String, Container>;
+
     if (vm.count("all")) {
-        sbutils::MinimalFileVisitor<String, Container> visitor;
+        sbutils::MinimalPathVisitor<BaseVisitor> visitor;
         sbutils::dfs_file_search(searchPaths, visitor);
         print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
     } else {
         if (extensions.empty() && stems.empty()) {
-            // Will skip .git folder.
-            sbutils::SimpleFileVisitor<String, Container, sbutils::FolderPolicy> visitor;
-            sbutils::dfs_file_search(searchPaths, visitor);
-            print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
+            if (pattern.empty()) {
+                // Will skip .git folder.
+                sbutils::SimplePathVisitor<BaseVisitor, sbutils::FolderPolicy> visitor;
+                sbutils::dfs_file_search(searchPaths, visitor);
+                print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
+            } else {
+                using NullFilter = sbutils::NullPolicy;
+                sbutils::PathSearchVisitor<BaseVisitor, NullFilter, NullFilter> visitor(
+                    NullFilter(), NullFilter(), std::move(pattern));
+                sbutils::dfs_file_search(searchPaths, visitor);
+                print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
+            }
+
         } else {
             using container_type = decltype(extensions);
             using string_type = std::string;
@@ -113,7 +124,7 @@ int main(int argc, char *argv[]) {
             sbutils::NormalPolicy<string_type, container_type> fileFilter(
                 std::move(stems), std::move(extensions));
             sbutils::FolderPolicy folderFilter;
-            sbutils::PathSearchVisitor<String, Container, decltype(folderFilter),
+            sbutils::PathSearchVisitor<BaseVisitor, decltype(folderFilter),
                                        decltype(fileFilter)>
                 visitor(folderFilter, fileFilter, std::move(pattern));
             sbutils::dfs_file_search(searchPaths, visitor);
