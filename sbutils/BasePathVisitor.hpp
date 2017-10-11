@@ -2,11 +2,10 @@
 
 #include "boost/filesystem.hpp"
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 namespace sbutils {
-	// This is the virtual base class for the path visitor. 
+    // This is the virtual base class for the path visitor.
     template <typename String, typename PathContainer> class BasePathVisitor {
       public:
         using string_type = String;
@@ -14,11 +13,24 @@ namespace sbutils {
         using path_container = PathContainer;
         using file_type = boost::filesystem::file_type;
         using directory_iterator = boost::filesystem::directory_iterator;
+        using dictionary_type = std::unordered_set<String>;
+
+        bool isVisited(const std::string &aPath) {
+            return Visited.find(aPath) != Visited.end();
+        }
 
         // Explore the first level of a given folder.
         void visit(const path &aPath, PathContainer &stack) {
             directory_iterator endIter;
             boost::system::error_code errcode, no_error;
+
+            // Skip this path if we have already visited.
+			auto it = Visited.find(aPath.string());
+			if (it == Visited.end()) {
+				Visited.emplace_hint(it, aPath.string());
+			} else {
+				return;
+			}
 
             // Return early if we cannot construct the directory iterator.
             directory_iterator dirIter(aPath, errcode);
@@ -52,8 +64,9 @@ namespace sbutils {
         }
 
       protected:
-        virtual void updateSearchResults(const string_type &pathStr);
-        virtual void processFile(const path &aPath);
-        virtual void processDirectory(const path &aPath, path_container &stack);
+        dictionary_type Visited;
+        virtual void updateSearchResults(const string_type &pathStr) = 0;
+        virtual void processFile(const path &aPath) = 0;
+        virtual void processDirectory(const path &aPath, path_container &stack) = 0;
     };
 } // namespace sbutils

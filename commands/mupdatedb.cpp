@@ -14,6 +14,7 @@
 #include "sbutils/FileUtils.hpp"
 #include "sbutils/Resources.hpp"
 #include "sbutils/Timer.hpp"
+#include "sbutils/PathSearchAlgorithms.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -79,7 +80,7 @@ int main(int argc, char *argv[]) {
     FileVisitor visitor;
     {
         sbutils::ElapsedTime<sbutils::MILLISECOND> searchTimer("Search time: ", verbose);
-        sbutils::filesystem::dfs_file_search(folders, visitor);
+        sbutils::dfs_file_search(folders, visitor);
     }
     
     // Save data to a rocksdb database.

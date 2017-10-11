@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "PathSearchAlgorithms.hpp"
 #include "DataStructures.hpp"
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
@@ -219,7 +220,7 @@ namespace sbutils {
 
         auto searchObj = [&searchFolders]() -> Container {
             Visitor visitor;
-            sbutils::filesystem::dfs_file_search(searchFolders, visitor);
+            sbutils::dfs_file_search(searchFolders, visitor);
             return visitor.getResults();
         };
 
@@ -264,7 +265,7 @@ namespace sbutils {
 
         auto searchObj = [&searchFolders, &results]() {
             Visitor visitor;
-            sbutils::filesystem::dfs_file_search(searchFolders, visitor);
+            sbutils::dfs_file_search(searchFolders, visitor);
             results = visitor.getResults();
         };
 

@@ -78,14 +78,6 @@ int main(int argc, char *argv[]) {
 
     auto verbose = vm.count("verbose");
     sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
-
-    std::string jsonFile;
-    if (vm.count("toJSON")) {
-        jsonFile = vm["toJSON"].as<std::string>();
-    }
-
-    using path = boost::filesystem::path;
-
     boost::system::error_code errcode;
 
     // If folders is empty then we will
@@ -104,6 +96,7 @@ int main(int argc, char *argv[]) {
         print(visitor.Paths.cbegin(), visitor.Paths.cend(), vm.count("report"));
     } else {
         if (extensions.empty() && stems.empty()) {
+			
             if (pattern.empty()) {
                 // Will skip .git folder.
                 sbutils::SimplePathVisitor<BaseVisitor, sbutils::FolderPolicy> visitor;

@@ -27,6 +27,42 @@ namespace sbutils {
         return open(database, options);
     }
 
+    // Write arguments to a key.
+    template <typename OArchive, typename... Args>
+    bool write(rocksdb::DB *db, const std::string &aKey, Args &&... args) {
+        rocksdb::WriteOptions options;
+        std::ostringstream os;
+        {
+            // Serialize the graph and vertex names into a string.
+            OArchive oarchive(os);
+            oarchive(std::forward<Args>(args)...);
+        }
+        rocksdb::Status dbstatus = db->Put(options, aKey, os.str());
+        return dbstatus.ok();
+    }
+
+    // Serialize given arguments to a string then write serialized data to NoSQL database using a given key.
+    template <typename OArchive, typename... Args>
+    bool write(rocksdb::DB *db, const rocksdb::WriteOptions &options, const std::string &aKey,
+               Args &&... args) {
+        std::ostringstream os;
+        {
+            // Serialize the graph and vertex names into a string.
+            OArchive oarchive(os);
+            oarchive(std::forward<Args>(args)...);
+        }
+        rocksdb::Status dbstatus = db->Put(options, aKey, os.str());
+        return dbstatus.ok();
+    }
+
+	// Read a value given a key then deserialize the string buffer to a given value.
+	template <typename IArchive, typename T>
+	T read(rocksdb::DB *db, const rocksdb::ReadOptions &options, const std::string &aKey) {
+		T value;
+		
+		return value;
+	}
+	
     template <typename T> void writeToRocksDB(const std::string &database, const T &results) {
         std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
         rocksdb::Status s;

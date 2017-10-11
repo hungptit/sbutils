@@ -22,6 +22,15 @@
 //   fmt::print("{0} -> {1}\n{0} -> {2}\n", key, value, val);
 // }
 
+template<typename Container>
+void read_write(const std::string &database, Container &&data) {
+	std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
+
+	{
+		sbutils::write(db, "foo", data);
+	}
+}
+
 void test_rocksdb(const std::string &database) {
     std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
 
@@ -44,6 +53,7 @@ void test_rocksdb(const std::string &database) {
         std::string val;
         db->Get(rocksdb::ReadOptions(), key, &val);
         auto s = db->Get(rocksdb::ReadOptions(), key, &val);
+
         fmt::print("s = {}\n", s.ok());
         fmt::print("{0} -> {1}\n", key, val);
     }
