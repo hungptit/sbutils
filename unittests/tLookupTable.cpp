@@ -32,7 +32,8 @@
 
 #include "gtest/gtest.h"
 
-
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
 
 template <typename Container> auto createTestData() {
     Container data = {std::make_tuple("foo", 1), std::make_tuple("boo", 2),
@@ -40,7 +41,7 @@ template <typename Container> auto createTestData() {
     return data;
 }
 
-TEST(BasicTests, Positive) {
+TEST_CASE("BasicTests", "") {
     using Container = std::vector<std::tuple<std::string, size_t>>;
     auto data = createTestData<Container>();
 

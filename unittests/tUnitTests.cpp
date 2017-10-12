@@ -1,6 +1,5 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "gtest/gtest.h"
 #include <array>
 #include <iostream>
 #include <map>
@@ -16,6 +15,9 @@
 #include "sbutils/Timer.hpp"
 
 #include "TestData.hpp"
+
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
 
 using path = boost::filesystem::path;
 
@@ -43,7 +45,7 @@ namespace {
   }
 }
 
-TEST(Display_Functions, Positive) {
+TEST_CASE("Display_Functions", "Positive") {
     {
         std::vector<int> data = {1, 2, 3, 4, 5, 6};
         sbutils::disp(data, "data: ");
@@ -63,37 +65,37 @@ TEST(Display_Functions, Positive) {
               << std::endl;
 }
 
-TEST(FileSystemUtilities, Positive) {
+TEST_CASE("FileSystemUtilities-Positive", "") {
     const boost::filesystem::path aFolder =
         boost::filesystem::temp_directory_path() /
         boost::filesystem::path("test");
     const std::string folderName = aFolder.string();
-    EXPECT_TRUE(sbutils::createDirectory(folderName));
-	EXPECT_TRUE(sbutils::isDirectory(folderName));
+    CHECK(sbutils::createDirectory(folderName));
+	CHECK(sbutils::isDirectory(folderName));
 
 	// TODO: Failed in Mac OS because /var to symlink to /private/var
 	// const std::string absPath = sbutils::getAbslutePath(folderName);
     // EXPECT_EQ(absPath , folderName);
 
-    EXPECT_TRUE(sbutils::getAbslutePath("./") == sbutils::getCurrentFolder());
-    EXPECT_TRUE(sbutils::remove(folderName));
+    CHECK(sbutils::getAbslutePath("./") == sbutils::getCurrentFolder());
+    CHECK(sbutils::remove(folderName));
 }
 
-TEST(FileSystemUtilities, Negative) {
+TEST_CASE("FileSystemUtilities-Negative", "") {
     std::string folderName = "/usr/test";
-    ASSERT_ANY_THROW(sbutils::createDirectory(folderName));
-    EXPECT_FALSE(sbutils::remove(folderName));
-    EXPECT_FALSE(sbutils::isRegularFile(folderName));
-    EXPECT_FALSE(sbutils::isDirectory("tUnitTests.cpp"));
+    REQUIRE_THROWS(sbutils::createDirectory(folderName));
+    CHECK_FALSE(sbutils::remove(folderName));
+    CHECK_FALSE(sbutils::isRegularFile(folderName));
+    CHECK_FALSE(sbutils::isDirectory("tUnitTests.cpp"));
 }
 
-TEST(TemporaryDirectory, Positive) {
+TEST_CASE("TemporaryDirectory", "Positive") {
     sbutils::TemporaryDirectory tmpDir;
     std::cout << tmpDir.getPath() << std::endl;
-    EXPECT_TRUE(boost::filesystem::exists(tmpDir.getPath()));
+    CHECK(boost::filesystem::exists(tmpDir.getPath()));
 }
 
-TEST(ExporeFolderRootLevel, Positive) {
+TEST_CASE("ExporeFolderRootLevel", "Positive") {
     {
         sbutils::TemporaryDirectory tmpDir;
         auto results = sbutils::exploreFolderAtRootLevel(tmpDir.getPath(), 0);
@@ -108,7 +110,7 @@ TEST(ExporeFolderRootLevel, Positive) {
     }
 }
 
-TEST(DataStructure, Positive) {
+TEST_CASE("DataStructure", "Positive") {
     // using IArchive = cereal::JSONInputArchive;
     using OArchive = cereal::JSONOutputArchive;
     using value_type = sbutils::FileInfo;
@@ -153,13 +155,13 @@ TEST(DataStructure, Positive) {
         dict.emplace(aFile);
         dict.emplace(aFile);
 
-        EXPECT_TRUE(dict.size() == 1);
-        EXPECT_TRUE(dict.find(aFile) != dict.end());
+        CHECK(dict.size() == 1);
+        CHECK(dict.find(aFile) != dict.end());
 
         map.emplace(std::make_pair("aKey", aFile));
         map["foo"] = aFile;
         map["boo"] = aFile;
-        EXPECT_TRUE(map.size() == 3);
+        CHECK(map.size() == 3);
 
         auto results = newdiff(v, v);
     }
@@ -178,12 +180,12 @@ TEST(DataStructure, Positive) {
         // fmt::print("Folders:\n");
         // std::for_each(aFolder.Folders.cbegin(), aFolder.Folders.cend(), printObj);
 
-        EXPECT_TRUE(aFolder.Files.size() == 1);
-        EXPECT_TRUE(aFolder.Folders.size() == 7);
+        CHECK(aFolder.Files.size() == 1);
+        CHECK(aFolder.Folders.size() == 7);
     }
 }
 
-TEST(DFS, Positive) {
+TEST_CASE("DFS", "Positive") {
     using path = boost::filesystem::path;
     using OArchive = cereal::JSONOutputArchive;
 
@@ -208,6 +210,6 @@ TEST(DFS, Positive) {
 
     // fmt::print("{}\n", output.str());
 
-    EXPECT_EQ(results.Graph.numberOfVertexes(), static_cast<size_t>(6));
-    EXPECT_TRUE(results.Graph.isDirected());
+    CHECK(results.Graph.numberOfVertexes() == static_cast<size_t>(6));
+    CHECK(results.Graph.isDirected());
 }
