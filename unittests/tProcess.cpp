@@ -5,9 +5,11 @@
 
 #include "sbutils/TemporaryDirectory.hpp"
 #include "sbutils/Process.hpp"
-#include "gtest/gtest.h"
 
-TEST(Basic, Positive) {
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
+TEST_CASE("Basic", "Positive") {
     sbutils::TemporaryDirectory tmpDir;
     std::string cmd("/bin/ls");
     std::vector<std::string> args = {"-l"};
@@ -15,6 +17,6 @@ TEST(Basic, Positive) {
     std::string buffer;
     sbutils::run(cmd, args, buffer);
     std::cout << "buffer: \"" << buffer << "\"";
-    EXPECT_TRUE(buffer == sbutils::run(cmd, args));
-    EXPECT_TRUE(buffer == "total 0\n");
+    CHECK(buffer == sbutils::run(cmd, args));
+    CHECK(buffer == "total 0\n");
 }
