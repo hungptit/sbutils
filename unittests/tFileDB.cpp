@@ -7,12 +7,14 @@
 #include <string>
 #include <vector>
 
-#include "sbutils/FileDBVisitor.hpp"
-#include "sbutils/MinimalPathVisitor.hpp"
+#include "sbutils/BasePathVisitor.hpp"
+#include "sbutils/SimplePathVisitor.hpp"
 #include "sbutils/PathFilter.hpp"
 #include "sbutils/PathSearchAlgorithms.hpp"
 #include "sbutils/PathVisitor.hpp"
 #include "sbutils/SimplePathVisitor.hpp"
+#include "sbutils/PathSearchVisitor.hpp"
+#include "sbutils/FileDBVisitor.hpp"
 #include "sbutils/TemporaryDirectory.hpp"
 
 #include "TestData.hpp"
@@ -124,7 +126,7 @@ TEST_CASE("Visitors", "") {
     using path = boost::filesystem::path;
     using String = std::string;
     sbutils::TemporaryDirectory tmpDir;
-    TestData testData(tmpDir.getPath());
+    TestData testData(tmpDir.getPath(), true);
 
     SECTION("NullPolicy") {
         using String = std::string;
@@ -132,13 +134,15 @@ TEST_CASE("Visitors", "") {
         using PathContainer = std::vector<path>;
         using FileFilter = sbutils::NullPolicy;
 		using DirFilter = sbutils::NullPolicy;
-        sbutils::FileDBVisitor<String, PathContainer, FileFilter, DirFilter> visitor;
+		using BaseVisitor = typename sbutils::BasePathVisitor<String, PathContainer>;
+		sbutils::PathSearchVisitor<BaseVisitor, FileFilter, DirFilter> visitor(DirFilter(), FileFilter(), "");
         PathContainer stack;
         visitor.visit(tmpDir.getPath(), stack);
         visitor.visit(tmpDir.getPath(), stack);
 
-        REQUIRE(visitor.Paths.size() == 8);
-        REQUIRE(stack.size() == 7);
+		fmt::print("{}\n", visitor.Paths[0]);
+        REQUIRE(visitor.Paths.size() == 1); // There is only one valid file at root level.
+        REQUIRE(stack.size() == 7);			// There are 7 folders in the stack.
     }
 
     SECTION("NormalPolicy") {
@@ -169,20 +173,22 @@ TEST_CASE("File search algorithms using NullPolicy", "dfs/bfs") {
     SECTION("dfs search algorithm") {
         using String = std::string;
         using PathContainer = std::vector<path>;
-
+		using BaseVisitor = typename sbutils::BasePathVisitor<String, PathContainer>;
+		
         SECTION("SimpleFileVisitor") {
             SECTION("NullPolicy") {
                 using CustomFilter = sbutils::NullPolicy;
+				
                 using Visitor =
-                    typename sbutils::SimpleFileVisitor<String, PathContainer, CustomFilter>;
-                REQUIRE(dfs<Visitor>(tmpDir.getPath()) == 20);
+                    typename sbutils::SimplePathVisitor<BaseVisitor, CustomFilter>;
+                REQUIRE(dfs<Visitor>(tmpDir.getPath()) == 13);
             }
 
             SECTION("NullPolicy") {
                 using CustomFilter = sbutils::NullPolicy;
                 using Visitor =
-                    typename sbutils::SimpleFileVisitor<String, PathContainer, CustomFilter>;
-                REQUIRE(dfs<Visitor>(tmpDir.getPath()) == 20);
+                    typename sbutils::SimplePathVisitor<BaseVisitor, CustomFilter>;
+                REQUIRE(dfs<Visitor>(tmpDir.getPath()) == 13);
             }
         }
 
@@ -207,20 +213,21 @@ TEST_CASE("File search algorithms using NullPolicy", "dfs/bfs") {
     SECTION("bfs search algorithm") {
         using PathContainer = std::deque<path>;
         using String = std::string;
-
+		using BaseVisitor = typename sbutils::BasePathVisitor<String, PathContainer>;
+		
         SECTION("Simple visitor") {
             SECTION("NullPolicy") {
                 using CustomFilter = sbutils::NullPolicy;
                 using Visitor =
-                    typename sbutils::SimpleFileVisitor<String, PathContainer, CustomFilter>;
-                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 20);
+                    typename sbutils::SimplePathVisitor<BaseVisitor, CustomFilter>;
+                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 13);
             }
 
             SECTION("NullPolicy") {
                 using CustomFilter = sbutils::NullPolicy;
                 using Visitor =
-                    typename sbutils::SimpleFileVisitor<String, PathContainer, CustomFilter>;
-                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 20);
+                    typename sbutils::SimplePathVisitor<BaseVisitor, CustomFilter>;
+                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 13);
             }
         }
 
@@ -228,15 +235,15 @@ TEST_CASE("File search algorithms using NullPolicy", "dfs/bfs") {
             SECTION("NullPolicy") {
                 using CustomFilter = sbutils::NullPolicy;
                 using Visitor =
-                    typename sbutils::SimpleFileVisitor<String, PathContainer, CustomFilter>;
-                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 20);
+                    typename sbutils::SimplePathVisitor<BaseVisitor, CustomFilter>;
+                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 13);
             }
 
             SECTION("NullPolicy") {
                 using CustomFilter = sbutils::NullPolicy;
                 using Visitor =
-                    typename sbutils::SimpleFileVisitor<String, PathContainer, CustomFilter>;
-                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 20);
+                    typename sbutils::SimplePathVisitor<BaseVisitor, CustomFilter>;
+                REQUIRE(bfs<Visitor>(tmpDir.getPath()) == 13);
             }
         }
     }

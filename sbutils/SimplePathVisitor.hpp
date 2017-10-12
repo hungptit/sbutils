@@ -22,15 +22,11 @@ namespace sbutils {
         void processFile(const path &aPath) { updateSearchResults(std::move(aPath.string())); }
 
         void processDirectory(const path &aPath, path_container &stack) {
-            auto pathStr = aPath.string();
-            if (!this->isVisited(pathStr)) {
-                const auto aStem = aPath.stem().string();
-                const auto anExtension = aPath.extension().string();
-                fmt::print("{}\n", pathStr);
-                if (FolderFilter.isValidStem(aStem) && FolderFilter.isValidExt(anExtension)) {
-                    stack.emplace_back(aPath);
-                }
-            }
+			const auto aStem = aPath.stem().string();
+			const auto anExtension = aPath.extension().string();
+			if (FolderFilter.isValidStem(aStem) && FolderFilter.isValidExt(anExtension)) {
+				stack.emplace_back(aPath);
+			}
         }
 
       private:

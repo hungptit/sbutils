@@ -3,6 +3,7 @@
 #include "boost/filesystem.hpp"
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 namespace sbutils {
     // This is the virtual base class for the path visitor.

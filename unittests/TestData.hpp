@@ -38,22 +38,22 @@ namespace {
             createTestFile(gitFolder / path("test.cpp"));
 
             auto sbtoolsFolder = createFolder(TmpDir, ".subversion");
-            createTestFile(sbtoolsFolder / path("foo.p"));
+            createTestFile(sbtoolsFolder / path("foo.p"), verbose);
 
             createFolder(TmpDir, "CMakeFiles");
 
             auto srcFolder = createFolder(TmpDir, "src");
-            createTestFile(srcFolder / path("test.cpp"));
-            createTestFile(srcFolder / path("read.cpp"));
-            createTestFile(srcFolder / path("write.cpp"));
-            createTestFile(srcFolder / path("write.p"));
-            createTestFile(srcFolder / path("write.txt"));
-            createTestFile(srcFolder / path("foo.m"));
-            createTestFile(srcFolder / path("foo.mat"));
-            createTestFile(srcFolder / path("foo.p"));
+            createTestFile(srcFolder / path("test.cpp"), verbose);
+            createTestFile(srcFolder / path("read.cpp"), verbose);
+            createTestFile(srcFolder / path("write.cpp"), verbose);
+            createTestFile(srcFolder / path("write.p"), verbose);
+            createTestFile(srcFolder / path("write.txt"), verbose);
+            createTestFile(srcFolder / path("foo.m"), verbose);
+            createTestFile(srcFolder / path("foo.mat"), verbose);
+            createTestFile(srcFolder / path("foo.p"), verbose);
 
             auto binFolder = createFolder(TmpDir, "bin");
-            createTestFile(binFolder / path("test"));
+            createTestFile(binFolder / path("test"), verbose);
 
             auto docFolder = createFolder(TmpDir, "doc");
         }

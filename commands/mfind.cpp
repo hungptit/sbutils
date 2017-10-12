@@ -80,16 +80,14 @@ int main(int argc, char *argv[]) {
     sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
     boost::system::error_code errcode;
 
-    // If folders is empty then we will
+    // If folders is empty then we will search for file in the current path.
     if (folders.empty()) folders.emplace_back("./");
     Container searchPaths;
     std::for_each(folders.cbegin(), folders.cend(),
                   [&searchPaths](auto item) { searchPaths.emplace_back(path(item)); });
 
     // Search for files in the given folders.
-
     using BaseVisitor = typename sbutils::BasePathVisitor<String, Container>;
-
     if (vm.count("all")) {
         sbutils::MinimalPathVisitor<BaseVisitor> visitor;
         sbutils::dfs_file_search(searchPaths, visitor);
