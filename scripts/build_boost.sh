@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./get_build_options.sh
+source scripts/get_build_options.sh
 
 # Build boost from git source
 BOOST_GIT=https://github.com/boostorg/boost.git
