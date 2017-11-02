@@ -75,6 +75,7 @@ if (HAVE_WTHREAD_SAFETY)
 endif()
 
 add_cxx_compiler_flag(-DFMT_HEADER_ONLY)
+add_cxx_compiler_flag(-DPUGIXML_HEADER_ONLY)
 add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
 # add_cxx_compiler_flag(-flto)
 
@@ -121,7 +122,7 @@ set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
 # Need to use Boost
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio Source)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio Source tBoostProcess)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
@@ -138,7 +139,7 @@ endif (Boost_FOUND)
 
 # Compile standard C++ example using the latest version of gcc.
 # set(CMAKE_CXX_COMPILER "g++-7")
-set(COMMAND_SRC_FILES tRegex tFuture tCatch)
+set(COMMAND_SRC_FILES tRegex tFuture tCatch tFuture.wait_for)
 foreach (src_file ${COMMAND_SRC_FILES})
   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
   TARGET_LINK_LIBRARIES(${src_file} -lpthread)

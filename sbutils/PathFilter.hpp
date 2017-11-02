@@ -31,6 +31,7 @@ namespace sbutils {
         Container Extensions;
     };
 
+	// A policy class for searching Perl files.
     class PerlPolicy {
       public:
         template <typename T> bool isValidExt(T &&anExtension) {
