@@ -53,7 +53,7 @@ template <typename T> auto create_test_data(const size_t N) {
 }
 
 // Create test data
-constexpr size_t N = 1000000;
+constexpr size_t N = 10000;
 using value_type = double;
 auto data = create_test_data<value_type>(N);
 using container_type = decltype(data);
