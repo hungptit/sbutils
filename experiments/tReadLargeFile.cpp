@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <vector>
 
+#include "celero/Celero.h"
+
 // write N * 512 integers
 void fillFile(int N, char *name) {
     FILE *fd = ::fopen(name, "wb");
@@ -54,7 +56,7 @@ void fillFile(int N, char *name) {
     ::fclose(fd);
 }
 
-int doSomeComputation(int *numbers, size_t size) {
+int DoSomeComputation(int *numbers, size_t size) {
     int answer = 0;
     // totally arbitrary
     for (size_t k = 0; k < size; k += 2) {
@@ -88,7 +90,7 @@ int testfread(char *name, int N) {
                       << "\n";
             return -1;
         }
-        answer += doSomeComputation(&numbers[0], numbers.size());
+        answer += DoSomeComputation(&numbers[0], numbers.size());
     }
     ::fclose(fd);
     return answer;
@@ -103,7 +105,7 @@ int testwithCpp(char *name, int N) {
         in.read(reinterpret_cast<char *>(&size), sizeof(int));
         numbers.resize(size);
         in.read(reinterpret_cast<char *>(&numbers[0]), sizeof(int) * size);
-        answer += doSomeComputation(&numbers[0], numbers.size());
+        answer += DoSomeComputation(&numbers[0], numbers.size());
     }
     in.close();
     return answer;
@@ -132,7 +134,7 @@ int testfreadwithsetbuffer(char *name, int N) {
                       << "\n";
             return -1;
         }
-        answer += doSomeComputation(&numbers[0], numbers.size());
+        answer += DoSomeComputation(&numbers[0], numbers.size());
     }
     ::fclose(fd);
     return answer;
@@ -161,7 +163,7 @@ int testfreadwithlargebuffer(char *name, int N) {
                       << "\n";
             return -1;
         }
-        answer += doSomeComputation(&numbers[0], numbers.size());
+        answer += DoSomeComputation(&numbers[0], numbers.size());
     }
     ::fclose(fd);
     return answer;
@@ -193,7 +195,7 @@ int testwmmap(char *name, int N, bool advise, bool shared) {
     close(fd);
     for (int t = 0; t < N; ++t) {
         int size = *addr++;
-        answer += doSomeComputation(addr, size);
+        answer += DoSomeComputation(addr, size);
         addr += size;
     }
     munmap(initaddr, length);
@@ -223,7 +225,7 @@ int testread(char *name, int N) {
                       << "\n";
             return -1;
         }
-        answer += doSomeComputation(&numbers[0], numbers.size());
+        answer += DoSomeComputation(&numbers[0], numbers.size());
     }
     ::close(fd);
     return answer;
@@ -288,15 +290,20 @@ class CPUTimer {
     }
 };
 
+constexpr int N = 16384 * 16;
+
 int main() {
-    const int N = 16384 * 32;
     int tot = 0;
     CPUTimer cput;
     WallClockTimer wct;
-    for (int T = 0; T < 30; ++T) {
-        char *name = tmpnam(NULL); // unsafe but for these purposes, ok
-        fillFile(N, name);
-
+	const int number_of_loops = 30;
+	const int number_of_trials = 10;
+	
+    for (int T = 0; T < number_of_loops; ++T) {
+		char *name = tmpnam(NULL); // unsafe but for these purposes, ok
+		fillFile(N, name);
+		std::cout << "Test file: " << name << "\n";
+		
         std::cout << "\n";
         // don't report times
         tot += testread(name, N);
@@ -304,63 +311,63 @@ int main() {
         // fread
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testfread(name, N);
+        for (int x = 0; x < number_of_trials; ++x) tot += testfread(name, N);
         std::cout << "fread\t\t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // fread with set buffer
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testfreadwithsetbuffer(name, N);
+        for (int x = 0; x < number_of_trials; ++x) tot += testfreadwithsetbuffer(name, N);
         std::cout << "fread w sbuffer\t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // fread with large buffer
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testfreadwithlargebuffer(name, N);
+        for (int x = 0; x < number_of_trials; ++x) tot += testfreadwithlargebuffer(name, N);
         std::cout << "fread w lbuffer\t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // read
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testread(name, N);
+        for (int x = 0; x < number_of_trials; ++x) tot += testread(name, N);
         std::cout << "read2 \t\t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // mmap
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testwmmap(name, N, false, false);
+        for (int x = 0; x < number_of_trials; ++x) tot += testwmmap(name, N, false, false);
         std::cout << "mmap \t\t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // fancy mmap
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testwmmap(name, N, true, false);
+        for (int x = 0; x < number_of_trials; ++x) tot += testwmmap(name, N, true, false);
         std::cout << "fancy mmap \t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // mmap
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testwmmap(name, N, false, true);
+        for (int x = 0; x < number_of_trials; ++x) tot += testwmmap(name, N, false, true);
         std::cout << "mmap (shared) \t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // fancy mmap
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testwmmap(name, N, true, true);
+        for (int x = 0; x < number_of_trials; ++x) tot += testwmmap(name, N, true, true);
         std::cout << "fancy mmap (shared) \t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 
         // C++
         cput.reset();
         wct.reset();
-        for (int x = 0; x < 10; ++x) tot += testwithCpp(name, N);
+        for (int x = 0; x < number_of_trials; ++x) tot += testwithCpp(name, N);
         std::cout << "Cpp\t\t\t" << 512 * N * 1.0 / cput.split() << " "
                   << 512 * N * 1.0 / wct.split() << "\n";
 

@@ -158,7 +158,7 @@ foreach (src_file ${COMMAND_SRC_FILES})
 endforeach (src_file)
 
 
-set(COMMAND_SRC_FILES fb tThreadSum)
+set(COMMAND_SRC_FILES fb tThreadSum tReadLargeFile)
 foreach (src_file ${COMMAND_SRC_FILES})
   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
   TARGET_LINK_LIBRARIES(${src_file} ${LIB_CELERO} ${LIB_JEMALLOC} -lpthread)
