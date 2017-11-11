@@ -1,10 +1,10 @@
 // This command can
 // * Extract audio to different format and quality.
 // * Can copy all downloaded files to a destination folder. It will create the destination
-// folder if it does not exist.
+//   folder if it does not exist.
 // * Beautify the output file name?
 // * Download links using multiple threads.
-// *
+// * 
 
 #include <algorithm>
 #include <iostream>
@@ -18,8 +18,8 @@
 namespace {
     struct InputParams {
         bool extract_audio;
+        unsigend int audio_quality;
         std::string audio_format;
-        std::string audio_quality;
         std::vector<std::string> links;
         std::string destination_folder;
         std::string logging_level;
@@ -46,12 +46,13 @@ int main(int argc, char *argv[]) {
       ("max-threads", po::value<unsigned int>(&numberOfThreads)->default_value(1), "Specify the maximum number of used threads.")
       ("destination-folder,d", po::value<std::string>(&inputs.Folders), "Destination folder.")
       ("logging-level,s", po::value<std::string>(&inputs.logging_level), "Specify the logging level. The default value is info.")
-      ("logging-level,s", po::value<std::string>(&inputs.logging_level), "Specify the logging level. The default value is info.")
+      ("audio-format,s", po::value<std::string>(&inputs.logging_level), "Specify the logging level. The default value is info.")
+      ("audio-format,s", po::value<std::string>(&inputs.logging_level), "Specify the logging level. The default value is info.")
       ("links,l", po::value<std::vector<std::string>>(&args.links), "File extensions.")
       ("pattern,p", po::value<std::string>(&args.Pattern), "Search string pattern.")
       ("database,d", po::value<std::string>(&args.Database)->default_value(sbutils::Resources::Database), "File database.");
     // clang-format on
-    
+
     po::positional_options_description p;
     p.add("pattern", -1);
     po::variables_map vm;
