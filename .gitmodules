@@ -106,3 +106,7 @@
 	path = 3p/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
 	branch = master
+[submodule "3p/pistache"]
+	path = 3p/pistache
+	url = https://github.com/oktal/pistache.git
+	branch = master

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail				# Use Bash strict mode
-source scripts/get_build_options.sh
+source ./get_build_options.sh
 
 PKGNAME=$1
 CMAKE_OPTIONS=${2:-""}

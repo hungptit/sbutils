@@ -53,12 +53,13 @@ namespace sbutils {
         return results;
     }
 
+	template<typename Container>
     std::string read(const std::string &textFile) {
         boost::iostreams::mapped_file mmap(
             textFile, boost::iostreams::mapped_file::readonly);
         auto begin = mmap.const_data();
         auto end = begin + mmap.size();
-        return std::string(begin, end);
+        return Container(begin, end);
     }
 
     std::vector<boost::filesystem::path>
