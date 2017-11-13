@@ -26,7 +26,7 @@ include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
 
 # set(CMAKE_BUILD_TYPE Debug)
-# set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_CXX_COMPILER "clang++")
 # add_cxx_compiler_flag(--stdlib=libc++)
 
 set (CMAKE_BUILD_TYPE Release)
@@ -90,7 +90,7 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
-find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem iostreams)
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
@@ -110,11 +110,18 @@ set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
 
 # Need to use Boost
 if (Boost_FOUND) 
-  set(COMMAND_SRC_FILES tParser intro asyncio syncio Source)
+  set(COMMAND_SRC_FILES tParser intro asyncio syncio Source tBoostProcess)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
+      ${Boost_LIBRARIES} ${ROOT_DIR}/lib/libboost_program_options.a  ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
+  endforeach (src_file)
+
+  set(COMMAND_SRC_FILES download_youtube)
+  foreach (src_file ${COMMAND_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file}
+      ${Boost_LIBRARIES} ${ROOT_DIR}/lib/libboost_program_options.a  ${LIB_JEMALLOC} -lpthread)
   endforeach (src_file)
 
   #   set(COMMAND_SRC_FILES celeroCompressBools)

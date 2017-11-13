@@ -106,3 +106,7 @@
 	path = 3p/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
 	branch = master
+[submodule "3p/blaze"]
+	path = 3p/blaze
+	url = https://bitbucket.org/blaze-lib/blaze
+	branch = master
