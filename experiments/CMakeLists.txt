@@ -37,7 +37,7 @@ include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
 
 # set(CMAKE_BUILD_TYPE Debug)
-# set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_CXX_COMPILER "clang++")
 # add_cxx_compiler_flag(--stdlib=libc++)
 
 set (CMAKE_BUILD_TYPE Release)
@@ -77,7 +77,7 @@ endif()
 add_cxx_compiler_flag(-DFMT_HEADER_ONLY)
 add_cxx_compiler_flag(-DPUGIXML_HEADER_ONLY)
 add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
-# add_cxx_compiler_flag(-flto)
+add_cxx_compiler_flag(-DBLAZE_USE_CPP_THREADS)
 
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -102,7 +102,7 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
-find_package(Boost REQUIRED date_time system filesystem program_options iostreams)
+find_package(Boost REQUIRED date_time system filesystem iostreams)
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
@@ -126,7 +126,14 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
+      ${Boost_LIBRARIES} ${ROOT_DIR}/lib/libboost_program_options.a  ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
+  endforeach (src_file)
+
+  set(COMMAND_SRC_FILES download_youtube)
+  foreach (src_file ${COMMAND_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file}
+      ${Boost_LIBRARIES} ${ROOT_DIR}/lib/libboost_program_options.a  ${LIB_JEMALLOC} -lpthread)
   endforeach (src_file)
 
   #   set(COMMAND_SRC_FILES celeroCompressBools)
@@ -139,7 +146,7 @@ endif (Boost_FOUND)
 
 # Compile standard C++ example using the latest version of gcc.
 # set(CMAKE_CXX_COMPILER "g++-7")
-set(COMMAND_SRC_FILES tRegex tFuture tCatch tFuture.wait_for)
+set(COMMAND_SRC_FILES tRegex tFuture tCatch)
 foreach (src_file ${COMMAND_SRC_FILES})
   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
   TARGET_LINK_LIBRARIES(${src_file} -lpthread)
@@ -156,7 +163,6 @@ foreach (src_file ${COMMAND_SRC_FILES})
   TARGET_LINK_LIBRARIES(${src_file} ${LIB_JEMALLOC}  -lpthread)
   ADD_TEST(${src_file} ./${src_file})
 endforeach (src_file)
-
 
 set(COMMAND_SRC_FILES fb tThreadSum tReadLargeFile)
 foreach (src_file ${COMMAND_SRC_FILES})

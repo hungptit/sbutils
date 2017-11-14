@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "boost/process.hpp"
 #include <iostream>
 #include <string>
@@ -47,4 +48,13 @@ int main() {
 	// 	std::cout << "Error description: " << results.description() << "\n";
 	// 	std::cout << "Error offset: " << results.offset << " (error at [..." << (outstr.size() + results.offset) << "]\n\n";
 	// }
+=======
+#include <string>
+#include "boost/process.hpp"
+
+int  main () {
+          
+          return 0;
+          
+>>>>>>> master
 }

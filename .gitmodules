@@ -19,9 +19,6 @@
 [submodule "3p/zlib"]
 	path = 3p/zlib
 	url = https://github.com/madler/zlib.git
-[submodule "3p/poco"]
-	path = 3p/poco
-	url = https://github.com/pocoproject/poco.git
 [submodule "3p/rocksdb"]
 	path = 3p/rocksdb
 	url = https://github.com/facebook/rocksdb.git
@@ -73,10 +70,6 @@
 	path = 3p/rabbitmq-c
 	url = https://github.com/alanxz/rabbitmq-c.git
 	branch = master
-[submodule "3p/EASTL"]
-	path = 3p/EASTL
-	url = https://github.com/electronicarts/EASTL.git
-	branch = master
 [submodule "3p/libcuckoo"]
 	path = 3p/libcuckoo
 	url = https://github.com/efficient/libcuckoo.git
@@ -85,7 +78,6 @@
 	path = 3p/how-to-use-pvs-studio-free
 	url = https://github.com/viva64/how-to-use-pvs-studio-free.git
 	branch = master
-
 [submodule "include/date"]
 	path = include/date
 	url = https://github.com/HowardHinnant/date.git
@@ -113,4 +105,6 @@
 [submodule "3p/pugixml"]
 	path = 3p/pugixml
 	url = https://github.com/zeux/pugixml.git
-	branch = master
+[submodule "3p/blaze"]
+	path = 3p/blaze
+	url = https://bitbucket.org/blaze-lib/blaze

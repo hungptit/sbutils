@@ -6,17 +6,18 @@
 #include <type_traits>
 #include <vector>
 #include <iostream>
+#include "blaze/Blaze.h"
 
 #include "celero/Celero.h"
 
-constexpr int NumberOfSamples = 50;
+constexpr int NumberOfSamples = 20;
 constexpr int NumberOfIterations = 10;
 
 template <typename Container>
 double sum(const Container &v, const std::size_t begin, const std::size_t end) {
     double s = 0;
     for (auto idx = begin; idx < end; ++idx) {
-        s += v[idx];
+        s += v[idx] * v[idx];
     }
     return s;
 }
@@ -33,7 +34,7 @@ double sum_async(const Container &v, const std::size_t begin, const std::size_t 
 template <typename Iter>
 typename std::iterator_traits<Iter>::value_type sum_iter(Iter begin, Iter end) {
     typename std::iterator_traits<Iter>::value_type results = 0.0;
-    std::for_each(begin, end, [&results](auto const item) { results += item; });
+    std::for_each(begin, end, [&results](auto const item) { results += item * item; });
     return results;
 }
 
@@ -52,11 +53,30 @@ template <typename T> auto create_test_data(const size_t N) {
     return v;
 }
 
+template <typename T> auto create_blaze_test_data(const std::vector<T> &data) {
+  using blaze::DynamicVector;
+  DynamicVector<T> results(data.size());
+  for (size_t idx =  0; idx < data.size(); ++idx) {
+    results[idx] = data[idx];
+  }
+  return results;
+}
+
+template <typename T> auto sum_blaze(const T & x, const size_t nthreads = 1) {
+  blaze::setNumThreads( nthreads );
+  // std::cout << blaze::getNumThreads() << "\n";
+  return blaze::dot(x, x);
+}
+
 // Create test data
-constexpr size_t N = 10000;
+constexpr size_t N = 100000;
 using value_type = double;
 auto data = create_test_data<value_type>(N);
+auto blaze_data = create_blaze_test_data(data);
 using container_type = decltype(data);
+
+using blaze::StaticVector;
+using blaze::DynamicVector;
 
 CELERO_MAIN
 
@@ -74,4 +94,16 @@ BENCHMARK(sum, iter, NumberOfSamples, NumberOfIterations) {
 
 BENCHMARK(sum, iter_async, NumberOfSamples, NumberOfIterations) {
     celero::DoNotOptimizeAway(sum_iter_async(data.cbegin(), data.cend()));
+}
+
+BENCHMARK(sum, blaze, NumberOfSamples, NumberOfIterations) {
+  celero::DoNotOptimizeAway(sum_blaze(blaze_data, 1));
+}
+
+BENCHMARK(sum, blaze_two_threads, NumberOfSamples, NumberOfIterations) {
+  celero::DoNotOptimizeAway(sum_blaze(blaze_data, 2));
+}
+
+BENCHMARK(sum, blaze_four_threads, NumberOfSamples, NumberOfIterations) {
+  celero::DoNotOptimizeAway(sum_blaze(blaze_data, 4));
 }
