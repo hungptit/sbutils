@@ -85,7 +85,6 @@
 	path = 3p/how-to-use-pvs-studio-free
 	url = https://github.com/viva64/how-to-use-pvs-studio-free.git
 	branch = master
-
 [submodule "include/date"]
 	path = include/date
 	url = https://github.com/HowardHinnant/date.git
@@ -109,4 +108,8 @@
 [submodule "3p/pistache"]
 	path = 3p/pistache
 	url = https://github.com/oktal/pistache.git
+	branch = master
+[submodule "3p/pugixml"]
+	path = 3p/pugixml
+	url = https://github.com/zeux/pugixml.git
 	branch = master

@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <future>
+#include <random>
 
 #include "fb.hpp"
 
@@ -39,12 +41,6 @@ BENCHMARK(search, fbstring2, NumberOfSamples, NumberOfIterations) {
     celero::DoNotOptimizeAway(search<folly::fbstring>(aLinefb, fbpattern));
 }
 
-// int main() {
-// 	folly::fbstring str("Hello");
-// 	fmt::print("{}\n", str.data());
-// 	std::unordered_set<folly::fbstring> dict;
-
-// 	std::ofstream os("out.cereal", std::ios::binary);
-// 	cereal::BinaryOutputArchive archive( os );
-// 	archive(str);
-// }
+BASELINE(sum, original, 5, 10) {
+    celero::DoNotOptimizeAway(sum(data, 0, N));
+}

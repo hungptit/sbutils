@@ -45,7 +45,6 @@ namespace sbutils {
 
             for (; dirIter != endIter; ++dirIter) {
                 auto const &currentPath = dirIter->path();
-                auto const &currentPathStr = currentPath.string();
                 auto const status = dirIter->status(errcode);
                 if (errcode != no_error) {
                     continue; // Move on if we cannot get the status of a given path.

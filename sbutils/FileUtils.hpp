@@ -224,7 +224,7 @@ namespace sbutils {
     }
 
     // Time related functionalities
-    std::string getTimeStampString() {
+    std::string GetTimeStampString() {
         const boost::posix_time::ptime now =
             boost::posix_time::second_clock::local_time();
         return boost::posix_time::to_iso_string(now);
