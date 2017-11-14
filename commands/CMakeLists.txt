@@ -17,10 +17,6 @@ get_git_version(GIT_VERSION)
 string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
 
-# For clang
-# set(CMAKE_CXX_COMPILER "clang++")
-# set(CMAKE_CXX_COMPILER "g++")
-
 # The version of the libraries
 set(GENERIC_LIB_VERSION ${VERSION})
 string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
@@ -28,6 +24,10 @@ string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
 include(CheckCXXCompilerFlag)
 include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
+
+# Use libc++  provided by llvm
+# set(CMAKE_CXX_COMPILER "clang++")
+# add_cxx_compiler_flag(-stdlib=libc++)
 
 # set(CMAKE_BUILD_TYPE Debug)
 
