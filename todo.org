@@ -5,4 +5,22 @@
 
 * TODO Use boost::process instead of Poco::Process to avoid of issues on Mac.
 * TODO Use fbstring for string related functionality.
-* TODO 
+* TODO Create workers
+** Master:
+*** Send/receive messages
++ Send receive messages 
+*** Distributed messages to workers using ZeroMQ.
++ What is the format of the exchange messages.
+  + header: type, name
+  + body: information.
+*** Log information.
++ Worker will send out the log messages to the main worker.
++ Main worker take messages and direct it to the right logging output.
+*** Timemout worker.
++ Kill the worker if it takes more time than needed.
++ Requeue the executed task.
+*** Increase/decrease the number of workers.
++ Randomly pick up workers the the worker id queue and send the kill signal.
++ Create a new thread and detach it from the main worker. The new thread will communicate with the main worker using messaging.
+*** How to we measure the system load?
++ 

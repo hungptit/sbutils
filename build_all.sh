@@ -17,7 +17,7 @@ printf "Build googletest\n"
 ./build_using_cmake.sh googletest > /dev/null
 
 printf "Build Celero\n"
-./build_using_cmake.sh Celero > /dev/null
+./build_using_cmake.sh Celero "-DCELERO_COMPILE_DYNAMIC_LIBRARIES:BOOL=OFF" > /dev/null
 
 printf "Build cereal\n"
 ./build_using_cmake.sh cereal "-DJUST_INSTALL_CEREAL=TRUE" > /dev/null 
@@ -27,9 +27,6 @@ printf "Build spdlog\n"
 
 printf "Build zlib\n"
 ./build_using_cmake.sh zlib > /dev/null 
-
-printf "Build poco\n"
-./build_using_cmake.sh poco "-DPOCO_STATIC=TRUE -DENABLE_DATA_ODBC=FALSE -DENABLE_DATA_MYSQL=FALSE -DENABLE_MONGODB=FALSE" > /dev/null
 
 printf "build rocksdb"
 ./build_rocksdb.sh > /dev/null 

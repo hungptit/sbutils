@@ -155,7 +155,7 @@ endforeach (src_file)
 
 # Folly examples
 include_directories ("/home/hdang/.linuxbrew/include/")
-set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+set(LIB_CELERO "${ROOT_DIR}/lib/libcelero.a")
 
 set(COMMAND_SRC_FILES fbstring)
 foreach (src_file ${COMMAND_SRC_FILES})
@@ -164,7 +164,7 @@ foreach (src_file ${COMMAND_SRC_FILES})
   ADD_TEST(${src_file} ./${src_file})
 endforeach (src_file)
 
-set(COMMAND_SRC_FILES fb tThreadSum tReadLargeFile)
+set(COMMAND_SRC_FILES fb tThreadSum tReadLargeFile tNegate)
 foreach (src_file ${COMMAND_SRC_FILES})
   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
   TARGET_LINK_LIBRARIES(${src_file} ${LIB_CELERO} ${LIB_JEMALLOC} -lpthread)
