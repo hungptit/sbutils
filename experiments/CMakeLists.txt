@@ -118,7 +118,8 @@ if (NOT EXISTS ${LIB_TBB})			# Fall back to system tbb libraries if we could not
 endif() 
 
 # Celero
-set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+# set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.dylib")
 
 # Need to use Boost
 if (Boost_FOUND) 
@@ -155,7 +156,7 @@ endforeach (src_file)
 
 # Folly examples
 include_directories ("/home/hdang/.linuxbrew/include/")
-set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.dylib")
 
 set(COMMAND_SRC_FILES fbstring)
 foreach (src_file ${COMMAND_SRC_FILES})
