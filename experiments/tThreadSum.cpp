@@ -64,7 +64,6 @@ template <typename T> auto create_blaze_test_data(const std::vector<T> &data) {
 
 template <typename T> auto sum_blaze(const T & x, const size_t nthreads = 1) {
   blaze::setNumThreads( nthreads );
-  // std::cout << blaze::getNumThreads() << "\n";
   return blaze::dot(x, x);
 }
 
