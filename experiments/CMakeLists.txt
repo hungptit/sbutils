@@ -156,11 +156,7 @@ endforeach (src_file)
 
 # Folly examples
 include_directories ("/home/hdang/.linuxbrew/include/")
-<<<<<<< HEAD
 set(LIB_CELERO "${ROOT_DIR}/lib/libcelero.a")
-=======
-set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.dylib")
->>>>>>> e49a6a540fb79967d4deab4dd85ab1bffbbd748e
 
 set(COMMAND_SRC_FILES fbstring)
 foreach (src_file ${COMMAND_SRC_FILES})
