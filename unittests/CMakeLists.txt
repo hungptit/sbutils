@@ -90,8 +90,6 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${ROOT_DIR}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
-# message(${BOOST_ROOT})
-
 find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
@@ -108,7 +106,12 @@ set(LIB_POCO_DATA "${ROOT_DIR}/lib/libPocoData.a")
 set(LIB_POCO_SQLITE "${ROOT_DIR}/lib/libPocoDataSQLite.a")
 set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
 set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
+
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+if (NOT "${LIB_TBB}")
+  set(LIB_TBB "-ltbb")
+endif ()
+  
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})

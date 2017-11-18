@@ -25,7 +25,7 @@ git submodule update --recursive;
 ./bootstrap.sh --prefix=$BOOST_PREFIX --without-icu
 ./b2 clean
 ./b2 headers
-./b2 --build-dir=$TMP_DIR/boost toolset=gcc stage
+./b2 --build-dir=$TMP_DIR/boost
 ./b2 $BUILD_OPTS --disable-icu --ignore-site-config variant=release threading=multi install
 
 popd;

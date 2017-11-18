@@ -1,43 +1,51 @@
 [submodule "cereal"]
 	path = 3p/cereal
 	url = https://github.com/USCiLab/cereal.git
+	branch = master
 [submodule "fmt"]
 	path = 3p/fmt
 	url = https://github.com/fmtlib/fmt.git
+	branch = master
 [submodule "graph"]
 	path = graph
 	url = https://github.com/hungptit/graph.git
+	branch = master
 [submodule "spdlog"]
 	path = 3p/spdlog
 	url = https://github.com/gabime/spdlog.git
+	branch = master
 [submodule "3p/Celero"]
 	path = 3p/Celero
 	url = https://github.com/DigitalInBlue/Celero.git
-[submodule "3p/googletest"]
-	path = 3p/googletest
-	url = https://github.com/google/googletest
+	branch = master
 [submodule "3p/zlib"]
 	path = 3p/zlib
 	url = https://github.com/madler/zlib.git
+	branch = master
 [submodule "3p/rocksdb"]
 	path = 3p/rocksdb
 	url = https://github.com/facebook/rocksdb.git
+	branch = master
 [submodule "3p/lz4"]
 	path = 3p/lz4
 	url = https://github.com/lz4/lz4.git
+	branch = master
 [submodule "3p/jemalloc"]
 	path = 3p/jemalloc
 	url = https://github.com/jemalloc/jemalloc.git
+	branch = master
 [submodule "3p/snappy"]
 	path = 3p/snappy
 	url = https://github.com/google/snappy.git
+	branch = master
 [submodule "3p/CMake"]
 	path = 3p/CMake
 	url = https://github.com/Kitware/CMake.git
+	branch = master
 [submodule "3p/tbb"]
 	path = 3p/tbb
 	url = https://github.com/01org/tbb.git
-	branch = master
+	branch = tbb_2018
 [submodule "3p/gperftools"]
 	path = 3p/gperftools
 	url = https://github.com/couchbase/gperftools
@@ -105,6 +113,8 @@
 [submodule "3p/pugixml"]
 	path = 3p/pugixml
 	url = https://github.com/zeux/pugixml.git
+	branch = master
 [submodule "3p/blaze"]
 	path = 3p/blaze
 	url = https://bitbucket.org/blaze-lib/blaze
+	branch = master
