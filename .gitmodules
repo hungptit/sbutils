@@ -118,3 +118,6 @@
 	path = 3p/blaze
 	url = https://bitbucket.org/blaze-lib/blaze
 	branch = master
+[submodule "3p/googletest"]
+	path = 3p/googletest
+	url = https://github.com/google/googletest.git
