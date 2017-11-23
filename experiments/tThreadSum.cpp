@@ -68,7 +68,7 @@ template <typename T> auto sum_blaze(const T & x, const size_t nthreads = 1) {
 }
 
 // Create test data
-constexpr size_t N = 100000;
+constexpr size_t N = 10000000;
 using value_type = double;
 auto data = create_test_data<value_type>(N);
 auto blaze_data = create_blaze_test_data(data);
