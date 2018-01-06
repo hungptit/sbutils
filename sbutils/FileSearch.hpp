@@ -16,7 +16,7 @@
 #include "tbb/parallel_sort.h"
 #include "tbb/tbb.h"
 
-#include "graph/DataStructures.hpp"
+#include "graph/graph.hpp"
 #include "PathSearchAlgorithms.hpp"
 
 

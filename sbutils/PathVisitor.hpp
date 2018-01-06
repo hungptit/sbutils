@@ -7,7 +7,7 @@
 // Other headers
 #include "boost/filesystem.hpp"
 #include "fmt/format.h"
-#include "graph/DataStructures.hpp"
+#include "graph/graph.hpp"
 
 namespace sbutils {
     // TODO: Tune the performance of this struct.
