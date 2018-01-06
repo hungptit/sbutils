@@ -76,7 +76,8 @@ set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
 set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
 set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
 set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
-set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+# set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+set(LIB_JEMALLOC "-ljemalloc")
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
@@ -131,12 +132,12 @@ if (Boost_FOUND)
   endforeach (src_file)
 
   
-  set(UNITTEST_SRC_FILES tProcess)
-  foreach (src_file ${UNITTEST_SRC_FILES})
-    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
-    ADD_TEST(${src_file} ./${src_file})
-  endforeach (src_file)
+  # set(UNITTEST_SRC_FILES tProcess)
+  # foreach (src_file ${UNITTEST_SRC_FILES})
+  #   ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+  #   TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_GTEST_MAIN} ${LIB_POCO_FOUNDATION} ${LIB_SNAPPY} -lpthread)
+  #   ADD_TEST(${src_file} ./${src_file})
+  # endforeach (src_file)
 
   # set(UNITTEST_SRC_FILES  tTest)
   # foreach (src_file ${UNITTEST_SRC_FILES})

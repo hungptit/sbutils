@@ -59,7 +59,7 @@ TEST_CASE("Display_Functions", "Positive") {
     }
 
     {
-        std::cout << "Current time: " << sbutils::getTimeStampString()
+        std::cout << "Current time: " << sbutils::GetTimeStampString()
                   << std::endl;
     }
 
@@ -212,6 +212,6 @@ TEST_CASE("DFS", "Positive") {
 
     // fmt::print("{}\n", output.str());
 
-    CHECK(results.Graph.numberOfVertexes() == static_cast<size_t>(6));
-    CHECK(results.Graph.isDirected());
+    CHECK(results.Graph.number_of_vertexes() == static_cast<size_t>(6));
+    CHECK(results.Graph.is_directed());
 }
