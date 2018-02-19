@@ -2,9 +2,9 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
-message("ROOT_DIR: ${ROOT_DIR}")
+set(ROOT_DIR "${ROOT_DIR}/../3p")
 
-# set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
+# set(CMAKE_INSTALL_PREFIX "${EXTERNAL_DIR}")
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -73,12 +73,12 @@ ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Libraries used by rocksdb
-set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
-set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
-set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
-set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
-set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+set(LIB_ROCKSDB "${EXTERNAL_DIR}/lib/librocksdb.a")
+set(LIB_ZLIB "${EXTERNAL_DIR}/lib/libz.a")
+set(LIB_LZ4 "${EXTERNAL_DIR}/lib/liblz4.a")
+set(LIB_BZ2 "${EXTERNAL_DIR}/lib/libbz2.a")
+set(LIB_SNAPPY "${EXTERNAL_DIR}/lib/libsnappy.a")
+set(LIB_JEMALLOC "${EXTERNAL_DIR}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
@@ -87,23 +87,20 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_NO_SYSTEM_PATHS TRUE)
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${ROOT_DIR}")
+  set(BOOST_ROOT "${EXTERNAL_DIR}")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
 find_package(Boost REQUIRED date_time system filesystem iostreams)
-set(LIB_PROGRAM_OPTIONS "${ROOT_DIR}/lib/libboost_program_options.a")
+set(LIB_PROGRAM_OPTIONS "${EXTERNAL_DIR}/lib/libboost_program_options.a")
 
 # Include folder
-include_directories ("${ROOT_DIR}/")
-include_directories ("${ROOT_DIR}/graph")
-include_directories ("${ROOT_DIR}/include/")
-include_directories ("${ROOT_DIR}/3p/rocksdb/include")
-include_directories ("${ROOT_DIR}/3p/tbb/include")
+include_directories ("${EXTERNAL_DIR}/graph/src")
+include_directories ("${EXTERNAL_DIR}/include/")
 
 # TBB
-set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+set(LIB_TBB "${EXTERNAL_DIR}/lib/libtbb.so")
 if (NOT EXISTS ${LIB_TBB})			# Fall back to system tbb libraries if we could not find the customized tbb.
   set(LIB_TBB "-ltbb")
 endif() 

@@ -2,7 +2,7 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
-set(PROJECTS_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+set(EXTERNAL_DIR "${ROOT_DIR}/../3p")
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 
@@ -71,16 +71,16 @@ ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Used libraries
-set(LIB_GTEST "${ROOT_DIR}/lib/libgtest.a")
-set(LIB_GTEST_MAIN "${ROOT_DIR}/lib/libgtest_main.a")
+set(LIB_GTEST "${EXTERNAL_DIR}/lib/libgtest.a")
+set(LIB_GTEST_MAIN "${EXTERNAL_DIR}/lib/libgtest_main.a")
 
 # Libraries used by rocksdb
-set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
-set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
-set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
-set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
-set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+set(LIB_ROCKSDB "${EXTERNAL_DIR}/3p/rocksdb/librocksdb.a")
+set(LIB_ZLIB "${EXTERNAL_DIR}/lib/libz.a")
+set(LIB_LZ4 "${EXTERNAL_DIR}/lib/liblz4.a")
+set(LIB_BZ2 "${EXTERNAL_DIR}/lib/libbz2.a")
+set(LIB_SNAPPY "${EXTERNAL_DIR}/lib/libsnappy.a")
+set(LIB_JEMALLOC "${EXTERNAL_DIR}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
@@ -89,9 +89,9 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_NO_SYSTEM_PATHS TRUE)
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${ROOT_DIR}/")
-  set(BOOST_INCLUDE_DIRS "${ROOT_DIR}/include")
-  set(BOOST_LIBRARY_DIRS "${ROOT_DIR}/lib")
+  set(BOOST_ROOT "${EXTERNAL_DIR}/")
+  set(BOOST_INCLUDE_DIRS "${EXTERNAL_DIR}/include")
+  set(BOOST_LIBRARY_DIRS "${EXTERNAL_DIR}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
 # message(${BOOST_ROOT})
@@ -99,20 +99,10 @@ endif (Boost_NO_SYSTEM_PATHS)
 find_package(Boost 1.60 REQUIRED date_time system filesystem graph program_options iostreams)
 
 # Include folder
-include_directories ("${ROOT_DIR}/")
-include_directories ("${ROOT_DIR}/include/")
-include_directories ("${ROOT_DIR}/graph/")
-include_directories ("${ROOT_DIR}/3p/rocksdb/include")
-include_directories ("${ROOT_DIR}/3p/tbb/include")
+include_directories ("${EXTERNAL_DIR}/include/")
+include_directories ("${ROOT_DIR}/graph/src/")
 
-# Use POCO static library
-set(LIB_POCO_FOUNDATION "${ROOT_DIR}/lib/libPocoFoundation.a")
-set(LIB_POCO_UTIL "${ROOT_DIR}/lib/libPocoUtil.a")
-set(LIB_POCO_DATA "${ROOT_DIR}/lib/libPocoData.a")
-set(LIB_POCO_SQLITE "${ROOT_DIR}/lib/libPocoDataSQLite.a")
-set(LIB_POCO_XML "${ROOT_DIR}/lib/libPocoXML.a")
-set(LIB_POCO_NET "${ROOT_DIR}/lib/libPocoNet.a")
-set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+set(LIB_TBB "${EXTERNAL_DIR}/lib/libtbb.so")
 
 if (Boost_FOUND)
   message(${Boost_LIBRARIES})

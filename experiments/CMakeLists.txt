@@ -2,7 +2,10 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
+set(LIB_DIR "${ROOT_DIR}/../3p/lib")
+
 message("ROOT_DIR: ${ROOT_DIR}")
+message("LIB_DIR: ${LIB_DIR}")
 
 # set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
@@ -26,7 +29,7 @@ include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
 
 # set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_COMPILER "clang++")
+# set(CMAKE_CXX_COMPILER "clang++")
 # add_cxx_compiler_flag(--stdlib=libc++)
 
 set (CMAKE_BUILD_TYPE Release)
@@ -71,12 +74,12 @@ ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Libraries used by rocksdb
-set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
-set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
-set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
-set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
-set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+set(LIB_ROCKSDB "${ROOT_DIR}/../3p/rocksdb/librocksdb.a")
+set(LIB_ZLIB "${LIB_DIR}/libz.a")
+set(LIB_LZ4 "${LIB_DIR}/liblz4.a")
+set(LIB_BZ2 "${LIB_DIR}/libbz2.a")
+set(LIB_SNAPPY "${LIB_DIR}/libsnappy.a")
+set(LIB_JEMALLOC "${LIB_DIR}/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
@@ -85,7 +88,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_NO_SYSTEM_PATHS TRUE)
 if (Boost_NO_SYSTEM_PATHS)
-  set(BOOST_ROOT "${ROOT_DIR}")
+  set(BOOST_ROOT "${ROOT_DIR}/../3p")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
@@ -94,19 +97,20 @@ find_package(Boost REQUIRED date_time system filesystem iostreams)
 
 # Include folder
 include_directories ("${ROOT_DIR}/")
+include_directories ("${ROOT_DIR}/../3p/include")
 include_directories ("${ROOT_DIR}/graph")
 include_directories ("${ROOT_DIR}/include/")
 include_directories ("${ROOT_DIR}/3p/rocksdb/include")
 # include_directories ("${ROOT_DIR}/3p/folly/folly")
 
 # TBB
-set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")
+set(LIB_TBB "${LIB_DIR}/libtbb.so")
 if (NOT EXISTS ${LIB_TBB})			# Fall back to system tbb libraries if we could not find the customized tbb.
   set(LIB_TBB "-ltbb")
 endif() 
 
 # Celero
-set(LIB_CELERO "${ROOT_DIR}/bin/libcelero.so")
+set(LIB_CELERO "${LIB_DIR}/libcelero.a")
 
 # Need to use Boost
 if (Boost_FOUND) 
@@ -114,14 +118,14 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${ROOT_DIR}/lib/libboost_program_options.a  ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
+      ${Boost_LIBRARIES}   ${LIB_JEMALLOC} ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
   endforeach (src_file)
 
   set(COMMAND_SRC_FILES download_youtube)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${ROOT_DIR}/lib/libboost_program_options.a  ${LIB_JEMALLOC} -lpthread)
+      ${Boost_LIBRARIES} ${LIB_JEMALLOC} -lpthread)
   endforeach (src_file)
 
   #   set(COMMAND_SRC_FILES celeroCompressBools)

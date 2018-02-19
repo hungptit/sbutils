@@ -18,7 +18,7 @@
 namespace {
     struct InputParams {
         bool extract_audio;
-        unsigend int audio_quality;
+        unsigned int audio_quality;
         std::string audio_format;
         std::vector<std::string> links;
         std::string destination_folder;
