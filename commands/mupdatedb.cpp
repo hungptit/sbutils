@@ -9,11 +9,11 @@
 #include <vector>
 #include <memory>
 
-#include "sbutils/RocksDB.hpp"
-#include "sbutils/FileSearch.hpp"
-#include "sbutils/FileUtils.hpp"
-#include "sbutils/Resources.hpp"
-#include "sbutils/Timer.hpp"
+#include "RocksDB.hpp"
+#include "FileSearch.hpp"
+#include "FileUtils.hpp"
+#include "Resources.hpp"
+#include "Timer.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;

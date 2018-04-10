@@ -2,9 +2,7 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
-set(ROOT_DIR "${ROOT_DIR}/../3p")
-
-# set(CMAKE_INSTALL_PREFIX "${EXTERNAL_DIR}")
+set(EXTERNAL_DIR "${ROOT_DIR}/../3p")
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -85,7 +83,7 @@ set(LIB_JEMALLOC "${EXTERNAL_DIR}/lib/libjemalloc.a")
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS TRUE)
+set(Boost_NO_SYSTEM_PATHS FALSE)
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${EXTERNAL_DIR}")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
@@ -96,8 +94,8 @@ find_package(Boost REQUIRED date_time system filesystem iostreams)
 set(LIB_PROGRAM_OPTIONS "${EXTERNAL_DIR}/lib/libboost_program_options.a")
 
 # Include folder
-include_directories ("${EXTERNAL_DIR}/graph/src")
 include_directories ("${EXTERNAL_DIR}/include/")
+include_directories ("${ROOT_DIR}/src/")
 
 # TBB
 set(LIB_TBB "${EXTERNAL_DIR}/lib/libtbb.so")

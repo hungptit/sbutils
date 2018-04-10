@@ -20,10 +20,10 @@
 
 #include "fmt/format.h"
 
-#include "sbutils/DataStructures.hpp"
-#include "sbutils/FileSearch.hpp"
-#include "sbutils/FolderDiff.hpp"
-#include "sbutils/Timer.hpp"
+#include "DataStructures.hpp"
+#include "FileSearch.hpp"
+#include "FolderDiff.hpp"
+#include "Timer.hpp"
 
 #include <sstream>
 #include <string>
