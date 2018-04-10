@@ -15,7 +15,9 @@
 
 #include "boost/filesystem.hpp"
 #include "boost/functional/hash.hpp"
-#include "graph/SparseGraph.hpp"
+#include "graph/graph.hpp"
+
+#include "fmt/format.h"
 
 namespace sbutils {
 

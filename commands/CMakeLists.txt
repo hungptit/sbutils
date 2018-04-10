@@ -2,6 +2,7 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
+set(EXTERNAL_DIR "${ROOT_DIR}/../3p/")
 message("ROOT_DIR: ${ROOT_DIR}")
 
 # set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
@@ -73,19 +74,19 @@ ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Libraries used by rocksdb
-set(LIB_ROCKSDB "${ROOT_DIR}/3p/rocksdb/librocksdb.a")
-set(LIB_ZLIB "${ROOT_DIR}/lib/libz.a")
-set(LIB_LZ4 "${ROOT_DIR}/lib/liblz4.a")
-set(LIB_BZ2 "${ROOT_DIR}/lib/libbz2.a")
-set(LIB_SNAPPY "${ROOT_DIR}/lib/libsnappy.a")
-set(LIB_JEMALLOC "${ROOT_DIR}/lib/libjemalloc.a")
+set(LIB_ROCKSDB "${EXTERNAL_DIR}/lib/librocksdb.a")
+set(LIB_ZLIB "${EXTERNAL_DIR}/lib/libz.a")
+set(LIB_LZ4 "${EXTERNAL_DIR}/lib/liblz4.a")
+set(LIB_BZ2 "${EXTERNAL_DIR}/lib/libbz2.a")
+set(LIB_SNAPPY "${EXTERNAL_DIR}/lib/libsnappy.a")
+set(LIB_JEMALLOC "${EXTERNAL_DIR}/lib/libjemalloc.a")
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_SYSTEM_PATHS TRUE)
+set(Boost_NO_SYSTEM_PATHS FALSE)
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_ROOT "${ROOT_DIR}")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
@@ -93,14 +94,10 @@ if (Boost_NO_SYSTEM_PATHS)
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
 find_package(Boost REQUIRED date_time system filesystem iostreams)
-set(LIB_PROGRAM_OPTIONS "${ROOT_DIR}/lib/libboost_program_options.a")
 
 # Include folder
-include_directories ("${ROOT_DIR}/")
-include_directories ("${ROOT_DIR}/graph")
-include_directories ("${ROOT_DIR}/include/")
-include_directories ("${ROOT_DIR}/3p/rocksdb/include")
-include_directories ("${ROOT_DIR}/3p/tbb/include")
+include_directories ("${EXTERNAL_DIR}/include")
+include_directories ("${ROOT_DIR}/sbutils")
 
 # TBB
 set(LIB_TBB "${ROOT_DIR}/3p/tbb/lib/libtbb.so")

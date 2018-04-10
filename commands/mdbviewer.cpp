@@ -12,11 +12,11 @@
 #include <tuple>
 #include <vector>
 
-#include "sbutils/FileSearch.hpp"
-#include "sbutils/FileUtils.hpp"
-#include "sbutils/Resources.hpp"
-#include "sbutils/RocksDB.hpp"
-#include "sbutils/Timer.hpp"
+#include "FileSearch.hpp"
+#include "FileUtils.hpp"
+#include "Resources.hpp"
+#include "RocksDB.hpp"
+#include "Timer.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
