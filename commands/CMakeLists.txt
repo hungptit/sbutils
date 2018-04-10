@@ -79,7 +79,10 @@ set(LIB_ZLIB "${EXTERNAL_DIR}/lib/libz.a")
 set(LIB_LZ4 "${EXTERNAL_DIR}/lib/liblz4.a")
 set(LIB_BZ2 "${EXTERNAL_DIR}/lib/libbz2.a")
 set(LIB_SNAPPY "${EXTERNAL_DIR}/lib/libsnappy.a")
+
 set(LIB_JEMALLOC "${EXTERNAL_DIR}/lib/libjemalloc.a")
+
+message (${LIB_JEMALLOC})
 
 # This option make sure that we use the local boost version. Note that if the
 # system boost is installed then CMake might use that boost version.
@@ -93,7 +96,7 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
-find_package(Boost REQUIRED date_time system filesystem iostreams)
+find_package(Boost REQUIRED date_time system filesystem iostreams program_options)
 
 # Include folder
 include_directories ("${EXTERNAL_DIR}/include")
@@ -110,8 +113,8 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_PROGRAM_OPTIONS} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
-      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
+      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
+      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc)
   endforeach (src_file)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

@@ -16,14 +16,12 @@
 #include "Timer.hpp"
 #include "UtilsTBB.hpp"
 
-#include "tbb/task_scheduler_init.h"
 #include "fmt/format.h"
+#include "tbb/task_scheduler_init.h"
 
 template <typename Container> void print(Container &&results) {
-    fmt::MemoryWriter writer;
     std::for_each(results.begin(), results.end(),
-                  [&writer](auto const &item) { writer << item.Path << "\n"; });
-    fmt::print("{}", writer.str());
+                  [](auto const &item) { fmt::print("{0}\n", item.Path); });
 }
 
 int main(int argc, char *argv[]) {

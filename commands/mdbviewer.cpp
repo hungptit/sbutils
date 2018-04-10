@@ -72,10 +72,8 @@ int main(int argc, char *argv[]) {
         }
 
         fmt::print("Number of keys: {}\n", keys.size());
-        fmt::MemoryWriter writer;
         std::for_each(keys.begin(), keys.end(),
-                      [&writer](const auto &aKey) { writer << aKey << "\n"; });
-        fmt::print("{0}\n", writer.str());
+                      [](const auto &aKey) { fmt::print("{}\n", aKey); });
     } else if (!keys.empty()) {
         // Display the key-value of a given list of keys
         std::for_each(keys.begin(), keys.end(), [&db](auto const &aKey) {

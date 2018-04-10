@@ -14,10 +14,10 @@
 
 #include "fmt/format.h"
 
-#include "sbutils/FileSearch.hpp"
-#include "sbutils/Print.hpp"
-#include "sbutils/Timer.hpp"
-#include "sbutils/Utils.hpp"
+#include "FileSearch.hpp"
+#include "Print.hpp"
+#include "Timer.hpp"
+#include "Utils.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
