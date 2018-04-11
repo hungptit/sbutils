@@ -12,7 +12,7 @@
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
 #include "RocksDB.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 #include "Utils.hpp"
 #include "graph/graph.hpp"
 
@@ -25,7 +25,7 @@ namespace sbutils {
         using IArchive = sbutils::DefaultIArchive;
         Container allFiles;
 
-        sbutils::ElapsedTime<sbutils::MILLISECOND> t("Read baseline: ", verbose);
+        utils::ElapsedTime<utils::MILLISECOND> t("Read baseline: ", verbose);
 
         // Open the database
         std::unique_ptr<rocksdb::DB> db(sbutils::open(database));
@@ -137,7 +137,7 @@ namespace sbutils {
     template <typename Container>
     std::tuple<Container, Container, Container> diff(Container &&first, Container &&second,
                                                      bool verbose = false) {
-        sbutils::ElapsedTime<sbutils::MILLISECOND> t("Diff time: ", verbose);
+        utils::ElapsedTime<utils::MILLISECOND> t("Diff time: ", verbose);
         Container modifiedFiles;
         Container results;
         Container newFiles;

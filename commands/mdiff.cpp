@@ -23,7 +23,7 @@
 #include "DataStructures.hpp"
 #include "FileSearch.hpp"
 #include "FolderDiff.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 
 #include <sstream>
 #include <string>
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 
     {
         tbb::task_scheduler_init task_scheduler(numberOfThreads);
-        sbutils::ElapsedTime<sbutils::SECOND> e("Diff time: ", verbose);
+        utils::ElapsedTime<utils::SECOND> e("Diff time: ", verbose);
         std::vector<sbutils::FileInfo> allEditedFiles, allNewFiles, allDeletedFiles;
 
         std::tie(allEditedFiles, allDeletedFiles, allNewFiles) =

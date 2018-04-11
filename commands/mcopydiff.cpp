@@ -20,7 +20,7 @@
 #include "fmt/format.h"
 
 #include "FolderDiff.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 #include "UtilsTBB.hpp"
 
 #include "tbb/task_scheduler_init.h"
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
         // We will copy new files and edited files to the destiation
         // folder. We also remove all deleted files in the destination
         // folder.
-        sbutils::ElapsedTime<sbutils::SECOND> e("Copy files: ", verbose);
+        utils::ElapsedTime<utils::SECOND> e("Copy files: ", verbose);
 
         auto runObj = [&allEditedFiles, &allNewFiles, &allDeletedFiles,
                        verbose](const std::string &aDstDir) {

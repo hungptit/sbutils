@@ -16,7 +16,7 @@
 #include "FileUtils.hpp"
 #include "Resources.hpp"
 #include "RocksDB.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         fmt::print("database: {}\n", database);
     }
 
-    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
 
     // Open a given database
     rocksdb::Options options;

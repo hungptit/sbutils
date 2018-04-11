@@ -16,7 +16,7 @@
 
 #include "FileSearch.hpp"
 #include "Print.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 #include "Utils.hpp"
 
 int main(int argc, char *argv[]) {
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     }
 
     auto verbose = vm.count("verbose");
-    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", verbose);
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", verbose);
     
     std::string jsonFile;
     if (vm.count("toJSON")) {

@@ -99,8 +99,8 @@ find_package(Boost REQUIRED date_time system filesystem iostreams program_option
 include_directories ("${EXTERNAL_DIR}/include")
 include_directories ("${ROOT_DIR}/src")
 
-SET(LIB_HS "${EXTERNAL_DIR}/lib64/libhs.a")
-SET(LIB_HS_RUNTIME "${EXTERNAL_DIR}/lib64/libhs_runtime.a")
+SET(LIB_HS "${EXTERNAL_DIR}/lib/libhs.a")
+SET(LIB_HS_RUNTIME "${EXTERNAL_DIR}/lib/libhs_runtime.a")
 
 # TBB
 set(LIB_TBB "${EXTERNAL_DIR}/lib/libtbb.so")
@@ -114,7 +114,7 @@ if (Boost_FOUND)
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
       ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC} ${LIB_HS}
-      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ldl)
+      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ljemalloc -ldl)
   endforeach (src_file)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

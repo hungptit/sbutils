@@ -13,7 +13,7 @@
 #include "FileUtils.hpp"
 #include "FolderDiff.hpp"
 #include "Resources.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 #include "UtilsTBB.hpp"
 
 #include "fmt/format.h"
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
 
     args.Verbose = vm.count("verbose");
-    sbutils::ElapsedTime<sbutils::MILLISECOND> timer("Total time: ", args.Verbose);
+    utils::ElapsedTime<utils::MILLISECOND> timer("Total time: ", args.Verbose);
     tbb::task_scheduler_init task_scheduler(numberOfThreads);
 
     if (args.Verbose) {

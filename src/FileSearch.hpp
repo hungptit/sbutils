@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "DataStructures.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 #include "Utils.hpp"
 
 #include "boost/filesystem.hpp"
@@ -294,7 +294,7 @@ namespace sbutils {
         template <typename Container, typename Visitor>
         void dfs_file_search(const Container &searchPaths, Visitor &visitor,
                              bool verbose = false) {
-            ElapsedTime<MILLISECOND> timer("Search files: ", verbose);
+			utils::ElapsedTime<utils::MILLISECOND> timer("Search files: ", verbose);
             Container folders(searchPaths);
             while (!folders.empty()) {
                 auto aPath = folders.back();

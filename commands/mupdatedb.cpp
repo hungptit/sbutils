@@ -13,7 +13,7 @@
 #include "FileSearch.hpp"
 #include "FileUtils.hpp"
 #include "Resources.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     }
 
     bool verbose = vm.count("verbose");
-    sbutils::ElapsedTime<sbutils::MILLISECOND> totalTimer("Total time: ", verbose);
+    utils::ElapsedTime<utils::MILLISECOND> totalTimer("Total time: ", verbose);
     
     std::vector<path> folders;
 
@@ -78,13 +78,13 @@ int main(int argc, char *argv[]) {
                                    sbutils::filesystem::NormalPolicy>;
     FileVisitor visitor;
     {
-        sbutils::ElapsedTime<sbutils::MILLISECOND> searchTimer("Search time: ", verbose);
+        utils::ElapsedTime<utils::MILLISECOND> searchTimer("Search time: ", verbose);
         sbutils::filesystem::dfs_file_search(folders, visitor);
     }
     
     // Save data to a rocksdb database.
     {
-        sbutils::ElapsedTime<sbutils::SECOND> timer1("Serialization time: ", verbose);
+        utils::ElapsedTime<utils::SECOND> timer1("Serialization time: ", verbose);
 
         auto const results = visitor.getFolderHierarchy<index_type>();
 

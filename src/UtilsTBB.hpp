@@ -8,7 +8,7 @@
 #include <type_traits>
 
 #include "DataStructures.hpp"
-#include "Timer.hpp"
+#include "utils/timer.hpp"
 #include "Utils.hpp"
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 
