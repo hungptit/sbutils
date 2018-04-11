@@ -14,12 +14,12 @@
 namespace {
     template <typename T, typename... Args>
     bool isValid(const sbutils::FileInfo &info, T &&first) {
-        return first.isValid(info);
+        return first(info);
     }
 
     template <typename T, typename... Args>
     bool isValid(const sbutils::FileInfo &info, T &&first, Args &&... args) {
-        return first.isValid(info) &&
+        return first(info) &&
                isValid(info, std::forward<Args>(args)...);
     }
 }
@@ -31,24 +31,11 @@ namespace sbutils {
         return ss.str();
     }
 
-    // class KnuthMorrisPrattFilter {
-    //   public:
-    //     using iter_type = std::string::const_iterator;
-    //     explicit KnuthMorrisPrattFilter(const std::string &pattern)
-    //         : SearchAlg(pattern.begin(), pattern.end()) {}
-
-    //     bool isValid(const FileInfo &info) { return SearchAlg(info.Path) !=
-    //     info.Path.end(); }
-
-    //   private:
-    //     boost::algorithm::knuth_morris_pratt<iter_type> SearchAlg;
-    // };
-
     template <typename Container> class ExtFilter {
       public:
 		ExtFilter(const Container &exts) : Extensions(exts) {};
 		
-        bool isValid(const FileInfo &info) const {
+        bool operator()(const FileInfo &info) const {
             if (Extensions.empty()) {
                 return true;
             }
@@ -64,7 +51,7 @@ namespace sbutils {
       public:
         explicit StemFilter(Container &stems) : Stems(stems) {}
 
-        bool isValid(const FileInfo &info) const {
+        bool operator()(const FileInfo &info) const {
             if (Stems.empty()) {
                 return true;
             }
@@ -81,7 +68,7 @@ namespace sbutils {
         using iter_type = std::string::const_iterator;
         explicit SimpleFilter(const std::string &pattern) : Pattern(pattern) {}
 
-        bool isValid(const FileInfo &info) const {
+        bool operator()(const FileInfo &info) const {
             return info.Path.find(Pattern) != std::string::npos;
         }
 

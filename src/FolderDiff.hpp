@@ -14,7 +14,7 @@
 #include "RocksDB.hpp"
 #include "Timer.hpp"
 #include "Utils.hpp"
-#include "graph/SparseGraph.hpp"
+#include "graph/graph.hpp"
 
 #include "tbb/parallel_invoke.h"
 
@@ -71,7 +71,7 @@ namespace sbutils {
             tbb::parallel_invoke(readVidObj, readGraphObj);
 
             if (verbose) {
-                fmt::print("Number of vertexes: {0}\n", g.numberOfVertexes());
+                fmt::print("Number of vertexes: {0}\n", g.number_of_vertexes());
             }
 
             assert(vids.size() == g.numberOfVertexes());

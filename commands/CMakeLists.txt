@@ -2,7 +2,10 @@ PROJECT(TOOLS)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
-set(EXTERNAL_DIR "${ROOT_DIR}/../3p")
+set(EXTERNAL_DIR "${ROOT_DIR}/../3p/")
+message("ROOT_DIR: ${ROOT_DIR}")
+
+# set(CMAKE_INSTALL_PREFIX "${ROOT_DIR}")
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -90,12 +93,14 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 # message(${BOOST_ROOT})
-find_package(Boost REQUIRED date_time system filesystem iostreams)
-set(LIB_PROGRAM_OPTIONS "${EXTERNAL_DIR}/lib/libboost_program_options.a")
+find_package(Boost REQUIRED date_time system filesystem iostreams program_options)
 
 # Include folder
-include_directories ("${EXTERNAL_DIR}/include/")
-include_directories ("${ROOT_DIR}/src/")
+include_directories ("${EXTERNAL_DIR}/include")
+include_directories ("${ROOT_DIR}/src")
+
+SET(LIB_HS "${EXTERNAL_DIR}/lib64/libhs.a")
+SET(LIB_HS_RUNTIME "${EXTERNAL_DIR}/lib64/libhs_runtime.a")
 
 # TBB
 set(LIB_TBB "${EXTERNAL_DIR}/lib/libtbb.so")
@@ -108,8 +113,8 @@ if (Boost_FOUND)
   foreach (src_file ${COMMAND_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file}
-      ${Boost_LIBRARIES} ${LIB_PROGRAM_OPTIONS} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC}
-      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread)
+      ${Boost_LIBRARIES} ${LIB_ROCKSDB} ${LIB_LZ4} ${LIB_SNAPPY}  ${LIB_ZLIB} ${LIB_JEMALLOC} ${LIB_HS}
+      ${LIB_BZ2} ${LIB_FMT} ${LIB_TBB} -lpthread -ldl)
   endforeach (src_file)
   INSTALL_PROGRAMS("/bin/" FILES ${COMMAND_SRC_FILES})
 endif (Boost_FOUND)

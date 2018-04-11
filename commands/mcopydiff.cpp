@@ -19,9 +19,9 @@
 
 #include "fmt/format.h"
 
-#include "sbutils/FolderDiff.hpp"
-#include "sbutils/Timer.hpp"
-#include "sbutils/UtilsTBB.hpp"
+#include "FolderDiff.hpp"
+#include "Timer.hpp"
+#include "UtilsTBB.hpp"
 
 #include "tbb/task_scheduler_init.h"
 

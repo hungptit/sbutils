@@ -7,7 +7,8 @@
 
 #include "FileUtils.hpp"
 #include "FolderDiff.hpp"
-#include "UtilsTBB.hpp"
+#include "Utils.hpp"
+#include "utils/regex_matchers.hpp"
 
 namespace sbutils {
     struct MLocateArgs {
@@ -27,8 +28,8 @@ namespace sbutils {
         const sbutils::ExtFilter<std::vector<std::string>> f1(args.Extensions);
         const sbutils::StemFilter<std::vector<std::string>> f2(args.Stems);
         const sbutils::SimpleFilter f3(args.Pattern);
-        auto results = (args.Pattern.empty()) ? filter_tbb(data, f1, f2)
-                                              : filter_tbb(data, f1, f2, f3);
+        auto results = (args.Pattern.empty()) ? filter(data, f1, f2)
+                                              : filter(data, f1, f2, f3);
         return results;
     }
 } // namespace sbutils

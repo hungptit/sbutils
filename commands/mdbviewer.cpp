@@ -12,11 +12,11 @@
 #include <tuple>
 #include <vector>
 
-#include "sbutils/FileSearch.hpp"
-#include "sbutils/FileUtils.hpp"
-#include "sbutils/Resources.hpp"
-#include "sbutils/RocksDB.hpp"
-#include "sbutils/Timer.hpp"
+#include "FileSearch.hpp"
+#include "FileUtils.hpp"
+#include "Resources.hpp"
+#include "RocksDB.hpp"
+#include "Timer.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace boost;
@@ -72,10 +72,8 @@ int main(int argc, char *argv[]) {
         }
 
         fmt::print("Number of keys: {}\n", keys.size());
-        fmt::MemoryWriter writer;
         std::for_each(keys.begin(), keys.end(),
-                      [&writer](const auto &aKey) { writer << aKey << "\n"; });
-        fmt::print("{0}\n", writer.str());
+                      [](const auto &aKey) { fmt::print("{}\n", aKey); });
     } else if (!keys.empty()) {
         // Display the key-value of a given list of keys
         std::for_each(keys.begin(), keys.end(), [&db](auto const &aKey) {
